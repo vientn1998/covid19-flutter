@@ -27,20 +27,19 @@ class Covid19ApiClient {
   }
 
 
-  Future<OverviewObj> getOverview() async {
+  Future<List<OverviewObj>> getOverview() async {
     try {
       final results = await request(path: 'AllReports', parameters: {
         'entity_id': '',
         'count': '10'
       });
       final list = results['reports'] as List;
-      final reports = list.map<ReportsObj>((item) => ReportsObj.fromJson(item));
+      final reports = list.map<ReportsObj>((item) => ReportsObj.fromJson(item)).toList();
 
-      return reports.toList()[0].listData[0].listOverview[0];
+      return reports[0].listData[0];
     } on Exception catch (exception) {
       print(exception.toString());
     }
   }
-
 
 }

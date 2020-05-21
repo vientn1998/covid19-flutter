@@ -20,13 +20,13 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
     Covid19Event event,
   ) async* {
     if (event is FetchDataOverview) {
-      yield* _mapFetchDataOverviewToState();
+      yield* _mapFetchDataOverviewToState(event);
     }
   }
 
-  Stream<Covid19State> _mapFetchDataOverviewToState() async* {
+  Stream<Covid19State> _mapFetchDataOverviewToState(FetchDataOverview event) async* {
     yield Covid19Loading();
-    final overviewObj = await covid19repository.getDataOverview();
+    final overviewObj = await covid19repository.getDataOverview(countryName: event.countryName);
     yield Covid19LoadedOverview(overviewObj: overviewObj);
   }
 

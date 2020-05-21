@@ -1,0 +1,21 @@
+import 'package:flutter/material.dart';
+import 'package:template_flutter/src/utils/hex_color.dart';
+
+const textColor = Color(0xff3C4954);
+const borderColor = Color(0xffD5D5D5);
+const background = Color(0xff10B453);
+const backgroundLight = Color(0xff3B5998);
+const backgroundSurvey = Color(0xff171A4A);
+const backgroundTextInput = Color(0xffD5D5D5);
+const colorFacebook = Color(0xff3B5998);
+const colorGoogle = Color(0xff00C571);
+const colorButtonSurvey = Color(0xffFD9941);
+const colorSplash = Color(0xff473F97);
+const colorTotalCase = Color(0xff4DE118);
+const colorDeath = Color(0xffEF2C2C);
+const colorRecovered = Color(0xff473F97);
+const colorActive = Color(0xff9059FF);
+const colorSerious = Color(0xff66BEFE);
+const colorTab = Color(0xffB4D3F1);
+const colorSkeleton = Color(0xffF5F2F8);
+const colorBackgroundSkeleton = Color(0xffFCFBFB);

@@ -1,0 +1,40 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:template_flutter/src/app/simple_bloc_delegate.dart';
+import 'package:template_flutter/src/blocs/covid19/bloc.dart';
+import 'package:template_flutter/src/repositories/covid19/covid_api_client.dart';
+import 'package:template_flutter/src/repositories/covid19/covid_repository.dart';
+import 'package:template_flutter/src/screens/introduction/splash_screen.dart';
+import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/share_preferences.dart';
+
+import 'src/app/my_app.dart';
+import 'src/screens/introduction/getstart_screen.dart';
+import 'src/screens/introduction/introduction_screen.dart';
+
+  main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  BlocSupervisor.delegate = SimpleBlocDelegate();
+  final Covid19Repository covid19repository = Covid19Repository(
+      covid19apiClient: Covid19ApiClient()
+  );
+
+  runApp(
+      MultiBlocProvider(
+        providers: [
+          BlocProvider<Covid19Bloc>(
+            create: (context) =>
+                Covid19Bloc(covid19repository: covid19repository),
+          )
+        ],
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+              fontFamily: 'Roboto'
+          ),
+          home: SplashPage(),
+        ),
+      )
+  );
+}

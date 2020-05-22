@@ -15,7 +15,7 @@ import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/hex_color.dart';
 import 'package:template_flutter/src/utils/styles.dart';
 import 'package:template_flutter/src/widgets/icon.dart';
-
+import 'package:geolocator/geolocator.dart';
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -25,10 +25,18 @@ class _HomePageState extends State<HomePage> {
   static const double spaceBorder = 4;
   bool isChooseCountry = true;
   var currentTab = StatusTabHome.total;
+  var countryName = "";
 
   checkPermission() async {
-    if (await Permission.contacts.request().isGranted) {
-      BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
+    final result = await Permission.locationWhenInUse.request();
+    if (result.isGranted) {
+      final Position position = await Geolocator().getLastKnownPosition(desiredAccuracy: LocationAccuracy.high);
+      List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
+      setState(() {
+        countryName = placemark[0].country;
+      });
+      print('----${placemark[0].country}');
+      BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: placemark[0].country));
     } else {
       //show dialog
       _showDialogDelete(context);
@@ -150,7 +158,7 @@ class _HomePageState extends State<HomePage> {
                             if (isChooseCountry) {
                               return;
                             }
-                            print('o');
+                            BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countryName));
                             isChooseCountry = true;
                           });
                         },
@@ -180,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                             if (!isChooseCountry) {
                               return;
                             }
-                            print('global');
+                            BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
                             isChooseCountry = false;
                           });
                         },
@@ -602,13 +610,16 @@ class _HomePageState extends State<HomePage> {
               child: Text('Close'),
               onPressed: () {
                 Navigator.of(context).pop();
-                BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: 'Vietnam'));
+                BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
               },
             ),
             CupertinoDialogAction(
               child: Text('Setting'),
-              onPressed: () {
-                AppSettings.openAppSettings();
+              onPressed: () async {
+                await AppSettings.openAppSettings();
+//                if (await Permission.contacts.isGranted) {
+//                  BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
+//                }
                 Navigator.pop(context, true);
               },
             ),

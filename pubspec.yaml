@@ -45,6 +45,10 @@ dependencies:
   #skeleton
   pk_skeleton: ^0.0.2
   skeleton_text: ^1.0.0
+  #request permission
+  permission_handler: ^5.0.0+hotfix.6
+  #open app setting
+  app_settings: 4.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -3,15 +3,24 @@ import 'package:flutter/material.dart';
 import 'package:template_flutter/src/models/covid19/Country.dart';
 
 class ReportsObj extends Equatable {
-  final List<TableObj> listData;
+  final List<List<OverviewObj>> listData;
 
   ReportsObj({this.listData});
 
   factory ReportsObj.fromJson(Map<String, dynamic> parsedJson) {
+    final data = List<OverviewObj>();
+    final dataParent = List<List<OverviewObj>>();
     final json = parsedJson['table'] as List;
-    final data = json.map((item) => TableObj.fromJson(item));
+    json.forEach((element) {
+      print('-----');
+      final list = element as List;
+      list.forEach((child) {
+        data.add(OverviewObj.fromJson(child));
+      });
+      dataParent.add(data);
+    });
     return ReportsObj(
-        listData: data
+        listData: dataParent
     );
   }
 
@@ -24,8 +33,8 @@ class TableObj extends Equatable {
 
   TableObj({this.listOverview});
 
-  factory TableObj.fromJson(dynamic parsedJson) {
-    final data = parsedJson.map((item) => OverviewObj.fromJson(item));
+  factory TableObj.fromJson(Map<String, dynamic> parsedJson) {
+    final data = parsedJson.values.map((item) => OverviewObj.fromJson(item)).toList();
     return TableObj(
         listOverview: data
     );

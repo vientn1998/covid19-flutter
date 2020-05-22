@@ -30,12 +30,7 @@ class _MyAppState extends State<MyApp> {
               );
             }
             if (state is Covid19LoadedOverview) {
-              final overviewObj = state.overviewObj;
-              return Center(
-                child: Text(
-                    overviewObj.totalCases
-                ),
-              );
+
             }
             return Center(
               child: CircularProgressIndicator(),

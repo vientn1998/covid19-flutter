@@ -6,7 +6,9 @@ import 'package:template_flutter/src/repositories/covid19/covid_repository.dart'
 import './bloc.dart';
 
 class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
-
+  var dataGlobal = OverviewObj();
+  var dataCountry = OverviewObj();
+  List<OverviewObj> listData = [];
   final Covid19Repository covid19repository;
 
 
@@ -26,8 +28,23 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
 
   Stream<Covid19State> _mapFetchDataOverviewToState(FetchDataOverview event) async* {
     yield Covid19Loading();
-    final overviewObj = await covid19repository.getDataOverview(countryName: event.countryName);
-    yield Covid19LoadedOverview(overviewObj: overviewObj);
+    if (listData.isEmpty) {
+      listData = await covid19repository.getDataOverview();
+      if (event.countryName == null || event.countryName.isEmpty) {
+        dataGlobal = listData[0];
+        yield Covid19LoadedOverview(overviewObj: dataGlobal);
+      } else {
+        dataCountry =listData.firstWhere((element) => element.country == event.countryName);
+        yield Covid19LoadedOverview(overviewObj: dataCountry);
+      }
+    } else {
+      if (event.countryName == null || event.countryName.isEmpty) {
+        dataGlobal = listData[0];
+        yield Covid19LoadedOverview(overviewObj: dataGlobal);
+      } else {
+        dataCountry =listData.firstWhere((element) => element.country == event.countryName);
+        yield Covid19LoadedOverview(overviewObj: dataCountry);
+      }
+    }
   }
-
 }

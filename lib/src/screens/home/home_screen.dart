@@ -92,7 +92,8 @@ class _HomePageState extends State<HomePage> {
                   IconBox(
                     iconData: Icons.search,
                     onPressed: () {
-                      print('onPressed search');
+                      BlocProvider.of<Covid19Bloc>(context).listData.clear();
+                      BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
                     },
                   ),
                 ],

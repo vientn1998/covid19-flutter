@@ -7,9 +7,9 @@ abstract class Covid19Event extends Equatable {
 }
 
 class FetchDataOverview extends Covid19Event {
-  String countryName;
-
-  FetchDataOverview({this.countryName});
+  String countryName = "";
+  bool isLoadData = true;
+  FetchDataOverview({this.countryName, this.isLoadData});
 
   @override
   List<Object> get props => [this.countryName];

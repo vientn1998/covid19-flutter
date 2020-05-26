@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:template_flutter/src/app/simple_bloc_delegate.dart';
 import 'package:template_flutter/src/blocs/common/bloc.dart';
 import 'package:template_flutter/src/blocs/covid19/bloc.dart';
+import 'package:template_flutter/src/blocs/death/bloc.dart';
 import 'package:template_flutter/src/blocs/local_search/bloc.dart';
 import 'package:template_flutter/src/database/covid_dao.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_api_client.dart';
@@ -35,6 +36,9 @@ import 'src/screens/introduction/introduction_screen.dart';
           ),
           BlocProvider<SearchBloc>(
             create: (context) => SearchBloc(covid19dao: Covid19Dao()),
+          ),
+          BlocProvider<DeathBloc>(
+            create: (context) => DeathBloc(covid19repository: covid19repository),
           )
         ],
         child: MaterialApp(

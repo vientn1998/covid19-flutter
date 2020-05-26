@@ -111,16 +111,15 @@ class _SearchPageState extends State<SearchPage> {
               title: Text(item.countryName),
 
               onTap: () {
-
+                Navigator.pop(context, item);
               },
 
               trailing: IconButton(
                   highlightColor: Colors.transparent,
                   splashColor: Colors.transparent,
                   icon: Icon(Icons.clear),
-
                   onPressed: () {
-
+                    BlocProvider.of<SearchBloc>(context).add(DeleteSearch(countryObj: item));
                   }
               )
           );

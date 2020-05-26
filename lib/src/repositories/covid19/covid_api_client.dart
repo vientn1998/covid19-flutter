@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:template_flutter/src/models/covid19/deaths.dart';
 import 'package:template_flutter/src/models/covid19/overview.dart';
 
 
@@ -26,7 +27,6 @@ class Covid19ApiClient {
     return jsonObject;
   }
 
-
   Future<List<OverviewObj>> getOverview() async {
     try {
       final results = await request(path: 'AllReports', parameters: {
@@ -37,6 +37,17 @@ class Covid19ApiClient {
       final reports = list.map<ReportsObj>((item) => ReportsObj.fromJson(item)).toList();
 
       return reports[0].listData[0];
+    } on Exception catch (exception) {
+      print(exception.toString());
+    }
+  }
+
+  Future<List<DeathsObj>> getTotalDeaths() async {
+    try {
+      final results = await request(path: 'deaths');
+      final list = results['deaths'] as List;
+      final data = list.map<DeathsObj>((item) => DeathsObj.fromJson(item)).toList();
+      return data;
     } on Exception catch (exception) {
       print(exception.toString());
     }

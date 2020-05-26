@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:template_flutter/src/models/covid19/deaths.dart';
 import 'package:template_flutter/src/models/covid19/overview.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_repository.dart';
 import './bloc.dart';
@@ -25,6 +26,8 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
       yield* _mapFetchDataOverviewToState(event);
     }
   }
+
+
 
   Stream<Covid19State> _mapFetchDataOverviewToState(FetchDataOverview event) async* {
     yield Covid19Loading();

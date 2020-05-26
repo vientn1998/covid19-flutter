@@ -55,6 +55,8 @@ dependencies:
   sembast: ^2.4.4+1
   #find commonly used locations on the filesystem
   path_provider: ^1.6.7
+  #chart
+  fl_chart: ^0.9.4
 
 dev_dependencies:
   flutter_test:

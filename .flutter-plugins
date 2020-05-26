@@ -1,12 +1,12 @@
 # This is a generated file; do not edit or check into version control.
-app_settings=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/app_settings-4.0.0/
-geolocator=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/geolocator-5.3.1/
-google_api_availability=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/google_api_availability-2.0.4/
-keyboard_visibility=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/keyboard_visibility-0.5.6/
-location_permissions=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/location_permissions-2.0.5/
-path_provider=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/path_provider-1.6.9/
-path_provider_macos=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/path_provider_macos-0.0.4+3/
-permission_handler=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.0.0+hotfix.6/
-shared_preferences=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/shared_preferences-0.5.7+2/
-shared_preferences_macos=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/shared_preferences_macos-0.0.1+8/
-shared_preferences_web=/Users/tranngocvien/.pub-cache/hosted/pub.dartlang.org/shared_preferences_web-0.1.2+5/
+app_settings=/Users/admin/.pub-cache/hosted/pub.dartlang.org/app_settings-4.0.0/
+geolocator=/Users/admin/.pub-cache/hosted/pub.dartlang.org/geolocator-5.3.1/
+google_api_availability=/Users/admin/.pub-cache/hosted/pub.dartlang.org/google_api_availability-2.0.4/
+keyboard_visibility=/Users/admin/.pub-cache/hosted/pub.dartlang.org/keyboard_visibility-0.5.6/
+location_permissions=/Users/admin/.pub-cache/hosted/pub.dartlang.org/location_permissions-2.0.5/
+path_provider=/Users/admin/.pub-cache/hosted/pub.dartlang.org/path_provider-1.6.9/
+path_provider_macos=/Users/admin/.pub-cache/hosted/pub.dartlang.org/path_provider_macos-0.0.4+3/
+permission_handler=/Users/admin/.pub-cache/hosted/pub.dartlang.org/permission_handler-5.0.0+hotfix.6/
+shared_preferences=/Users/admin/.pub-cache/hosted/pub.dartlang.org/shared_preferences-0.5.7+3/
+shared_preferences_macos=/Users/admin/.pub-cache/hosted/pub.dartlang.org/shared_preferences_macos-0.0.1+9/
+shared_preferences_web=/Users/admin/.pub-cache/hosted/pub.dartlang.org/shared_preferences_web-0.1.2+7/

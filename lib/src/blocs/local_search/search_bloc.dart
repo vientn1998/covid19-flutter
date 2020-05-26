@@ -30,12 +30,18 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     } else if (event is AddSearch) {
       print('list local: ${listCountryLocal.length}');
       if (listCountryLocal.length > 0) {
-        final country = listCountryLocal.firstWhere((item) => item.countrySearch == event.countryObj.countrySearch);
-        if (country == null) {
-          listCountryLocal.add(country);
+        print(listCountryLocal[0].countrySearch);
+        print(event.countryObj.countrySearch);
+        final country = listCountryLocal.where((element) => element.countrySearch == event.countryObj.countrySearch.toString()).toList();
+        if (country.length == 0) {
+          listCountryLocal.add(event.countryObj);
           await covid19dao.insert(event.countryObj);
+          yield AddSearchLocal();
         }
-        yield AddSearchLocal();
+
+      } else {
+        listCountryLocal.add(event.countryObj);
+        await covid19dao.insert(event.countryObj);
       }
 
     } else if (event is LoadingSearchFile) {
@@ -43,6 +49,10 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       yield* _mapDataFileToState(event);
     } else if (event is FetchSearchFile) {
       yield* _mapDataSearchFileToState(event);
+    } else if (event is DeleteSearch) {
+      yield LoadingSearchLocal();
+      await covid19dao.delete(event.countryObj);
+      yield* _mapDataLocalToState();
     }
   }
 
@@ -63,8 +73,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     print('All country ${listCountry.length}');
     yield LoadedSearchFile(list: listCountry);
   }
-
-
 
   Future<String>_loadFromAsset() async {
     return await rootBundle.loadString("assets/data/data_search.json");

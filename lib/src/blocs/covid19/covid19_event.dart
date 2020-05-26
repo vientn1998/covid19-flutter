@@ -10,7 +10,6 @@ class FetchDataOverview extends Covid19Event {
   String countryName = "";
   bool isLoadData = true;
   FetchDataOverview({this.countryName, this.isLoadData});
-
   @override
   List<Object> get props => [this.countryName];
 }
@@ -29,6 +28,7 @@ class FetchAllCountry extends Covid19Event {
   @override
   List<Object> get props => [];
 }
+
 
 
 

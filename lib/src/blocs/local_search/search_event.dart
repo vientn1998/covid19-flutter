@@ -28,6 +28,14 @@ class AddSearch extends SearchEvent{
   List<Object> get props => [this.countryObj];
 }
 
+class DeleteSearch extends SearchEvent {
+  CountryObj countryObj;
+  DeleteSearch({@required this.countryObj});
+
+  @override
+  List<Object> get props => [this.countryObj];
+}
+
 class LoadingSearchFile extends SearchEvent{
   BuildContext context;
 

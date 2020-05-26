@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:template_flutter/src/blocs/local_search/bloc.dart';
 import 'package:template_flutter/src/screens/introduction/introduction_screen.dart';
 import 'package:template_flutter/src/screens/main_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
@@ -43,6 +45,8 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
+    BlocProvider.of<SearchBloc>(context).add(LoadingSearchFile(context: context));
+    BlocProvider.of<SearchBloc>(context).add(LoadingSearch());
     checkLogin();
   }
 

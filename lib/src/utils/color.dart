@@ -7,6 +7,7 @@ const background = Color(0xff10B453);
 const backgroundLight = Color(0xff3B5998);
 const backgroundSurvey = Color(0xff171A4A);
 const backgroundTextInput = Color(0xffD5D5D5);
+const backgroundSearch = Color(0xffF5F5F5);
 const colorFacebook = Color(0xff3B5998);
 const colorGoogle = Color(0xff00C571);
 const colorButtonSurvey = Color(0xffFD9941);

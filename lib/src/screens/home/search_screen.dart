@@ -45,14 +45,13 @@ class _SearchPageState extends State<SearchPage> {
               margin: EdgeInsets.all(20),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                color: borderColor
+                color: backgroundSearch
               ),
               child: TextField(
                 decoration: InputDecoration(
                   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                  hintText: "Search Data...",
+                  hintText: "Search country name...",
                   border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.white30),
                 ),
                 textCapitalization: TextCapitalization.words,
                 autocorrect: false,
@@ -64,7 +63,7 @@ class _SearchPageState extends State<SearchPage> {
                 },
               ),
             ),
-            Flexible(
+            Expanded(
               child: Container(
                 child: BlocBuilder<SearchBloc, SearchState>(
                 builder: (context, state) {
@@ -102,6 +101,7 @@ class _SearchPageState extends State<SearchPage> {
   _buildDataLocal(List<CountryObj> data) {
     return ListView.builder(
         shrinkWrap: true,
+        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
         physics: NeverScrollableScrollPhysics(),
         itemCount: data.length,
         itemBuilder: (BuildContext ctx, int i) {
@@ -140,8 +140,8 @@ class _SearchPageState extends State<SearchPage> {
               title: Text(item.countryName),
 
               onTap: () {
-                BlocProvider.of<SearchBloc>(context).add(AddSearch(countryObj: CountryObj(country: item.country, countryName: item.countryName)));
-                Navigator.pop(context, item.country);
+                BlocProvider.of<SearchBloc>(context).add(AddSearch(countryObj: CountryObj(country: item.country, countryName: item.countryName, countrySearch: item.countrySearch)));
+                Navigator.pop(context, item.countrySearch);
               },
           );
         }

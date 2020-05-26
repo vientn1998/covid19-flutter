@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   static const double spaceBorder = 4;
   bool isChooseCountry = true;
   var currentTab = StatusTabHome.total;
-  var countryName = "";
+  var countryName = "", countrySearch = "";
 
   checkPermission() async {
     final result = await Permission.locationWhenInUse.request();
@@ -35,12 +35,14 @@ class _HomePageState extends State<HomePage> {
       final Position position = await Geolocator().getLastKnownPosition(desiredAccuracy: LocationAccuracy.low);
       if (position != null && position.latitude != null && position.latitude != null) {
         List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
+        print('location device: ${placemark[0].toJson()}');
+        final country = BlocProvider.of<SearchBloc>(context).listCountry.firstWhere((item) => item.code.contains(placemark[0].isoCountryCode));
         setState(() {
           countryName = placemark[0].administrativeArea;
           isChooseCountry = true;
+          countrySearch = country == null ? placemark[0].country : country.countrySearch;
         });
-        print('- country---${placemark[0].toJson()}');
-        BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: placemark[0].country));
+        BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countrySearch));
       } else {
         BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
         setState(() {
@@ -56,10 +58,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 2), () {
+    Timer(Duration(seconds: 1), () {
       checkPermission();
     });
-    BlocProvider.of<SearchBloc>(context).add(LoadingSearch());
   }
 
   @override
@@ -106,7 +107,10 @@ class _HomePageState extends State<HomePage> {
                       final result = await Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => SearchPage()),
                       );
-                      print('- load data by country: $result');
+                      print('search return: $result');
+                      setState(() {
+                        isChooseCountry = true;
+                      });
                       BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: result));
                     },
                   ),
@@ -173,7 +177,7 @@ class _HomePageState extends State<HomePage> {
                             if (isChooseCountry) {
                               return;
                             }
-                            BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
+                            BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countrySearch));
                             isChooseCountry = true;
                           });
                         },

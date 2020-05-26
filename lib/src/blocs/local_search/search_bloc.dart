@@ -28,7 +28,11 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       yield LoadingSearchLocal();
       yield* _mapDataLocalToState();
     } else if (event is AddSearch) {
-      await covid19dao.insert(event.countryObj);
+      final country = listCountryLocal.firstWhere((item) => item.countrySearch == event.countryObj.countrySearch);
+      if (country == null) {
+        listCountryLocal.add(country);
+        await covid19dao.insert(event.countryObj);
+      }
       yield AddSearchLocal();
     } else if (event is LoadingSearchFile) {
       yield LoadingFile();
@@ -39,17 +43,18 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   Stream<SearchState> _mapDataSearchFileToState(FetchSearchFile event) async* {
-    yield LoadingSearchLocal();
+//    yield LoadingSearchLocal();
     final data = listCountry.where((element) => element.countryName.contains(event.keySearch)).toList();
-    print('list data search ${data.length}');
+    print('data searching ${data.length}');
     yield LoadedSearchFile(list: data);
   }
 
   Stream<SearchState> _mapDataFileToState(LoadingSearchFile event) async* {
     String data = await parseJson();
     final jsonResult = jsonDecode(data) as List;
-    listCountry = jsonResult.map((item) => CountryObj.fromJson(item)).toList();
-    print('count data country ${listCountry.length}');
+    listCountry.clear();
+    listCountry.addAll(jsonResult.map((item) => CountryObj.fromJson(item)).toList());
+    print('All country ${listCountry.length}');
     yield LoadedSearchFile(list: listCountry);
   }
 
@@ -64,7 +69,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   Stream<SearchState> _mapDataLocalToState() async* {
-    listCountryLocal = await covid19dao.getAllSortedByName();
+    listCountryLocal.clear();
+    listCountryLocal.addAll(await covid19dao.getAllSortedByName());
     yield LoadedSearchLocal(list: listCountryLocal);
   }
 }

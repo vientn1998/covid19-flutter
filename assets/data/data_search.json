@@ -1,0 +1,394 @@
+[
+  {
+    "countryName": "Afghanistan",
+    "country": "afghanistan"
+  },
+  {
+    "countryName": "Albania",
+    "country": "albania"
+  },
+  {
+    "countryName": "Algeria",
+    "country": "algeria"
+  },
+  {
+    "countryName": "AndorrA",
+    "country": "andorra"
+  },
+  {
+    "countryName": "Angola",
+    "country": "angola"
+  },
+  {
+    "countryName": "Anguilla",
+    "country": "anguilla"
+  },
+  {
+    "countryName": "Antigua and Barbuda",
+    "country": "antigua-and-barbuda"
+  },
+  {
+    "countryName": "Argentina",
+    "country": "argentina"
+  },
+  {
+    "countryName": "Armenia",
+    "country": "armenia"
+  },
+  {
+    "countryName": "Aruba",
+    "country": "aruba"
+  },
+  {
+    "countryName": "Australia",
+    "country": "australia"
+  },
+  {
+    "countryName": "Austria",
+    "country": "austria"
+  },
+  {
+    "countryName": "Azerbaijan",
+    "country": "azerbaijan"
+  },
+  {
+    "countryName": "Bahamas",
+    "country": "bahamas"
+  },
+  {
+    "countryName": "Bahrain",
+    "country": "bahrain"
+  },
+  {
+    "countryName": "Bangladesh",
+    "country": "bangladesh"
+  },
+  {
+    "countryName": "Barbados",
+    "country": "barbados"
+  },
+  {
+    "countryName": "Belarus",
+    "country": "belarus"
+  },
+  {
+    "countryName": "Belgium",
+    "country": "belgium"
+  },
+  {
+    "countryName": "Belize",
+    "country": "belize"
+  },
+  {
+    "countryName": "Benin",
+    "country": "benin"
+  },
+  {
+    "countryName": "Bermuda",
+    "country": "bermuda"
+  },
+  {
+    "countryName": "Bhutan",
+    "country": "bhutan"
+  },
+  {
+    "countryName": "Bolivia",
+    "country": "bolivia"
+  },
+  {
+    "countryName": "Bosnia and Herzegovina",
+    "country": "bosnia-and-herzegovina"
+  },
+  {
+    "countryName": "Botswana",
+    "country": "botswana"
+  },
+  {
+    "countryName": "Brazil",
+    "country": "brazil"
+  },
+  {
+    "countryName": "British Indian Ocean Territory",
+    "country": "british-virgin-islands"
+  },
+  {
+    "countryName": "Brunei Darussalam",
+    "country": "brunei-darussalam"
+  },
+  {
+    "countryName": "Bulgaria",
+    "country": "bulgaria"
+  },
+  {
+    "countryName": "Burkina Faso",
+    "country": "burkina-faso"
+  },
+  {
+    "countryName": "Burundi",
+    "country": "burundi"
+  },
+  {
+    "countryName": "Cambodia",
+    "country": "cambodia"
+  },
+  {
+    "countryName": "Cameroon",
+    "country": "cameroon"
+  },
+  {
+    "countryName": "Canada",
+    "country": "canada"
+  },
+  {
+    "countryName": "Chile",
+    "country": "chile"
+  },
+  {
+    "countryName": "China",
+    "country": "china"
+  },
+  {
+    "countryName": "Colombia",
+    "country": "colombia"
+  },
+  {
+    "countryName": "Croatia",
+    "country": "croatia"
+  },
+  {
+    "countryName": "Cuba",
+    "country": "cuba"
+  },
+  {
+    "countryName": "Czech Republic",
+    "country": "czech-republic"
+  },
+  {
+    "countryName": "Denmark",
+    "country": "denmark"
+  },
+  {
+    "countryName": "France",
+    "country": "france"
+  },
+  {
+    "countryName": "Germany",
+    "country": "germany"
+  },
+  {
+    "countryName": "Ghana",
+    "country": "ghana"
+  },
+  {
+    "countryName": "Greenland",
+    "country": "greenland"
+  },
+  {
+    "countryName": "Hungary",
+    "country": "hungary"
+  },
+  {
+    "countryName": "Iceland",
+    "country": "iceland"
+  },
+  {
+    "countryName": "India",
+    "country": "india"
+  },
+  {
+    "countryName": "Indonesia",
+    "country": "indonesia"
+  },
+  {
+    "countryName": "Iran",
+    "country": "iran"
+  },
+  {
+    "countryName": "Iraq",
+    "country": "iraq"
+  },
+  {
+    "countryName": "Israel",
+    "country": "IL"
+  },
+  {
+    "countryName": "Italy",
+    "country": "italy"
+  },
+  {
+    "countryName": "Japan",
+    "country": "japan"
+  },
+  {
+    "countryName": "Jordan",
+    "country": "jordan"
+  },
+  {
+    "countryName": "Kazakhstan",
+    "country": "kazakhstan"
+  },
+  {
+    "countryName": "Lao",
+    "country": "laos"
+  },
+  {
+    "countryName": "Liberia",
+    "country": "liberia"
+  },
+  {
+    "countryName": "Libyan",
+    "country": "libya"
+  },
+  {
+    "countryName": "Malaysia",
+    "country": "malaysia"
+  },
+  {
+    "countryName": "Maldives",
+    "country": "maldives"
+  },
+  {
+    "countryName": "Mexico",
+    "country": "mexico"
+  },
+  {
+    "countryName": "Myanmar",
+    "country": "myanmar"
+  },
+  {
+    "countryName": "Nepal",
+    "country": "nepal"
+  },
+  {
+    "countryName": "Netherlands",
+    "country": "netherlands"
+  },
+  {
+    "countryName": "New Zealand",
+    "country": "new-zealand"
+  },
+  {
+    "countryName": "Nigeria",
+    "country": "nigeria"
+  },
+  {
+    "countryName": "Pakistan",
+    "country": "pakistan"
+  },
+  {
+    "countryName": "Panama",
+    "country": "panama"
+  },
+  {
+    "countryName": "Paraguay",
+    "country": "paraguay"
+  },
+  {
+    "countryName": "Peru",
+    "country": "peru"
+  },
+  {
+    "countryName": "Philippines",
+    "country": "philippines"
+  },
+  {
+    "countryName": "Poland",
+    "country": "poland"
+  },
+  {
+    "countryName": "Portugal",
+    "country": "portugal"
+  },
+  {
+    "countryName": "Qatar",
+    "country": "qatar"
+  },
+  {
+    "countryName": "Russian",
+    "country": "russia"
+  },
+  {
+    "countryName": "Saudi Arabia",
+    "country": "saudi-arabia"
+  },
+  {
+    "countryName": "Senegal",
+    "country": "senegal"
+  },
+  {
+    "countryName": "Singapore",
+    "country": "singapore"
+  },
+  {
+    "countryName": "Slovakia",
+    "country": "slovakia"
+  },
+  {
+    "countryName": "Slovenia",
+    "country": "slovenia"
+  },
+  {
+    "countryName": "South Africa",
+    "country": "south-africa"
+  },
+  {
+    "countryName": "South Korea",
+    "country": "south-korea"
+  },
+  {
+    "countryName": "Spain",
+    "country": "spain"
+  },
+  {
+    "countryName": "Sweden",
+    "country": "sweden"
+  },
+  {
+    "countryName": "Taiwan, Province of China",
+    "country": "taiwan"
+  },
+  {
+    "countryName": "Thailand",
+    "country": "thailand"
+  },
+  {
+    "countryName": "Timor-Leste",
+    "country": "timor-leste"
+  },
+  {
+    "countryName": "Ukraine",
+    "country": "ukraine"
+  },
+  {
+    "countryName": "United Kingdom",
+    "country": "uk"
+  },
+  {
+    "countryName": "United States",
+    "country": "us"
+  },
+  {
+    "countryName": "Uruguay",
+    "country": "uruguay"
+  },
+  {
+    "countryName": "Uzbekistan",
+    "country": "uzbekistan"
+  },
+  {
+    "countryName": "Venezuela",
+    "country": "venezuela"
+  },
+  {
+    "countryName": "Viet Nam",
+    "country": "viet-nam"
+  },
+  {
+    "countryName": "Zambia",
+    "country": "zambia"
+  },
+  {
+    "countryName": "Zimbabwe",
+    "country": "zimbabwe"
+  }
+]

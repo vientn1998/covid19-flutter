@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:template_flutter/src/app/simple_bloc_delegate.dart';
 import 'package:template_flutter/src/blocs/common/bloc.dart';
 import 'package:template_flutter/src/blocs/covid19/bloc.dart';
+import 'package:template_flutter/src/blocs/local_search/bloc.dart';
+import 'package:template_flutter/src/database/covid_dao.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_api_client.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_repository.dart';
 import 'package:template_flutter/src/screens/introduction/splash_screen.dart';
@@ -30,6 +32,9 @@ import 'src/screens/introduction/introduction_screen.dart';
           ),
           BlocProvider<CommonBloc>(
             create: (context) => CommonBloc(),
+          ),
+          BlocProvider<SearchBloc>(
+            create: (context) => SearchBloc(covid19dao: Covid19Dao()),
           )
         ],
         child: MaterialApp(

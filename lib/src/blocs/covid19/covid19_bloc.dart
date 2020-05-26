@@ -42,7 +42,8 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
         dataGlobal = listData[0];
         yield Covid19LoadedOverview(overviewObj: dataGlobal);
       } else {
-        dataCountry =listData.firstWhere((element) => element.country == event.countryName);
+        print(listData.toString());
+        dataCountry = listData.firstWhere((element) => element.country == event.countryName);
         yield Covid19LoadedOverview(overviewObj: dataCountry);
       }
     }

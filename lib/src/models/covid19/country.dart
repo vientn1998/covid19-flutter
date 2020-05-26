@@ -1,9 +1,11 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 
 class CountryObj extends Equatable{
+  int id;
   int updated;
   String country;
-  CountryInfo countryInfo;
+  String countryName;
   int cases;
   int todayCases;
   int deaths;
@@ -12,29 +14,30 @@ class CountryObj extends Equatable{
   int active;
   int critical;
 
+  Map<String, dynamic> toMap() {
+    return {
+      'country' : this.country,
+      'countryName' : this.countryName
+    };
+  }
+
+
   CountryObj({
     this.updated,
     this.country,
-    this.countryInfo,
     this.cases,
     this.todayCases,
     this.todayDeaths,
     this.recovered,
     this.active,
     this.critical,
+    this.countryName
   });
 
   factory CountryObj.fromJson(Map<String, dynamic> parsedJson) {
     return CountryObj(
-      updated: parsedJson['updated'],
       country: parsedJson['country'],
-      cases: parsedJson['cases'],
-      todayCases: parsedJson['todayCases'],
-      todayDeaths: parsedJson['todayDeaths'],
-      recovered: parsedJson['recovered'],
-      active: parsedJson['active'],
-      critical: parsedJson['critical'],
-      countryInfo: CountryInfo.fromJson(parsedJson['countryInfo']),
+      countryName: parsedJson['countryName'],
     );
   }
 

@@ -8,7 +8,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:pk_skeleton/pk_skeleton.dart';
 import 'package:skeleton_text/skeleton_text.dart';
 import 'package:template_flutter/src/blocs/covid19/bloc.dart';
+import 'package:template_flutter/src/blocs/local_search/bloc.dart';
 import 'package:template_flutter/src/models/covid19/overview.dart';
+import 'package:template_flutter/src/screens/home/search_screen.dart';
 import 'package:template_flutter/src/services/permission_service.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
@@ -30,13 +32,21 @@ class _HomePageState extends State<HomePage> {
   checkPermission() async {
     final result = await Permission.locationWhenInUse.request();
     if (result.isGranted) {
-      final Position position = await Geolocator().getLastKnownPosition(desiredAccuracy: LocationAccuracy.high);
-      List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
-      setState(() {
-        countryName = placemark[0].country;
-      });
-      print('----${placemark[0].country}');
-      BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: placemark[0].country));
+      final Position position = await Geolocator().getLastKnownPosition(desiredAccuracy: LocationAccuracy.low);
+      if (position != null && position.latitude != null && position.latitude != null) {
+        List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
+        setState(() {
+          countryName = placemark[0].administrativeArea;
+          isChooseCountry = true;
+        });
+        print('- country---${placemark[0].toJson()}');
+        BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: placemark[0].country));
+      } else {
+        BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
+        setState(() {
+          isChooseCountry = false;
+        });
+      }
     } else {
       //show dialog
       _showDialogDelete(context);
@@ -49,6 +59,7 @@ class _HomePageState extends State<HomePage> {
     Timer(Duration(seconds: 2), () {
       checkPermission();
     });
+    BlocProvider.of<SearchBloc>(context).add(LoadingSearch());
   }
 
   @override
@@ -84,16 +95,19 @@ class _HomePageState extends State<HomePage> {
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       Text(
-                        'Da Nang, Viet Nam',
+                        countryName,
                         style: kTitleBold,
                       ),
                     ],
                   ),
                   IconBox(
                     iconData: Icons.search,
-                    onPressed: () {
-                      BlocProvider.of<Covid19Bloc>(context).listData.clear();
-                      BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
+                    onPressed: () async {
+                      final result = await Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => SearchPage()),
+                      );
+                      print('- load data by country: $result');
+                      BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: result));
                     },
                   ),
                 ],
@@ -159,7 +173,7 @@ class _HomePageState extends State<HomePage> {
                             if (isChooseCountry) {
                               return;
                             }
-                            BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countryName));
+                            BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
                             isChooseCountry = true;
                           });
                         },
@@ -333,7 +347,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             Text(
-              value,
+              value.isEmpty ? "0" : value,
               style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.white,

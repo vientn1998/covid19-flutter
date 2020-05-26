@@ -28,12 +28,16 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
       yield LoadingSearchLocal();
       yield* _mapDataLocalToState();
     } else if (event is AddSearch) {
-      final country = listCountryLocal.firstWhere((item) => item.countrySearch == event.countryObj.countrySearch);
-      if (country == null) {
-        listCountryLocal.add(country);
-        await covid19dao.insert(event.countryObj);
+      print('list local: ${listCountryLocal.length}');
+      if (listCountryLocal.length > 0) {
+        final country = listCountryLocal.firstWhere((item) => item.countrySearch == event.countryObj.countrySearch);
+        if (country == null) {
+          listCountryLocal.add(country);
+          await covid19dao.insert(event.countryObj);
+        }
+        yield AddSearchLocal();
       }
-      yield AddSearchLocal();
+
     } else if (event is LoadingSearchFile) {
       yield LoadingFile();
       yield* _mapDataFileToState(event);
@@ -43,7 +47,9 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   Stream<SearchState> _mapDataSearchFileToState(FetchSearchFile event) async* {
-//    yield LoadingSearchLocal();
+    yield LoadingSearchLocal();
+    listCountryLocal.clear();
+    listCountryLocal.addAll(await covid19dao.getAllSortedByName());
     final data = listCountry.where((element) => element.countryName.contains(event.keySearch)).toList();
     print('data searching ${data.length}');
     yield LoadedSearchFile(list: data);

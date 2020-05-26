@@ -9,6 +9,7 @@ import 'package:pk_skeleton/pk_skeleton.dart';
 import 'package:skeleton_text/skeleton_text.dart';
 import 'package:template_flutter/src/blocs/covid19/bloc.dart';
 import 'package:template_flutter/src/blocs/local_search/bloc.dart';
+import 'package:template_flutter/src/models/covid19/country.dart';
 import 'package:template_flutter/src/models/covid19/overview.dart';
 import 'package:template_flutter/src/screens/home/search_screen.dart';
 import 'package:template_flutter/src/services/permission_service.dart';
@@ -36,7 +37,7 @@ class _HomePageState extends State<HomePage> {
       if (position != null && position.latitude != null && position.latitude != null) {
         List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
         print('location device: ${placemark[0].toJson()}');
-        final country = BlocProvider.of<SearchBloc>(context).listCountry.firstWhere((item) => item.code.contains(placemark[0].isoCountryCode));
+        final country = BlocProvider.of<SearchBloc>(context).listCountry.firstWhere((item) => item.code != null && item.code.contains(placemark[0].isoCountryCode.toString()));
         setState(() {
           countryName = placemark[0].administrativeArea;
           isChooseCountry = true;
@@ -104,14 +105,16 @@ class _HomePageState extends State<HomePage> {
                   IconBox(
                     iconData: Icons.search,
                     onPressed: () async {
-                      final result = await Navigator.of(context).push(
+                      final item = await Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => SearchPage()),
-                      );
-                      print('search return: $result');
+                      ) as CountryObj;
+                      print('search return: ${item.countrySearch}');
                       setState(() {
                         isChooseCountry = true;
+                        countrySearch = item.countrySearch;
+                        countryName = item.countryName;
                       });
-                      BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: result));
+                      BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countrySearch));
                     },
                   ),
                 ],
@@ -342,7 +345,7 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  newCase,
+                  newCase ?? "0",
                   style: TextStyle(
                       fontWeight: FontWeight.w700,
                       color: Colors.white,

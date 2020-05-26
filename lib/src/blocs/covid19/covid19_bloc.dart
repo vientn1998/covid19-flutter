@@ -39,6 +39,7 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
       }
     } else {
       if (event.countryName == null || event.countryName.isEmpty) {
+        dataGlobal = listData[0];
         yield Covid19LoadedOverview(overviewObj: dataGlobal);
       } else {
         try{

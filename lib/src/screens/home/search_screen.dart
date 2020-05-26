@@ -141,7 +141,7 @@ class _SearchPageState extends State<SearchPage> {
 
               onTap: () {
                 BlocProvider.of<SearchBloc>(context).add(AddSearch(countryObj: CountryObj(country: item.country, countryName: item.countryName, countrySearch: item.countrySearch)));
-                Navigator.pop(context, item.countrySearch);
+                Navigator.pop(context, item);
               },
           );
         }

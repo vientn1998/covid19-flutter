@@ -4,6 +4,7 @@ class DeathsObj extends Equatable {
   int id;
   String date;
   int totalDeaths;
+  double percent;
   String changeInTotal;
 
   Map<String, dynamic> toMap() {

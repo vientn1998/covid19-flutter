@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
         print('location device: ${placemark[0].toJson()}');
         final country = BlocProvider.of<SearchBloc>(context).listCountry.firstWhere((item) => item.code != null && item.code.contains(placemark[0].isoCountryCode.toString()));
         setState(() {
-          countryName = placemark[0].locality +", "+ placemark[0].country;
+          countryName = placemark[0].administrativeArea +", "+ placemark[0].country;
           isChooseCountry = true;
           countrySearch = country == null ? placemark[0].country : country.countrySearch;
         });
@@ -274,12 +274,12 @@ class _HomePageState extends State<HomePage> {
                 builder: (context, state) {
                   if (state is Covid19LoadedDeaths) {
                     final list = state.list;
-                    final data = list.map((e) => DeathsObj.clone(e)).toList().take(5);
+                    final data = list.map((e) => DeathsObj.clone(e)).toList().take(7).toList();
                     return Container(
                       height: 300,
                       width: double.infinity,
                       child: Padding(
-                        padding: const EdgeInsets.only(right: 16.0, left: 24.0, top: 15.0, bottom: 0),
+                        padding: const EdgeInsets.only(right: 16.0, left: 24.0, top: 14.0, bottom: 0),
                         child: LineChart(
                           mainData(data),
                         ),
@@ -302,13 +302,31 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+
+
   LineChartData mainData(List<DeathsObj> data) {
     final dataSortByDeath = data.map((e) => DeathsObj.clone(e)).toList();
     dataSortByDeath.sort((a, b) => a.totalDeaths.compareTo(b.totalDeaths));
-    dataSortByDeath.toList().forEach((element) {
-      print(element.totalDeaths);
+    final valueMax = dataSortByDeath[dataSortByDeath.length - 1].totalDeaths;
+    final valueMin = dataSortByDeath[0].totalDeaths;
+    if (valueMin > 999) {
+      dataSortByDeath.asMap().forEach((index, value) {
+        value.totalDeaths = value.totalDeaths ~/ 1000;
+        print('result: ${value.totalDeaths}');
+      });
+    }
+    data.forEach((element) {
+      element.percent = element.totalDeaths / valueMax * data.length;
+      element.date = element.date.split(" ")[1];
+      print(element.date);
     });
-    final maxLeft = dataSortByDeath[0].totalDeaths / dataSortByDeath[0].totalDeaths * 100;
+    data = data.reversed.toList();
+    List<FlSpot> listFLSpot = [];
+    List<LineBarSpot> listToolTipItem = [];
+    data.asMap().forEach((index, value) {
+      listFLSpot.add(FlSpot(index.toDouble(), value.totalDeaths / valueMax * data.length));
+      listToolTipItem.add(LineBarSpot(LineChartBarData(),index,FlSpot(index.toDouble(), value.totalDeaths / valueMax * data.length)));
+    });
     return LineChartData(
       gridData: FlGridData(
         show: true,
@@ -321,8 +339,8 @@ class _HomePageState extends State<HomePage> {
         },
         getDrawingVerticalLine: (value) {
           return FlLine(
-            color: Colors.white30,
-            strokeWidth: 1,
+            color: Colors.lightBlueAccent,
+            strokeWidth: 0.2,
           );
         },
       ),
@@ -332,9 +350,13 @@ class _HomePageState extends State<HomePage> {
           showTitles: true,
           reservedSize: 22,
           textStyle:
-          const TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 14),
+          const TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 13),
           getTitles: (value) {
+            if (value.toInt() == data.length) {
+              return '';
+            }
             return data[value.toInt()].date.toString();
+
           },
           margin: 5,
         ),
@@ -343,10 +365,13 @@ class _HomePageState extends State<HomePage> {
           textStyle: const TextStyle(
             color: textColor,
             fontWeight: FontWeight.w600,
-            fontSize: 14,
+            fontSize: 13,
           ),
           getTitles: (value) {
-            return dataSortByDeath[value.toInt()].totalDeaths.toString();
+            if (value.toInt() > 0) {
+              return dataSortByDeath[value.toInt() - 1].totalDeaths.toString() + 'k';
+            }
+            return '';
           },
           reservedSize: 20,
           margin: 12,
@@ -355,27 +380,24 @@ class _HomePageState extends State<HomePage> {
       borderData:
       FlBorderData(show: true, border: Border.all(color: Colors.grey, width: 0.5)),
       minX: 0,
-      maxX: 6,
+      maxX: data.length.toDouble() - 1,
       minY: 0,
       maxY: data.length.toDouble(),
+      lineTouchData: LineTouchData(
+        fullHeightTouchLine: false,
+        touchTooltipData: LineTouchTooltipData(
+          
+        ),
+      ),
       lineBarsData: [
         LineChartBarData(
-          spots: [
-            FlSpot(0, 3),
-            FlSpot(1, 2),
-            FlSpot(2, 5),
-            FlSpot(3, 3.1),
-            FlSpot(4, 4),
-            FlSpot(5, 3),
-            FlSpot(6, 2),
-          ],
+          spots: listFLSpot,
           isCurved: true,
           colors: gradientColors,
           barWidth: 3,
-          isStrokeCapRound: true,
+          isStrokeCapRound: false,
           dotData: FlDotData(
             show: false,
-
           ),
           belowBarData: BarAreaData(
             show: true,

@@ -12,6 +12,7 @@ import 'package:template_flutter/src/blocs/covid19/bloc.dart';
 import 'package:template_flutter/src/blocs/death/bloc.dart';
 import 'package:template_flutter/src/blocs/local_search/bloc.dart';
 import 'package:template_flutter/src/models/covid19/country.dart';
+import 'package:template_flutter/src/models/covid19/deaths.dart';
 import 'package:template_flutter/src/models/covid19/overview.dart';
 import 'package:template_flutter/src/screens/home/search_screen.dart';
 import 'package:template_flutter/src/services/permission_service.dart';
@@ -34,8 +35,8 @@ class _HomePageState extends State<HomePage> {
   var countryName = "", countrySearch = "";
 
   List<Color> gradientColors = [
-    Colors.lightBlueAccent,
-    Colors.deepPurpleAccent,
+    HexColor("#9B95BA"),
+    HexColor("#149889"),
   ];
 
   checkPermission() async {
@@ -272,13 +273,15 @@ class _HomePageState extends State<HomePage> {
               BlocBuilder<DeathBloc, DeathState>(
                 builder: (context, state) {
                   if (state is Covid19LoadedDeaths) {
+                    final list = state.list;
+                    final data = list.map((e) => DeathsObj.clone(e)).toList().take(5);
                     return Container(
                       height: 300,
                       width: double.infinity,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 16.0, left: 24.0, top: 15.0, bottom: 0),
                         child: LineChart(
-                          mainData(),
+                          mainData(data),
                         ),
                       ),
                     );
@@ -299,20 +302,26 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  LineChartData mainData() {
+  LineChartData mainData(List<DeathsObj> data) {
+    final dataSortByDeath = data.map((e) => DeathsObj.clone(e)).toList();
+    dataSortByDeath.sort((a, b) => a.totalDeaths.compareTo(b.totalDeaths));
+    dataSortByDeath.toList().forEach((element) {
+      print(element.totalDeaths);
+    });
+    final maxLeft = dataSortByDeath[0].totalDeaths / dataSortByDeath[0].totalDeaths * 100;
     return LineChartData(
       gridData: FlGridData(
         show: true,
         drawVerticalLine: true,
         getDrawingHorizontalLine: (value) {
           return FlLine(
-            color: Colors.grey,
-            strokeWidth: 1,
+            color: Colors.lightBlueAccent,
+            strokeWidth: 0.2,
           );
         },
         getDrawingVerticalLine: (value) {
           return FlLine(
-            color: Colors.grey,
+            color: Colors.white30,
             strokeWidth: 1,
           );
         },
@@ -325,25 +334,7 @@ class _HomePageState extends State<HomePage> {
           textStyle:
           const TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 14),
           getTitles: (value) {
-            switch (value.toInt()) {
-              case 0:
-                return '0';
-              case 1:
-                return '1';
-              case 2:
-                return '2';
-              case 3:
-                return '3';
-              case 4:
-                return '4';
-              case 5:
-                return '5';
-              case 6:
-                return '6';
-              case 7:
-                return '7';
-            }
-            return '';
+            return data[value.toInt()].date.toString();
           },
           margin: 5,
         ),
@@ -355,32 +346,18 @@ class _HomePageState extends State<HomePage> {
             fontSize: 14,
           ),
           getTitles: (value) {
-            switch (value.toInt()) {
-              case 1:
-                return '10k';
-              case 2:
-                return '20k';
-              case 3:
-                return '30k';
-              case 4:
-                return '40k';
-              case 5:
-                return '50k';
-              case 6:
-                return '60k';
-            }
-            return '';
+            return dataSortByDeath[value.toInt()].totalDeaths.toString();
           },
           reservedSize: 20,
           margin: 12,
         ),
       ),
       borderData:
-      FlBorderData(show: true, border: Border.all(color: Colors.grey, width: 1)),
+      FlBorderData(show: true, border: Border.all(color: Colors.grey, width: 0.5)),
       minX: 0,
-      maxX: 7,
+      maxX: 6,
       minY: 0,
-      maxY: 6,
+      maxY: data.length.toDouble(),
       lineBarsData: [
         LineChartBarData(
           spots: [
@@ -391,11 +368,10 @@ class _HomePageState extends State<HomePage> {
             FlSpot(4, 4),
             FlSpot(5, 3),
             FlSpot(6, 2),
-            FlSpot(7, 5),
           ],
           isCurved: true,
           colors: gradientColors,
-          barWidth: 4,
+          barWidth: 3,
           isStrokeCapRound: true,
           dotData: FlDotData(
             show: false,
@@ -403,7 +379,7 @@ class _HomePageState extends State<HomePage> {
           ),
           belowBarData: BarAreaData(
             show: true,
-            colors: gradientColors.map((color) => color.withOpacity(0.5)).toList(),
+            colors: gradientColors.map((color) => color.withOpacity(0.6)).toList(),
           ),
         ),
       ],

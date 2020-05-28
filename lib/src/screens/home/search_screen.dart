@@ -53,6 +53,7 @@ class _SearchPageState extends State<SearchPage> {
                   hintText: "Search country name...",
                   border: InputBorder.none,
                 ),
+                autofocus: true,
                 textCapitalization: TextCapitalization.words,
                 autocorrect: false,
                 textInputAction: TextInputAction.search,

@@ -11,13 +11,14 @@ class ReportsObj extends Equatable {
     final data = List<OverviewObj>();
     final dataParent = List<List<OverviewObj>>();
     final json = parsedJson['table'] as List;
-    json.forEach((element) {
-      print('-----');
-      final list = element as List;
-      list.forEach((child) {
-        data.add(OverviewObj.fromJson(child));
-      });
-      dataParent.add(data);
+    json.asMap().forEach((index, value) {
+      if (index == 0) {
+        final list = value as List;
+        list.forEach((child) {
+          data.add(OverviewObj.fromJson(child));
+        });
+        dataParent.add(data);
+      }
     });
     return ReportsObj(
         listData: dataParent
@@ -56,6 +57,18 @@ class OverviewObj extends Equatable{
   String country;
   String continent;
   String seriousCritical;
+
+  int get newCase {
+    return int.parse(this.newCases.replaceAll("+", "").replaceAll(",", ""));
+  }
+
+  int get newDeath {
+    return int.parse(this.newDeaths.replaceAll("+", "").replaceAll(",", ""));
+  }
+
+  bool get isTypeTotal {
+    return this.country.contains("Total:") ?? false;
+  }
 
   OverviewObj({
     this.totalCases,

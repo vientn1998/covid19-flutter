@@ -5,6 +5,7 @@ abstract class DeathEvent extends Equatable {
 }
 
 class FetchAllDeaths extends DeathEvent {
+
   FetchAllDeaths();
   @override
   List<Object> get props => [];

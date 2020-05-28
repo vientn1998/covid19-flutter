@@ -13,7 +13,8 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
   List<OverviewObj> listData = [];
   final Covid19Repository covid19repository;
 
-  Covid19Bloc({@required this.covid19repository}) : assert(covid19repository != null);
+  Covid19Bloc({@required this.covid19repository})
+      : assert(covid19repository != null);
 
   @override
   Covid19State get initialState => InitialCovid19State();
@@ -29,19 +30,39 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
     }
   }
 
-  Stream<Covid19State> _mapFetchNewCaseToState(FetchAllCountryNewCase event) async* {
+  Stream<Covid19State> _mapFetchNewCaseToState(
+      FetchAllCountryNewCase event) async* {
     yield Covid19LoadingNewCase();
     try {
-      yield Covid19LoadedNewCase(list: listData.where((data) =>
-      data.newCases.trim().isNotEmpty).toList());
+      if (event.isNewCase) {
+        final list = listData
+            .where((data) => ((data.newCases.trim().isNotEmpty &&
+                !data.country.trim().contains("World"))))
+            .toList();
+        final data = list
+            .where((element) => element.country.contains(event.keySearch))
+            .toList();
+        data.sort((a, b) => b.newCase.compareTo(a.newCase));
+        yield Covid19LoadedNewCase(list: data);
+      } else {
+        final list = listData
+            .where((data) => ((data.newDeaths.trim().isNotEmpty &&
+            !data.country.trim().contains("World"))))
+            .toList();
+        final data = list
+            .where((element) => element.country.contains(event.keySearch))
+            .toList();
+        data.sort((a, b) => b.newDeath.compareTo(a.newDeath));
+        yield Covid19LoadedNewCase(list: data);
+      }
     } on Exception catch (exception) {
       print(exception.toString());
       yield Covid19LoadedNewCase(list: []);
     }
   }
 
-
-  Stream<Covid19State> _mapFetchDataOverviewToState(FetchDataOverview event) async* {
+  Stream<Covid19State> _mapFetchDataOverviewToState(
+      FetchDataOverview event) async* {
     yield Covid19Loading();
     if (listData.isEmpty) {
       listData.addAll(await covid19repository.getDataOverview());
@@ -49,7 +70,8 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
         dataGlobal = listData[0];
         yield Covid19LoadedOverview(overviewObj: dataGlobal);
       } else {
-        dataCountry = listData.firstWhere((element) => element.country == event.countryName);
+        dataCountry = listData
+            .firstWhere((element) => element.country == event.countryName);
         yield Covid19LoadedOverview(overviewObj: dataCountry);
       }
     } else {
@@ -57,12 +79,15 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
         dataGlobal = listData[0];
         yield Covid19LoadedOverview(overviewObj: dataGlobal);
       } else {
-        try{
-          dataCountry = listData.firstWhere((country) => country.country.toLowerCase().contains(event.countryName.toString().toLowerCase()));
+        try {
+          dataCountry = listData.firstWhere((country) => country.country
+              .toLowerCase()
+              .contains(event.countryName.toString().toLowerCase()));
           yield Covid19LoadedOverview(overviewObj: dataCountry);
         } on Exception catch (exception) {
           print(exception.toString());
-          dataCountry = listData.firstWhere((element) => element.country == "Vietnam");
+          dataCountry =
+              listData.firstWhere((element) => element.country == "Vietnam");
           yield Covid19LoadedOverview(overviewObj: dataCountry);
         }
       }

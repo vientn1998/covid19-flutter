@@ -9,7 +9,7 @@ abstract class Covid19Event extends Equatable {
 class FetchDataOverview extends Covid19Event {
   String countryName = "";
   bool isLoadData = true;
-  FetchDataOverview({this.countryName, this.isLoadData});
+  FetchDataOverview({this.countryName = "", this.isLoadData});
   @override
   List<Object> get props => [this.countryName];
 }
@@ -30,13 +30,13 @@ class FetchAllCountry extends Covid19Event {
 }
 
 class FetchAllCountryNewCase extends Covid19Event {
-
-  FetchAllCountryNewCase();
+  String keySearch = "";
+  bool isNewCase = true;
+  FetchAllCountryNewCase({this.keySearch = "", this.isNewCase});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [this.keySearch];
 }
-
 
 
 

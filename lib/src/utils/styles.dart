@@ -46,6 +46,12 @@ const kBodyBold = const TextStyle(
     fontWeight: FontWeight.bold
 );
 
+const kBodyBoldW600 = const TextStyle(
+    color: textColor,
+    fontSize: 16,
+    fontWeight: FontWeight.w600
+);
+
 const kSmall = const TextStyle(
     color: textColor,
     fontSize: 12,

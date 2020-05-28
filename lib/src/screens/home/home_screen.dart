@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pk_skeleton/pk_skeleton.dart';
 import 'package:skeleton_text/skeleton_text.dart';
@@ -14,6 +15,7 @@ import 'package:template_flutter/src/blocs/local_search/bloc.dart';
 import 'package:template_flutter/src/models/covid19/country.dart';
 import 'package:template_flutter/src/models/covid19/deaths.dart';
 import 'package:template_flutter/src/models/covid19/overview.dart';
+import 'package:template_flutter/src/screens/home/newcase_screen.dart';
 import 'package:template_flutter/src/screens/home/search_screen.dart';
 import 'package:template_flutter/src/services/permission_service.dart';
 import 'package:template_flutter/src/utils/color.dart';
@@ -126,9 +128,7 @@ class _HomePageState extends State<HomePage> {
                     IconBox(
                       iconData: Icons.search,
                       onPressed: () async {
-                        final item = await Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => SearchPage()),
-                        ) as CountryObj;
+                        final item = await Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade, child: SearchPage())) as CountryObj;
                         if (item != null) {
                           print('search return: ${item.countrySearch}');
                           setState(() {
@@ -271,7 +271,7 @@ class _HomePageState extends State<HomePage> {
                   }
                   if (state is Covid19LoadedOverview) {
                     final overview = state.overviewObj;
-                    return widgetLoadData(overview);
+                    return widgetLoadData(overview, isGlobal: !isChooseCountry);
                   }
                   return widgetLoading();
                 },
@@ -590,7 +590,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  widgetLoadData(OverviewObj data) {
+  widgetLoadData(OverviewObj data, {bool isGlobal = false}) {
     return Column(
       children: <Widget>[
         Padding(
@@ -607,7 +607,15 @@ class _HomePageState extends State<HomePage> {
                     child: widgetDeath(
                         colorTotalCase, 'TotalCase', data.totalCases,
                         newCase: data.newCases),
-                    onTap: () {},
+                    onTap: () async {
+                      if (!isChooseCountry) {
+//                        await Navigator.push(context, MaterialPageRoute(
+//                          builder: (context) => NewCasePage(isNewCase: true,),
+//                        ));
+                      await Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade, child: NewCasePage(isNewCase: true)));
+                        BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
+                      }
+                    },
                   ),
                 ),
                 SizedBox(
@@ -649,7 +657,10 @@ class _HomePageState extends State<HomePage> {
                   child: InkWell(
                     child: widgetDeath(colorDeath, 'Deaths', data.totalDeaths,
                         newCase: data.newDeaths),
-                    onTap: () {},
+                    onTap: () async {
+                      await Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade, child: NewCasePage(isNewCase: false)));
+                      BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
+                    },
                   ),
                 ),
               ],

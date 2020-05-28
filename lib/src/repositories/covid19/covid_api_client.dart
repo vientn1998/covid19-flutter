@@ -35,7 +35,6 @@ class Covid19ApiClient {
       });
       final list = results['reports'] as List;
       final reports = list.map<ReportsObj>((item) => ReportsObj.fromJson(item)).toList();
-
       return reports[0].listData[0];
     } on Exception catch (exception) {
       print(exception.toString());

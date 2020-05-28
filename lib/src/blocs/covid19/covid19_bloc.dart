@@ -24,9 +24,21 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
   ) async* {
     if (event is FetchDataOverview) {
       yield* _mapFetchDataOverviewToState(event);
+    } else if (event is FetchAllCountryNewCase) {
+      yield* _mapFetchNewCaseToState(event);
     }
   }
 
+  Stream<Covid19State> _mapFetchNewCaseToState(FetchAllCountryNewCase event) async* {
+    yield Covid19LoadingNewCase();
+    try {
+      yield Covid19LoadedNewCase(list: listData.where((data) =>
+      data.newCases.trim().isNotEmpty).toList());
+    } on Exception catch (exception) {
+      print(exception.toString());
+      yield Covid19LoadedNewCase(list: []);
+    }
+  }
 
 
   Stream<Covid19State> _mapFetchDataOverviewToState(FetchDataOverview event) async* {

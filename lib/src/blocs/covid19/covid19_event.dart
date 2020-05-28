@@ -29,6 +29,14 @@ class FetchAllCountry extends Covid19Event {
   List<Object> get props => [];
 }
 
+class FetchAllCountryNewCase extends Covid19Event {
+
+  FetchAllCountryNewCase();
+
+  @override
+  List<Object> get props => [];
+}
+
 
 
 

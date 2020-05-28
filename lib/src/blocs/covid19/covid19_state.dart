@@ -49,3 +49,15 @@ class Covid19LoadedDataByCountryName extends Covid19State {
   @override
   List<Object> get props => [this.overviewObj];
 }
+
+
+class Covid19LoadingNewCase extends Covid19State {}
+
+class Covid19LoadedNewCase extends Covid19State {
+
+  final List<OverviewObj> list;
+  Covid19LoadedNewCase({@required this.list}) : assert(list != null);
+
+  @override
+  List<Object> get props => [this.list];
+}

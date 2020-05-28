@@ -7,6 +7,7 @@ import 'package:template_flutter/src/screens/introduction/introduction_screen.da
 import 'package:template_flutter/src/screens/main_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/hex_color.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 
 import 'getstart_screen.dart';
@@ -54,7 +55,7 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: colorFacebook,
+        color: HexColor("#2979FF"),
         child: Stack(
           fit: StackFit.expand,
           children: <Widget>[

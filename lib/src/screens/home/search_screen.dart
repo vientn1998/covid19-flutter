@@ -101,7 +101,7 @@ class _SearchPageState extends State<SearchPage> {
   _buildDataLocal(List<CountryObj> data) {
     return ListView.builder(
         shrinkWrap: true,
-        padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+        padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
         physics: NeverScrollableScrollPhysics(),
         itemCount: data.length,
         itemBuilder: (BuildContext ctx, int i) {

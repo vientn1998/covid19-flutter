@@ -35,31 +35,40 @@ class _HomePageState extends State<HomePage> {
   var countryName = "", countrySearch = "";
 
   List<Color> gradientColors = [
-    HexColor("#9B95BA"),
-    HexColor("#149889"),
+    HexColor("#64b5f6"),
+    HexColor("#42a5f5"),
+    HexColor("#1976d2"),
   ];
 
   checkPermission() async {
     final result = await Permission.locationWhenInUse.request();
     if (result.isGranted) {
-      final Position position = await Geolocator().getLastKnownPosition(desiredAccuracy: LocationAccuracy.low);
-      if (position != null && position.latitude != null && position.latitude != null) {
-        List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
-        print('location device: ${placemark[0].toJson()}');
-        final country = BlocProvider.of<SearchBloc>(context).listCountry.firstWhere((item) => item.code != null && item.code.contains(placemark[0].isoCountryCode.toString()));
-        setState(() {
-          countryName = placemark[0].administrativeArea +", "+ placemark[0].country;
-          isChooseCountry = true;
-          countrySearch = country == null ? placemark[0].country : country.countrySearch;
-        });
-        BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countrySearch));
-      } else {
+      try {
+        final Position position = await Geolocator().getLastKnownPosition(desiredAccuracy: LocationAccuracy.low);
+        if (position != null && position.latitude != null && position.latitude != null) {
+          List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
+          print('location device: ${placemark[0].toJson()}');
+          final country = BlocProvider.of<SearchBloc>(context).listCountry.firstWhere((item) => item.code != null && item.code.contains(placemark[0].isoCountryCode.toString()));
+          setState(() {
+            countryName = placemark[0].administrativeArea +", "+ placemark[0].country;
+            isChooseCountry = true;
+            countrySearch = country == null ? placemark[0].country : country.countrySearch;
+          });
+          print('search : $countrySearch');
+          BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countrySearch));
+        } else {
+          BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
+          setState(() {
+            isChooseCountry = false;
+          });
+        }
+        BlocProvider.of<DeathBloc>(context).add(FetchAllDeaths());
+      }on Exception catch (exception) {
+        print(exception.toString());
         BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
-        setState(() {
-          isChooseCountry = false;
-        });
+        BlocProvider.of<DeathBloc>(context).add(FetchAllDeaths());
       }
-      BlocProvider.of<DeathBloc>(context).add(FetchAllDeaths());
+
     } else {
       //show dialog
       _showDialogDelete(context);
@@ -384,9 +393,10 @@ class _HomePageState extends State<HomePage> {
       minY: 0,
       maxY: data.length.toDouble(),
       lineTouchData: LineTouchData(
+        enabled: false,
         fullHeightTouchLine: false,
         touchTooltipData: LineTouchTooltipData(
-          
+
         ),
       ),
       lineBarsData: [
@@ -401,7 +411,7 @@ class _HomePageState extends State<HomePage> {
           ),
           belowBarData: BarAreaData(
             show: true,
-            colors: gradientColors.map((color) => color.withOpacity(0.6)).toList(),
+            colors: gradientColors.map((color) => color.withOpacity(0.5)).toList(),
           ),
         ),
       ],

@@ -89,222 +89,221 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              SizedBox(
-                height: heightSpaceLarge,
-              ),
-              SizedBox(
-                height: heightSpaceSmall,
-              ),
-              //notify and search
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: paddingDefault, left: paddingDefault),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    IconBox(
-                      iconData: Icons.notifications_none,
-                      onPressed: () {
-
-                      },
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        Text(
-                          countryName,
-                          style: kTitleBold,
-                        ),
-                      ],
-                    ),
-                    IconBox(
-                      iconData: Icons.search,
-                      onPressed: () async {
-                        final item = await Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade, child: SearchPage())) as CountryObj;
-                        if (item != null) {
-                          print('search return: ${item.countrySearch}');
-                          setState(() {
-                            isChooseCountry = true;
-                            countrySearch = item.countrySearch;
-                            countryName = item.countryName;
-                          });
-                          BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countrySearch));
-
-                        }
-                      },
-                    ),
-                  ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Container(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                SizedBox(
+                  height: heightSpaceSmall,
                 ),
-              ),
-              SizedBox(
-                height: heightSpaceLarge,
-              ),
-              //menu
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: paddingDefault, left: paddingDefault),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    IconMenuBox(
-                      iconData: Icons.report,
-                      background: colorTotalCase,
-                      title: 'Report',
-                      onPressed: () {},
-                    ),
-                    IconMenuBox(
-                      iconData: Icons.next_week,
-                      background: colorDeath,
-                      title: 'Prevention',
-                      onPressed: () {},
-                    ),
-                    IconMenuBox(
-                      iconData: Icons.camera_enhance,
-                      background: colorActive,
-                      title: 'Symptoms',
-                      onPressed: () {},
-                    ),
-                    IconMenuBox(
-                      iconData: Icons.tap_and_play,
-                      background: colorSerious,
-                      title: 'News',
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: heightSpaceLarge,
-              ),
-              //tab
-              Padding(
-                padding: const EdgeInsets.only(
-                    right: paddingDefault, left: paddingDefault),
-                child: Container(
-                  height: sizeBoxIcon,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20), color: colorTab),
+                //notify and search
+                Padding(
+                  padding: const EdgeInsets.only(
+                      right: paddingDefault, left: paddingDefault),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      Flexible(
-                        flex: 1,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              if (isChooseCountry) {
-                                return;
-                              }
-                              BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countrySearch));
-                              isChooseCountry = true;
-                            });
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(
-                                top: spaceBorder,
-                                left: spaceBorder,
-                                bottom: spaceBorder),
-                            height: double.maxFinite,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: isChooseCountry ? Colors.white : null),
-                            child: Center(
-                              child: Text(
-                                'My Country',
-                                style: kBodyBold,
-                              ),
-                            ),
-                          ),
-                        ),
+                      IconBox(
+                        iconData: Icons.notifications_none,
+                        onPressed: () {
+
+                        },
                       ),
-                      Flexible(
-                        flex: 1,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              if (!isChooseCountry) {
-                                return;
-                              }
-                              BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
-                              isChooseCountry = false;
-                            });
-                          },
-                          child: Container(
-                            margin: EdgeInsets.only(
-                                top: spaceBorder,
-                                right: spaceBorder,
-                                bottom: spaceBorder),
-                            height: double.maxFinite,
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: isChooseCountry ? null : Colors.white),
-                            child: Center(
-                              child: Text(
-                                'Global',
-                                style: kBodyBold,
-                              ),
-                            ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          Text(
+                            countryName,
+                            style: kTitleBold,
                           ),
-                        ),
+                        ],
+                      ),
+                      IconBox(
+                        iconData: Icons.search,
+                        onPressed: () async {
+                          final item = await Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade, child: SearchPage())) as CountryObj;
+                          if (item != null) {
+                            print('search return: ${item.countrySearch}');
+                            setState(() {
+                              isChooseCountry = true;
+                              countrySearch = item.countrySearch;
+                              countryName = item.countryName;
+                            });
+                            BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countrySearch));
+
+                          }
+                        },
                       ),
                     ],
                   ),
                 ),
-              ),
-              SizedBox(
-                height: heightSpaceNormal,
-              ),
-              //content
-              BlocBuilder<Covid19Bloc, Covid19State>(
-                builder: (context, state) {
-                  if (state is Covid19Loading) {
-                    return widgetLoading();
-                  }
-                  if (state is Covid19LoadedOverview) {
-                    final overview = state.overviewObj;
-                    return widgetLoadData(overview, isGlobal: !isChooseCountry);
-                  }
-                  return widgetLoading();
-                },
-              ),
-              SizedBox(
-                height: heightSpaceNormal,
-              ),
-              BlocBuilder<DeathBloc, DeathState>(
-                builder: (context, state) {
-                  if (state is Covid19LoadedDeaths) {
-                    final list = state.list;
-                    final data = list.map((e) => DeathsObj.clone(e)).toList().take(7).toList();
-                    return Container(
-                      height: 300,
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 16.0, left: 24.0, top: 14.0, bottom: 0),
-                        child: LineChart(
-                          mainData(data),
-                        ),
+                SizedBox(
+                  height: heightSpaceLarge,
+                ),
+                //menu
+                Padding(
+                  padding: const EdgeInsets.only(
+                      right: paddingDefault, left: paddingDefault),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      IconMenuBox(
+                        iconData: Icons.report,
+                        background: colorTotalCase,
+                        title: 'Report',
+                        onPressed: () {},
                       ),
-                    );
-                  }
-                  if (state is Covid19DeathsLoading) {
+                      IconMenuBox(
+                        iconData: Icons.next_week,
+                        background: colorDeath,
+                        title: 'Prevention',
+                        onPressed: () {},
+                      ),
+                      IconMenuBox(
+                        iconData: Icons.camera_enhance,
+                        background: colorActive,
+                        title: 'Symptoms',
+                        onPressed: () {},
+                      ),
+                      IconMenuBox(
+                        iconData: Icons.tap_and_play,
+                        background: colorSerious,
+                        title: 'News',
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: heightSpaceLarge,
+                ),
+                //tab
+                Padding(
+                  padding: const EdgeInsets.only(
+                      right: paddingDefault, left: paddingDefault),
+                  child: Container(
+                    height: sizeBoxIcon,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20), color: colorTab),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        Flexible(
+                          flex: 1,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                if (isChooseCountry) {
+                                  return;
+                                }
+                                BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countrySearch));
+                                isChooseCountry = true;
+                              });
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(
+                                  top: spaceBorder,
+                                  left: spaceBorder,
+                                  bottom: spaceBorder),
+                              height: double.maxFinite,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: isChooseCountry ? Colors.white : null),
+                              child: Center(
+                                child: Text(
+                                  'My Country',
+                                  style: kBodyBold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Flexible(
+                          flex: 1,
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                if (!isChooseCountry) {
+                                  return;
+                                }
+                                BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
+                                isChooseCountry = false;
+                              });
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(
+                                  top: spaceBorder,
+                                  right: spaceBorder,
+                                  bottom: spaceBorder),
+                              height: double.maxFinite,
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: isChooseCountry ? null : Colors.white),
+                              child: Center(
+                                child: Text(
+                                  'Global',
+                                  style: kBodyBold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: heightSpaceNormal,
+                ),
+                //content
+                BlocBuilder<Covid19Bloc, Covid19State>(
+                  builder: (context, state) {
+                    if (state is Covid19Loading) {
+                      return widgetLoading();
+                    }
+                    if (state is Covid19LoadedOverview) {
+                      final overview = state.overviewObj;
+                      return widgetLoadData(overview, isGlobal: !isChooseCountry);
+                    }
+                    return widgetLoading();
+                  },
+                ),
+                SizedBox(
+                  height: heightSpaceNormal,
+                ),
+                BlocBuilder<DeathBloc, DeathState>(
+                  builder: (context, state) {
+                    if (state is Covid19LoadedDeaths) {
+                      final list = state.list;
+                      final data = list.map((e) => DeathsObj.clone(e)).toList().take(7).toList();
+                      return Container(
+                        height: 300,
+                        width: double.infinity,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 16.0, left: 24.0, top: 14.0, bottom: 0),
+                          child: LineChart(
+                            mainData(data),
+                          ),
+                        ),
+                      );
+                    }
+                    if (state is Covid19DeathsLoading) {
+                      return widgetLoadingChart();
+                    }
                     return widgetLoadingChart();
-                  }
-                  return widgetLoadingChart();
-                },
-              ),
-              SizedBox(
-                height: heightSpaceLarge,
-              ),
-            ],
+                  },
+                ),
+                SizedBox(
+                  height: heightSpaceLarge,
+                ),
+              ],
+            ),
           ),
         ),
       ),

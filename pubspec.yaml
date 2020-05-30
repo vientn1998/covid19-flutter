@@ -59,6 +59,13 @@ dependencies:
   fl_chart: ^0.9.4
   #page transition
   page_transition: "^1.1.5"
+  #firebase
+  firebase_core: ^0.4.5
+  firebase_auth: ^0.16.1
+  #google sign
+  google_sign_in: ^4.5.1
+  #facebook sign
+  flutter_facebook_login: ^3.0.0
 
 dev_dependencies:
   flutter_test:

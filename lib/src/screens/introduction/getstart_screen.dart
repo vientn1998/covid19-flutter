@@ -1,11 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:template_flutter/src/app/my_app.dart';
 import 'package:template_flutter/src/screens/survey/suvery_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 import 'package:template_flutter/src/utils/styles.dart';
+import 'package:http/http.dart' as http;
 
 class GetStartScreen extends StatefulWidget {
   @override
@@ -14,6 +18,9 @@ class GetStartScreen extends StatefulWidget {
 
 class _GetStartScreenState extends State<GetStartScreen> {
   bool isKeyboardAppear = false;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final facebookLogin = FacebookLogin();
   @override
   void initState() {
     super.initState();
@@ -147,25 +154,30 @@ class _GetStartScreenState extends State<GetStartScreen> {
                           child: Material(
                             elevation: 2,
                             borderRadius: BorderRadius.circular(4),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: colorFacebook,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(4)),
-                              ),
-                              height: 50,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Image(
-                                      image: AssetImage(
-                                          'assets/images/ic_facebook.png'),
-                                    ),
-                                    SizedBox(width: 15,),
-                                    Text('Facebook', style: TextStyle(fontSize: 17, color: Colors.white),)
-                                  ],
+                            child: GestureDetector(
+                              onTap: () {
+                                _signInWithFacebook();
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: colorFacebook,
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(4)),
+                                ),
+                                height: 50,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Image(
+                                        image: AssetImage(
+                                            'assets/images/ic_facebook.png'),
+                                      ),
+                                      SizedBox(width: 15,),
+                                      Text('Facebook', style: TextStyle(fontSize: 17, color: Colors.white),)
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -178,25 +190,32 @@ class _GetStartScreenState extends State<GetStartScreen> {
                           child: Material(
                             elevation: 2,
                             borderRadius: BorderRadius.circular(4),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: colorGoogle,
-                                borderRadius:
-                                BorderRadius.all(Radius.circular(4)),
-                              ),
-                              height: 50,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Image(
-                                      image: AssetImage(
-                                          'assets/images/ic_google.png'),
-                                    ),
-                                    SizedBox(width: 15,),
-                                    Text('Google', style: TextStyle(fontSize: 17, color: Colors.white),)
-                                  ],
+                            child: GestureDetector(
+                              onTap: () {
+                                //sign google
+                                _signInWithGoogle().whenComplete(() => print('success login'));
+
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: colorGoogle,
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(4)),
+                                ),
+                                height: 50,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Image(
+                                        image: AssetImage(
+                                            'assets/images/ic_google.png'),
+                                      ),
+                                      SizedBox(width: 15,),
+                                      Text('Google', style: TextStyle(fontSize: 17, color: Colors.white),)
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -236,4 +255,39 @@ class _GetStartScreenState extends State<GetStartScreen> {
       ),
     ),
   );
+
+  Future<String> _signInWithGoogle() async {
+    final GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+    final AuthCredential authCredential = GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
+    final AuthResult authResult = await _firebaseAuth.signInWithCredential(authCredential);
+    final FirebaseUser firebaseUser = authResult.user;
+    assert(!firebaseUser.isAnonymous);
+    assert(await firebaseUser.getIdToken() != null);
+    final FirebaseUser currentUser = await _firebaseAuth.currentUser();
+    assert(firebaseUser.uid == currentUser.uid);
+    return 'signInWithGoogle current user: $currentUser';
+  }
+
+  Future<void> _signInWithFacebook() async {
+    await facebookLogin.logIn(['email', 'public_profile']).then((result) async {
+      switch(result.status) {
+        case FacebookLoginStatus.loggedIn:
+          print('login fb success \n ${result.accessToken.token}');
+          final graphResponse = await http.get(
+              'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${result.accessToken.token}');
+          print(graphResponse.body);
+          break;
+        case FacebookLoginStatus.cancelledByUser:
+          print('login fb cancelled by user');
+          break;
+        case FacebookLoginStatus.error:
+          print('login fb error');
+          break;
+      }
+    }).catchError((e) {
+      print(e.toString());
+    });
+  }
 }
+

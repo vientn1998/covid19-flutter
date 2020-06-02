@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:template_flutter/src/app/my_app.dart';
-import 'package:template_flutter/src/screens/introduction/getstart_screen.dart';
+import 'package:template_flutter/src/screens/introduction/login_screen.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/utils/styles.dart';
 
-import 'login_screen.dart';
+import 'getstart_screen.dart';
 
 class OnBoardingPage extends StatefulWidget {
   @override
@@ -19,7 +19,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
 
   void _onIntroEnd(context) {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => LoginPage()),
+      MaterialPageRoute(builder: (_) => GetStartPage()),
     );
   }
 

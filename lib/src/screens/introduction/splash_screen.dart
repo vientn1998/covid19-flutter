@@ -10,7 +10,7 @@ import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/hex_color.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 
-import 'getstart_screen.dart';
+import 'login_screen.dart';
 
 class SplashPage extends StatefulWidget {
   @override
@@ -29,9 +29,9 @@ class _SplashPageState extends State<SplashPage> {
         ));
       } else {
         final isSurvey = await SharePreferences().getBool(SharePreferenceKey.isApproveSuvery);
-        if (isSurvey == null) {
+        if (isSurvey == null || isSurvey == false) {
           Navigator.pushReplacement(context, MaterialPageRoute(
-            builder: (context) => GetStartScreen(),
+            builder: (context) => LoginScreen(),
           ));
         } else {
           Navigator.pushReplacement(context, MaterialPageRoute(

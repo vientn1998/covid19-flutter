@@ -14,7 +14,7 @@ import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 
 import 'src/app/my_app.dart';
-import 'src/screens/introduction/getstart_screen.dart';
+import 'src/screens/introduction/login_screen.dart';
 import 'src/screens/introduction/introduction_screen.dart';
 
   main() async{

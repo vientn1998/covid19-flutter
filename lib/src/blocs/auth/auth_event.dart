@@ -8,6 +8,8 @@ abstract class AuthEvent extends Equatable {
 
 class AuthGooglePressed extends AuthEvent {
   AuthGooglePressed();
-  @override
-  List<Object> get props => [];
+}
+
+class AuthLogoutGoogle extends AuthEvent {
+  AuthLogoutGoogle();
 }

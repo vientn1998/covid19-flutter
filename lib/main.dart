@@ -11,6 +11,7 @@ import 'package:template_flutter/src/blocs/local_search/bloc.dart';
 import 'package:template_flutter/src/database/covid_dao.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_api_client.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_repository.dart';
+import 'package:template_flutter/src/repositories/user_repository.dart';
 import 'package:template_flutter/src/screens/introduction/splash_screen.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
@@ -26,6 +27,7 @@ import 'src/screens/introduction/introduction_screen.dart';
       covid19apiClient: Covid19ApiClient()
   );
 
+  final userRepository = UserRepository();
   runApp(
       MultiBlocProvider(
         providers: [
@@ -40,7 +42,7 @@ import 'src/screens/introduction/introduction_screen.dart';
             create: (context) => SearchBloc(covid19dao: Covid19Dao()),
           ),
           BlocProvider<AuthBloc>(
-            create: (context) => AuthBloc(),
+            create: (context) => AuthBloc(userRepository: userRepository),
           ),
           BlocProvider<DeathBloc>(
             create: (context) => DeathBloc(covid19repository: covid19repository),
@@ -51,7 +53,7 @@ import 'src/screens/introduction/introduction_screen.dart';
           theme: ThemeData(
               fontFamily: 'Roboto'
           ),
-          home: SplashPage(),
+          home: SplashPage(userRepository: userRepository,),
         ),
       )
   );

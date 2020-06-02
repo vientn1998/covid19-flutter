@@ -8,21 +8,22 @@ abstract class AuthState extends Equatable {
   List<Object> get props => [];
 }
 
-class InitialAuthState extends AuthState {
+class UnInitialized extends AuthState {
   @override
   List<Object> get props => [];
 }
 
-class AuthProgress extends AuthState {
-  AuthProgress();
-}
-
-class AuthGoogleSuccess extends AuthState {
+class Authenticated extends AuthState{
   UserObj userObj;
-  AuthGoogleSuccess({@required this.userObj}) : assert(userObj != null);
+  Authenticated({@required this.userObj}) : assert(userObj != null);
+  @override
+  List<Object> get props => [];
 }
 
-class AuthGoogleError extends AuthState {
-  String errorMessage = "";
-  AuthGoogleError({this.errorMessage = ""});
+class AuthenticateError extends AuthState {
+  AuthenticateError();
+}
+
+class UnAuthenticated extends AuthState {
+  UnAuthenticated();
 }

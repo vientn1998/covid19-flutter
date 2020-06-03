@@ -12,6 +12,8 @@ import 'package:template_flutter/src/screens/main_screen.dart';
 import 'package:template_flutter/src/screens/survey/suvery_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
+import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/utils/styles.dart';
 import 'package:http/http.dart' as http;
 
@@ -44,15 +46,24 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Scaffold(
           body: Center(
             child: BlocListener<AuthBloc, AuthState>(
-              listener: (context, state) {
+              listener: (context, state) async {
                 if (state is UnAuthenticated ||
                     state is UnInitialized ||
                     state is AuthenticateError) {
                   print('init');
                 } else if (state is Authenticated) {
-                  Navigator.pushReplacement(context, MaterialPageRoute(
-                    builder: (context) => MainPage(),
-                  ));
+                  final user = state.userObj;
+                  final isSurvey = await SharePreferences().getBool(SharePreferenceKey.isApproveSuvery);
+                  if (isSurvey != null && isSurvey == true) {
+                    Navigator.pushReplacement(context, MaterialPageRoute(
+                      builder: (context) => MainPage(),
+                    ));
+                  } else {
+                    Navigator.pushReplacement(context, MaterialPageRoute(
+                      builder: (context) => SurveyPage(userObj: user,),
+                    ));
+
+                  }
                 }
               },
               child: Container(

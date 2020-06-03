@@ -8,6 +8,7 @@ import 'package:template_flutter/src/blocs/common/bloc.dart';
 import 'package:template_flutter/src/blocs/covid19/bloc.dart';
 import 'package:template_flutter/src/blocs/death/bloc.dart';
 import 'package:template_flutter/src/blocs/local_search/bloc.dart';
+import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/database/covid_dao.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_api_client.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_repository.dart';
@@ -46,7 +47,10 @@ import 'src/screens/introduction/introduction_screen.dart';
           ),
           BlocProvider<DeathBloc>(
             create: (context) => DeathBloc(covid19repository: covid19repository),
-          )
+          ),
+          BlocProvider<UserBloc>(
+            create: (context) => UserBloc(userRepository: userRepository),
+          ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

@@ -14,8 +14,13 @@ class UserRepository {
       : this._firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn();
 
-  Future<void> addAccount(UserObj userObj) async {
-    userCollection.document(userObj.id).setData(userObj.toJson());
+  Future<bool> addAccount(UserObj userObj) async {
+    await userCollection.document(userObj.id).setData(userObj.toJson())
+        .then((value) {
+          return true;
+    }, onError: (error) {
+          return false;
+    });
   }
 
   Future<Stream<List<UserObj>>> getListUser() async{
@@ -25,8 +30,8 @@ class UserRepository {
   }
 
   Future<Stream<UserObj>> getUser(String id) async{
-    return userCollection.document(id).snapshots().map((event) {
-      return UserObj.fromSnapshot(event);
+    return userCollection.document(id).snapshots().map((document) {
+      return UserObj.fromSnapshot(document);
     });
   }
 

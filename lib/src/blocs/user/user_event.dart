@@ -13,3 +13,7 @@ class UserCreate extends UserEvent {
   final UserObj userObj;
   UserCreate({@required this.userObj}) : assert(userObj != null);
 }
+
+class GetDetailsUser extends UserEvent {
+  GetDetailsUser();
+}

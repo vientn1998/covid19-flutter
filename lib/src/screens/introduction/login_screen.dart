@@ -8,6 +8,7 @@ import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:template_flutter/src/app/my_app.dart';
 import 'package:template_flutter/src/blocs/auth/auth_bloc.dart';
 import 'package:template_flutter/src/blocs/auth/bloc.dart';
+import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/screens/main_screen.dart';
 import 'package:template_flutter/src/screens/survey/suvery_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
@@ -34,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         setState(() {
+          print('aaaa $visible');
           isKeyboardAppear = visible;
         });
       },
@@ -89,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 CrossAxisAlignment.start,
                                 children: <Widget>[
                                   SizedBox(
-                                    height: 60,
+                                    height: 40,
                                   ),
                                   Text(
                                     'Welcome',
@@ -320,13 +322,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     style: kTitle,
                                   ),
                                   onPressed: () async {
-                                    Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              SurveyPage(),
-//                                  fullscreenDialog: true
-                                        ));
+                                    BlocProvider.of<UserBloc>(context).add(GetDetailsUser());
                                   },
                                 ),
                               ),

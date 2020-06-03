@@ -23,7 +23,7 @@ class UserRepository {
     });
   }
 
-  Future<Stream<List<UserObj>>> getListUser() async{
+  Stream<List<UserObj>> getListUser() {
     return userCollection.snapshots().map((snapshot) {
       return snapshot.documents.map((doc) => UserObj.fromSnapshot(doc)).toList();
     });

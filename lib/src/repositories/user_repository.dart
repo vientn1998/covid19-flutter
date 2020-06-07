@@ -23,6 +23,12 @@ class UserRepository {
     });
   }
 
+  Future<Stream<bool>> checkExist(String uuid) async {
+    return userCollection.document(uuid).snapshots().map((document) {
+      return document.exists;
+    });
+  }
+
   Future<Stream<List<UserObj>>> getListUser() async{
     return userCollection.snapshots().map((snapshot) {
       return snapshot.documents.map((doc) => UserObj.fromSnapshot(doc)).toList();

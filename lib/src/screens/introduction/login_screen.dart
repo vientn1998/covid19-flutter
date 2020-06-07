@@ -8,11 +8,14 @@ import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:template_flutter/src/app/my_app.dart';
 import 'package:template_flutter/src/blocs/auth/auth_bloc.dart';
 import 'package:template_flutter/src/blocs/auth/bloc.dart';
+import 'package:template_flutter/src/blocs/user/bloc.dart';
+import 'package:template_flutter/src/screens/introduction/create_account_screen.dart';
 import 'package:template_flutter/src/screens/main_screen.dart';
 import 'package:template_flutter/src/screens/survey/suvery_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/loading_dialog.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/utils/styles.dart';
 import 'package:http/http.dart' as http;
@@ -45,27 +48,43 @@ class _LoginScreenState extends State<LoginScreen> {
         gestures: [GestureType.onTap, GestureType.onPanUpdateDownDirection],
         child: Scaffold(
           body: Center(
-            child: BlocListener<AuthBloc, AuthState>(
-              listener: (context, state) async {
-                if (state is UnAuthenticated ||
+            child: MultiBlocListener(
+              listeners: [
+              BlocListener<AuthBloc, AuthState>(
+                listener: (context, state) async {
+                  if (state is UnAuthenticated ||
                     state is UnInitialized ||
                     state is AuthenticateError) {
-                  print('init');
-                } else if (state is Authenticated) {
-                  final user = state.userObj;
-                  final isSurvey = await SharePreferences().getBool(SharePreferenceKey.isApproveSuvery);
-                  if (isSurvey != null && isSurvey == true) {
-                    Navigator.pushReplacement(context, MaterialPageRoute(
-                      builder: (context) => MainPage(),
-                    ));
-                  } else {
-                    Navigator.pushReplacement(context, MaterialPageRoute(
-                      builder: (context) => SurveyPage(userObj: user,),
-                    ));
-
+                    print('init');
+                  } else if (state is Authenticated) {
+                    BlocProvider.of<UserBloc>(context).add(CheckUserExists(uuid: state.userObj.id));
                   }
-                }
-              },
+                }),
+                BlocListener<UserBloc, UserState>(
+                  listener: (context, state) async {
+                    if (state is UserLoading) {
+                      LoadingDialog(context).loadingHud.show();
+                    } else if (state is UserCheckExistsSuccess) {
+                      LoadingDialog(context).loadingHud.dismiss();
+                      if (state.isExist) {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MainPage(),
+                            ));
+                      } else {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreateAccountPage(),
+                            ));
+                      }
+                    } else if (state is UserCheckExistsError) {
+                      LoadingDialog(context).loadingHud.dismiss();
+                    }
+                  },
+                ),
+              ],
               child: Container(
                 color: Colors.white,
                 child: Padding(

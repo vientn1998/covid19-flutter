@@ -32,6 +32,8 @@ dependencies:
   equatable: ^1.1.1
   flutter_bloc: ^4.0.0
   introduction_screen: ^1.0.8
+  #loading_hub
+  loading_hud: ^0.2.0
   #detech when keyboard visibility or dismiss
   keyboard_visibility: ^0.5.6
   #keyborad dismiss when click everywhere

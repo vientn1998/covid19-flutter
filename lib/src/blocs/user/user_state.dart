@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 
 abstract class UserState extends Equatable {
   const UserState();
@@ -11,14 +12,19 @@ class InitialUserState extends UserState {
   List<Object> get props => [];
 }
 
-class UserCreateLoading extends UserState {
+class UserLoading extends UserState {}
 
+class UserCheckExistsSuccess extends UserState {
+  bool isExist = false;
+  UserCheckExistsSuccess(this.isExist);
+  @override
+  List<Object> get props => [isExist];
 }
 
-class UserCreateSuccess extends UserState {
+class UserCheckExistsError extends UserState {}
 
-}
+class UserCreateLoading extends UserState {}
 
-class UserCreateError extends UserState {
+class UserCreateSuccess extends UserState {}
 
-}
+class UserCreateError extends UserState {}

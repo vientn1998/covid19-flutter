@@ -13,3 +13,12 @@ class UserCreate extends UserEvent {
   final UserObj userObj;
   UserCreate({@required this.userObj}) : assert(userObj != null);
 }
+
+class CheckUserExists extends UserEvent {
+
+  final String uuid;
+
+  CheckUserExists({@required this.uuid}) : assert(uuid != null);
+  @override
+  List<Object> get props => [uuid];
+}

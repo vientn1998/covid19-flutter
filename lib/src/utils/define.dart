@@ -14,6 +14,7 @@ enum SharePreferenceKey {
   isLogin,
   isApproveSuvery,
   isIntroduce,
+  uuid
 }
 
 enum StatusTabHome {

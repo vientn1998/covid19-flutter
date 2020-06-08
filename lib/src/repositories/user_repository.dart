@@ -4,56 +4,62 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 
 class UserRepository {
-
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
   final userCollection = Firestore.instance.collection("Users");
-
 
   UserRepository({FirebaseAuth firebaseAuth, GoogleSignIn googleSignIn})
       : this._firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn();
 
   Future<bool> addAccount(UserObj userObj) async {
-    await userCollection.document(userObj.id).setData(userObj.toJson())
-        .then((value) {
-          return true;
+    await userCollection.document(userObj.id).setData(userObj.toJson()).then(
+        (value) {
+      return true;
     }, onError: (error) {
-          return false;
+      return false;
     });
   }
 
-  Future<Stream<bool>> checkExist(String uuid) async {
-    return userCollection.document(uuid).snapshots().map((document) {
-      return document.exists;
+  Future<bool> checkExist(String uuid) async{
+    await userCollection.document(uuid).snapshots().map((document) {
+      return document != null && document.exists;
     });
   }
 
-  Future<Stream<List<UserObj>>> getListUser() async{
+  Future<bool> checkExists(String uuid) async{
+    await userCollection.document(uuid).get().then((value) => value != null);
+  }
+
+  Stream<List<UserObj>> getListUser() {
     return userCollection.snapshots().map((snapshot) {
-      return snapshot.documents.map((doc) => UserObj.fromSnapshot(doc)).toList();
+      return snapshot.documents
+          .map((doc) => UserObj.fromSnapshot(doc))
+          .toList();
     });
   }
 
-  Future<Stream<UserObj>> getUser(String id) async{
+  Future<Stream<UserObj>> getUser(String id) async {
     return userCollection.document(id).snapshots().map((document) {
       return UserObj.fromSnapshot(document);
     });
   }
 
   Future<FirebaseUser> signWithGoogle() async {
-    final GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
-    final AuthCredential authCredential = GoogleAuthProvider.getCredential(idToken: googleSignInAuthentication.idToken, accessToken: googleSignInAuthentication.accessToken);
-    final AuthResult authResult = await _firebaseAuth.signInWithCredential(authCredential);
+    final GoogleSignInAccount googleSignInAccount =
+        await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount.authentication;
+    final AuthCredential authCredential = GoogleAuthProvider.getCredential(
+        idToken: googleSignInAuthentication.idToken,
+        accessToken: googleSignInAuthentication.accessToken);
+    final AuthResult authResult =
+        await _firebaseAuth.signInWithCredential(authCredential);
     return authResult.user;
   }
 
   Future<void> signOut() async {
-    return Future.wait([
-      _firebaseAuth.signOut(),
-      _googleSignIn.signOut()
-    ]);
+    return Future.wait([_firebaseAuth.signOut(), _googleSignIn.signOut()]);
   }
 
   Future<bool> isSignedIn() async {
@@ -62,6 +68,4 @@ class UserRepository {
     print(currentUser != null);
     return currentUser != null;
   }
-
-
 }

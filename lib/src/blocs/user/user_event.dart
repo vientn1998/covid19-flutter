@@ -22,3 +22,6 @@ class CheckUserExists extends UserEvent {
   @override
   List<Object> get props => [uuid];
 }
+class GetDetailsUser extends UserEvent {
+  GetDetailsUser();
+}

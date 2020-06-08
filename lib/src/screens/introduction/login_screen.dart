@@ -37,6 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         setState(() {
+          print('aaaa $visible');
           isKeyboardAppear = visible;
         });
       },
@@ -63,9 +64,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 BlocListener<UserBloc, UserState>(
                   listener: (context, state) async {
                     if (state is UserLoading) {
-                      LoadingDialog(context).loadingHud.show();
+                      print('UserLoading');
+//                      LoadingDialog(context).loadingHud.show();
                     } else if (state is UserCheckExistsSuccess) {
-                      LoadingDialog(context).loadingHud.dismiss();
+                      print('UserCheckExistsSuccess ${state.isExist}');
+//                      LoadingDialog(context).loadingHud.dismiss();
                       if (state.isExist) {
                         Navigator.pushReplacement(
                             context,
@@ -80,7 +83,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             ));
                       }
                     } else if (state is UserCheckExistsError) {
-                      LoadingDialog(context).loadingHud.dismiss();
+                      print('UserCheckExistsError');
+//                      LoadingDialog(context).loadingHud.dismiss();
                     }
                   },
                 ),
@@ -108,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 CrossAxisAlignment.start,
                                 children: <Widget>[
                                   SizedBox(
-                                    height: 60,
+                                    height: 40,
                                   ),
                                   Text(
                                     'Welcome',
@@ -339,13 +343,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     style: kTitle,
                                   ),
                                   onPressed: () async {
-                                    Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              SurveyPage(),
-//                                  fullscreenDialog: true
-                                        ));
+                                    BlocProvider.of<UserBloc>(context).add(GetDetailsUser());
                                   },
                                 ),
                               ),

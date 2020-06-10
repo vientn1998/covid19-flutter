@@ -21,14 +21,19 @@ class UserRepository {
     });
   }
 
-  Future<bool> checkExist(String uuid) async{
-    await userCollection.document(uuid).snapshots().map((document) {
-      return document != null && document.exists;
+  Future<bool> checkExist(String uuid) async {
+    bool isExists = false;
+    await userCollection.document(uuid).get().then((value) {
+      if (value.exists) {
+        isExists = true;
+      } else {
+        isExists = false;
+      }
     });
-  }
-
-  Future<bool> checkExists(String uuid) async{
-    await userCollection.document(uuid).get().then((value) => value != null);
+    return isExists;
+//    userCollection.document(uuid).snapshots().map((document) {
+//      return document != null && document.exists;
+//    });
   }
 
   Stream<List<UserObj>> getListUser() {

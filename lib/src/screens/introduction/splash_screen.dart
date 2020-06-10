@@ -46,7 +46,7 @@ class _SplashPageState extends State<SplashPage> {
             ));
           } else {
             Navigator.pushReplacement(context, MaterialPageRoute(
-              builder: (context) => SurveyPage(),
+              builder: (context) => LoginScreen(),
             ));
 
           }

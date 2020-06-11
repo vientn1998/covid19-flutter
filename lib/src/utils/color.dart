@@ -20,3 +20,4 @@ const colorSerious = Color(0xff66BEFE);
 const colorTab = Color(0xffB4D3F1);
 const colorSkeleton = Color(0xffF5F2F8);
 const colorBackgroundSkeleton = Color(0xffFCFBFB);
+const colorIcon = Colors.black38;

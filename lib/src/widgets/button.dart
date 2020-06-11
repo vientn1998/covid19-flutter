@@ -14,7 +14,7 @@ class ButtonCustom extends StatelessWidget {
   Widget build(BuildContext context) {
     return RaisedButton(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(this.borderRadius)
+          borderRadius: BorderRadius.circular(this.borderRadius)
       ),
       color: background,
       textColor: Colors.white,

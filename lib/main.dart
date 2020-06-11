@@ -55,7 +55,7 @@ import 'src/screens/introduction/introduction_screen.dart';
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-              fontFamily: 'Roboto'
+              fontFamily: 'Roboto',
           ),
           home: SplashPage(userRepository: userRepository,),
         ),

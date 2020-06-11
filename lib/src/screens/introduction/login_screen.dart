@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:loading_hud/loading_hud.dart';
 import 'package:template_flutter/src/app/my_app.dart';
 import 'package:template_flutter/src/blocs/auth/auth_bloc.dart';
 import 'package:template_flutter/src/blocs/auth/bloc.dart';
@@ -62,13 +63,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   }
                 }),
                 BlocListener<UserBloc, UserState>(
-                  listener: (context, state) async {
+                  listener: (buildContext, state) async {
                     if (state is UserLoading) {
                       print('UserLoading');
-//                      LoadingDialog(context).loadingHud.show();
+                      LoadingHud(context).show();
                     } else if (state is UserCheckExistsSuccess) {
                       print('UserCheckExistsSuccess ${state.isExist}');
-//                      LoadingDialog(context).loadingHud.dismiss();
+                      LoadingHud(context).dismiss();
                       if (state.isExist) {
                         Navigator.pushReplacement(
                             context,
@@ -232,7 +233,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   BorderRadius.circular(4),
                                   child: GestureDetector(
                                     onTap: () {
-                                      _signInWithFacebook();
+//                                      _signInWithFacebook();
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => CreateAccountPage(),
+                                          ));
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
@@ -359,25 +365,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       );
-
-  Future<String> _signInWithGoogle() async {
-    final GoogleSignInAccount googleSignInAccount =
-        await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
-    final AuthCredential authCredential = GoogleAuthProvider.getCredential(
-        idToken: googleSignInAuthentication.idToken,
-        accessToken: googleSignInAuthentication.accessToken);
-    final AuthResult authResult =
-        await _firebaseAuth.signInWithCredential(authCredential);
-    final FirebaseUser firebaseUser = authResult.user;
-    assert(!firebaseUser.isAnonymous);
-    assert(await firebaseUser.getIdToken() != null);
-    final FirebaseUser currentUser = await _firebaseAuth.currentUser();
-    assert(firebaseUser.uid == currentUser.uid);
-    print(currentUser.email);
-    return 'signInWithGoogle current user: $currentUser';
-  }
 
   Future<void> _signInWithFacebook() async {
     await facebookLogin.logIn(['email', 'public_profile']).then((result) async {

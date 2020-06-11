@@ -47,13 +47,19 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 ),
                 SizedBox(height: 50,),
                 CustomTextField(hint: 'Full name', iconData: Icons.perm_identity
-                  , textInputType: TextInputType.text, textCapitalization: TextCapitalization.words,),
+                  , textInputType: TextInputType.text, textCapitalization: TextCapitalization.words,onChanged: (value) {
+                      print('fullName: $value');
+                    }),
                 SizedBox(height: 20,),
                 CustomTextField(value: 'ngoxvien2020@gmail.com', iconData: Icons.email
-                  , textInputType: TextInputType.text, isEnable: false,),
+                  , textInputType: TextInputType.text, isEnable: false,onChanged: (value) {
+                    print('Email: $value');
+                  },),
                 SizedBox(height: 20,),
                 CustomTextField(hint: 'Phone', iconData: Icons.phone
-                  , textInputType: TextInputType.phone,),
+                  , textInputType: TextInputType.phone,onChanged: (value) {
+                      print('Phone: $value');
+                    }),
                 SizedBox(height: 30,),
 
                 Container(

@@ -8,11 +8,11 @@ class UserObj extends Equatable {
   String name = "";
   String email = "";
   String avatar = "";
+  String phone = "";
+  UserObj({this.id, this.name, this.email, this.avatar, this.phone});
 
-  UserObj({this.id, this.name, this.email, this.avatar});
-
-  UserObj copyWith({String id, String name, String email, String avatar}) {
-    return UserObj(id: id, name: name, email: email, avatar: avatar);
+  UserObj copyWith({String id, String name, String email, String avatar, String phone}) {
+    return UserObj(id: id, name: name, email: email, avatar: avatar, phone: phone);
   }
 
   static UserObj fromJson(Map<String, Object> json) {
@@ -21,6 +21,7 @@ class UserObj extends Equatable {
       name: json["name"] as String,
       email: json["email"] as String,
       avatar: json["avatar"] as String,
+      phone: json["phone"] as String,
     );
   }
 
@@ -29,6 +30,7 @@ class UserObj extends Equatable {
         id: snap.data['id'],
         name: snap.data['name'],
         email: snap.data['email'],
+        phone: snap.data['phone'],
         avatar: snap.data['avatar']
     );
   }
@@ -38,6 +40,7 @@ class UserObj extends Equatable {
       "id": id,
       "name": name,
       "email": email,
+      "phone": phone,
       "avatar": avatar,
     };
   }
@@ -46,6 +49,7 @@ class UserObj extends Equatable {
     return {
       "id": id,
       "name": name,
+      "phone": phone,
       "email": email,
       "avatar": avatar,
     };
@@ -54,9 +58,9 @@ class UserObj extends Equatable {
   @override
   String toString() {
     // TODO: implement toString
-    return 'User: $id $name $email $avatar)';
+    return 'User: $id $name $phone $email $avatar)';
   }
 
   @override
-  List<Object> get props => [this.avatar, this.id, this.email, this.name];
+  List<Object> get props => [this.avatar, this.id, this.email, this.name, this.phone];
 }

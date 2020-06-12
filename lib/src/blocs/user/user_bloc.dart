@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:template_flutter/src/models/user_model.dart';
@@ -32,11 +33,22 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   Stream<UserState> _mapCreateUserToState(UserCreate event) async* {
     yield UserCreateLoading();
-    final isSuccess = await userRepository.addAccount(event.userObj);
-    if (isSuccess != null && isSuccess == true) {
-      yield UserCreateSuccess();
+    if (event.file != null) {
+      final urlAvatar = await userRepository.uploadFileToServer("avatar", event.file);
+      event.userObj.avatar = urlAvatar;
+      final isSuccess = await userRepository.addAccount(event.userObj);
+      if (isSuccess != null && isSuccess == true) {
+        yield UserCreateSuccess();
+      } else {
+        yield UserCreateError();
+      }
     } else {
-      yield UserCreateError();
+      final isSuccess = await userRepository.addAccount(event.userObj);
+      if (isSuccess != null && isSuccess == true) {
+        yield UserCreateSuccess();
+      } else {
+        yield UserCreateError();
+      }
     }
   }
 

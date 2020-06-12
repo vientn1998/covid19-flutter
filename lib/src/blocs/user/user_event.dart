@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:template_flutter/src/models/user_model.dart';
@@ -11,7 +13,8 @@ abstract class UserEvent extends Equatable {
 
 class UserCreate extends UserEvent {
   final UserObj userObj;
-  UserCreate({@required this.userObj}) : assert(userObj != null);
+  final File file;
+  UserCreate({@required this.userObj, this.file}) : assert(userObj != null);
 }
 
 class CheckUserExists extends UserEvent {

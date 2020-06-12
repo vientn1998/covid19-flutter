@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 
@@ -7,7 +10,7 @@ class UserRepository {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
   final userCollection = Firestore.instance.collection("Users");
-
+  final storageReference = FirebaseStorage.instance.ref();
   UserRepository({FirebaseAuth firebaseAuth, GoogleSignIn googleSignIn})
       : this._firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn();
@@ -21,6 +24,16 @@ class UserRepository {
     });
   }
 
+  Future<String> uploadFileToServer(String folder, File file) async {
+    storageReference.child('$folder/${DateTime.now()}');
+    StorageUploadTask uploadTask = storageReference.putFile(file);
+    await uploadTask.onComplete;
+    print('File Uploaded');
+    storageReference.getDownloadURL().then((fileURL) {
+      return fileURL;
+    });
+  }
+
   Future<bool> checkExist(String uuid) async {
     bool isExists = false;
     await userCollection.document(uuid).get().then((value) {
@@ -31,9 +44,6 @@ class UserRepository {
       }
     });
     return isExists;
-//    userCollection.document(uuid).snapshots().map((document) {
-//      return document != null && document.exists;
-//    });
   }
 
   Stream<List<UserObj>> getListUser() {

@@ -12,6 +12,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="template_flutter"
+        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <!-- Facebook Login configuration -->
         <meta-data android:name="com.facebook.sdk.ApplicationId"

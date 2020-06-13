@@ -77,11 +77,14 @@ class _LoginScreenState extends State<LoginScreen> {
                               builder: (context) => MainPage(),
                             ));
                       } else {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CreateAccountPage(),
-                            ));
+                        if (BlocProvider.of<AuthBloc>(context).state is Authenticated){
+                          final user = (BlocProvider.of<AuthBloc>(context).state as Authenticated).userObj;
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CreateAccountPage(userObj: user,),
+                              ));
+                        }
                       }
                     } else if (state is UserCheckExistsError) {
                       print('UserCheckExistsError');

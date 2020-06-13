@@ -32,6 +32,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   }
 
   Stream<UserState> _mapCreateUserToState(UserCreate event) async* {
+    print('data account ${event.userObj.toString()}');
     yield UserCreateLoading();
     if (event.file != null) {
       final urlAvatar = await userRepository.uploadFileToServer("avatar", event.file);
@@ -44,6 +45,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       }
     } else {
       final isSuccess = await userRepository.addAccount(event.userObj);
+      print('status create account $isSuccess');
       if (isSuccess != null && isSuccess == true) {
         yield UserCreateSuccess();
       } else {

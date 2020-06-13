@@ -4,34 +4,49 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:loading_hud/loading_hud.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 
 class UserRepository {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
   final userCollection = Firestore.instance.collection("Users");
-  final storageReference = FirebaseStorage.instance.ref();
   UserRepository({FirebaseAuth firebaseAuth, GoogleSignIn googleSignIn})
       : this._firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn();
 
   Future<bool> addAccount(UserObj userObj) async {
+    bool isSuccess = false;
     await userCollection.document(userObj.id).setData(userObj.toJson()).then(
         (value) {
-      return true;
+          isSuccess = true;
     }, onError: (error) {
       return false;
     });
+    return isSuccess;
   }
 
   Future<String> uploadFileToServer(String folder, File file) async {
-    storageReference.child('$folder/${DateTime.now()}');
-    StorageUploadTask uploadTask = storageReference.putFile(file);
-    await uploadTask.onComplete;
-    print('File Uploaded');
-    storageReference.getDownloadURL().then((fileURL) {
-      return fileURL;
-    });
+    print('folder: $folder');
+    String urlAvatar = "";
+    try{
+      FirebaseStorage firebaseStorage = FirebaseStorage.instance;
+      StorageReference storageReferenceProfilePic = firebaseStorage.ref();
+      StorageReference imageRef = storageReferenceProfilePic.child(
+          folder + "/" + DateTime.now().toString() + ".jpg");
+      StorageUploadTask uploadTask = imageRef.putFile(file);
+      await uploadTask.onComplete;
+
+      await imageRef.getDownloadURL().then((fileURL) {
+        print('File Uploaded $folder: $fileURL');
+        urlAvatar = fileURL;
+      });
+      return urlAvatar;
+    } catch (error) {
+      print('exception upload');
+      print(error);
+      return "";
+    }
   }
 
   Future<bool> checkExist(String uuid) async {

@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
+import 'package:loading_hud/loading_hud.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/utils/color.dart';
@@ -19,6 +21,11 @@ import 'package:template_flutter/src/widgets/text_field_dropdown.dart';
 import '../main_screen.dart';
 
 class CreateAccountPage extends StatefulWidget {
+
+  final UserObj userObj;
+
+  CreateAccountPage({Key key, @required this.userObj}): assert(userObj != null);
+
   @override
   _CreateAccountPageState createState() => _CreateAccountPageState();
 }
@@ -27,11 +34,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   String valueGender, valueBirthday, valueName, valueEmail,valuePhone;
   DateTime dateTimeBirthday;
   File _fileAvatar;
+  bool isHasAvatar = false;
   @override
   void initState() {
     super.initState();
     valueGender = 'Gender';
     valueBirthday = 'Birthday';
+    valueName = widget.userObj.name;
   }
 
   @override
@@ -45,12 +54,15 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           child: BlocListener<UserBloc, UserState>(
             listener: (context, state) {
               if (state is UserCreateLoading) {
+                LoadingHud(context).show();
                 print('Create Loading');
               } else if (state is UserCreateSuccess) {
+                LoadingHud(context).dismiss();
                 Navigator.pushReplacement(context, MaterialPageRoute(
                   builder: (context) => MainPage(),
                 ));
-              } else {
+              } else if (state is UserCreateError) {
+                LoadingHud(context).dismiss();
                 print('Create error');
               }
             },
@@ -64,76 +76,80 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     SizedBox(
                       height: 23,
                     ),
-
                     Material(
-                      child: InkWell(
-                        child: Container(
-                          height: _widthHeightAvatar,
-                          width: _widthHeightAvatar,
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(
-                                        (_widthHeightAvatar) / 2)),
-                                height: _widthHeightAvatar,
-                                width: _widthHeightAvatar,
-                                child: ClipOval(
-                                  child: _fileAvatar != null ? Image.file(_fileAvatar, fit: BoxFit.cover,) : null,
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment(0, 0),
-                                child: Icon(Icons.add, size: 30, color: Colors.blue),
-                              )
-                            ],
-                          ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.blueAccent),
+                          borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
                         ),
-                        onTap: () async {
-                          final data = await showCupertinoModalPopup(
-                            context: context,
-                            builder: (context) => CupertinoActionSheet(
-                                cancelButton: CupertinoActionSheetAction(
-                                  isDefaultAction: true,
-                                  child: const Text('Cancel', style: TextStyle(color: Colors.red),),
-
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                                actions: <Widget>[
-                                  CupertinoActionSheetAction(
-                                      child: const Text('Take a photo'), onPressed: () async {
-                                    Navigator.pop(context);
-                                    final file = await ImagePickUtils().getImageCamera();
-                                    setState(() {
-                                      _fileAvatar = file;
-                                    });
-                                  }),
-                                  CupertinoActionSheetAction(
-                                      child: const Text('Choose from gallery'), onPressed: () async {
-                                    Navigator.pop(context);
-                                    final file = await ImagePickUtils().getImageGallery();
-                                    setState(() {
-                                      _fileAvatar = file;
-                                    });
-                                  }),
-                                ]),
-                          );
-
-                          print(data);
-                        },
-                        borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
+                        height: _widthHeightAvatar,
+                        width: _widthHeightAvatar,
+                        child: Stack(
+                          children: <Widget>[
+                            Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                      (_widthHeightAvatar) / 2)),
+                              height: _widthHeightAvatar,
+                              width: _widthHeightAvatar,
+                              child: ClipOval(
+                                child: loadAvatar(_fileAvatar,widget.userObj.avatar),
+                              ),
+                            ),
+                            Align(
+                              alignment: Alignment(0, 0),
+                              child: isHasAvatar ? null :Icon(Icons.perm_identity, size: 30, color: Colors.blue),
+                            )
+                          ],
+                        ),
                       ),
                       borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
-                      elevation: 1,
-                      color: Colors.transparent,
+                      elevation: 0,
+                      color: backgroundSearch,
+                    ),
+                    FlatButton(
+                      child: (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) || _fileAvatar != null ? Text('Edit avatar') : Text('Add avatar'),
+                      onPressed: () async {
+                        final data = await showCupertinoModalPopup(
+                          context: context,
+                          builder: (context) => CupertinoActionSheet(
+                              cancelButton: CupertinoActionSheetAction(
+                                isDefaultAction: true,
+                                child: const Text('Cancel', style: TextStyle(color: Colors.red),),
+
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                              actions: <Widget>[
+                                CupertinoActionSheetAction(
+                                    child: const Text('Take a photo'), onPressed: () async {
+                                  Navigator.pop(context);
+                                  final file = await ImagePickUtils().getImageCamera();
+                                  setState(() {
+                                    _fileAvatar = file;
+                                  });
+                                }),
+                                CupertinoActionSheetAction(
+                                    child: const Text('Choose from gallery'), onPressed: () async {
+                                  Navigator.pop(context);
+                                  final file = await ImagePickUtils().getImageGallery();
+                                  setState(() {
+                                    _fileAvatar = file;
+                                  });
+                                }),
+                              ]),
+                        );
+
+                        print(data);
+                      },
                     ),
                     SizedBox(
                       height: 50,
                     ),
                     CustomTextField(
                         hint: 'Full name',
+                        value: widget.userObj.name,
                         iconData: Icons.perm_identity,
                         textInputType: TextInputType.text,
                         textCapitalization: TextCapitalization.words,
@@ -146,15 +162,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       height: 20,
                     ),
                     CustomTextField(
-                      value: 'ngoxvien2020@gmail.com',
+                      value: widget.userObj.email,
                       iconData: Icons.email,
                       textInputType: TextInputType.text,
                       isEnable: false,
-                      onChanged: (value) {
-                        setState(() {
-                          valueEmail = value;
-                        });
-                      },
                     ),
                     SizedBox(
                       height: 20,
@@ -236,15 +247,24 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                           title: 'Create',
                           background: colorActive,
                           onPressed: () {
+                            final user = UserObj();
+                            user.id = widget.userObj.id;
+                            user.name = valueName;
+                            user.email = widget.userObj.email;
+                            user.phone = valuePhone;
+                            user.gender = valueGender == "Gender" ? "" : valueGender;
+                            user.birthday = valueBirthday == "Birthday" ? 0 : dateTimeBirthday.millisecondsSinceEpoch;
+                            print('data submit');
+                            print(user.toString());
                             if (_fileAvatar == null) {
-                              final user = UserObj();
-                              user.name = valueName;
-                              user.email = valueEmail;
-                              user.phone = valuePhone;
-                              
-                              BlocProvider.of<UserBloc>(context).add(UserCreate());
+                              if (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) {
+                                user.avatar = widget.userObj.avatar;
+                                BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user));
+                              } else {
+                                BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user));
+                              }
                             } else {
-
+                              BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user, file: _fileAvatar));
                             }
                           },
                         ),
@@ -258,5 +278,24 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         ),
       ),
     );
+  }
+
+  Widget loadAvatar(File file, String url) {
+    if (file != null) {
+      setState(() {
+        isHasAvatar = true;
+      });
+      return Image.file(_fileAvatar, fit: BoxFit.cover,);
+    } else if (url != null && url.isNotEmpty) {
+      isHasAvatar = true;
+      return CachedNetworkImage(
+        imageUrl: url,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => CircularProgressIndicator(),
+        errorWidget: (context, url, error) => null,
+      );
+    } else {
+      return null;
+    }
   }
 }

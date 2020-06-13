@@ -9,10 +9,14 @@ class UserObj extends Equatable {
   String email = "";
   String avatar = "";
   String phone = "";
-  UserObj({this.id, this.name, this.email, this.avatar, this.phone});
+  String gender = "";
+  int birthday = 0;
+  UserObj({this.id, this.name, this.email, this.avatar, this.phone, this.gender, this.birthday});
 
-  UserObj copyWith({String id, String name, String email, String avatar, String phone}) {
-    return UserObj(id: id, name: name, email: email, avatar: avatar, phone: phone);
+  UserObj copyWith({String id, String name, String email, String avatar
+    , String phone, String gender, int birthday}) {
+    return UserObj(id: id, name: name, email: email, avatar: avatar,
+        phone: phone, gender: gender, birthday: birthday);
   }
 
   static UserObj fromJson(Map<String, Object> json) {
@@ -22,6 +26,8 @@ class UserObj extends Equatable {
       email: json["email"] as String,
       avatar: json["avatar"] as String,
       phone: json["phone"] as String,
+      gender: json["gender"] as String,
+      birthday: json["birthday"] as int,
     );
   }
 
@@ -31,18 +37,10 @@ class UserObj extends Equatable {
         name: snap.data['name'],
         email: snap.data['email'],
         phone: snap.data['phone'],
+        gender: snap.data['gender'],
+        birthday: snap.data['birthday'],
         avatar: snap.data['avatar']
     );
-  }
-
-  Map<String, Object> toDocument() {
-    return {
-      "id": id,
-      "name": name,
-      "email": email,
-      "phone": phone,
-      "avatar": avatar,
-    };
   }
 
   Map<String, Object> toJson() {
@@ -51,6 +49,8 @@ class UserObj extends Equatable {
       "name": name,
       "phone": phone,
       "email": email,
+      "gender": gender,
+      "birthday": birthday,
       "avatar": avatar,
     };
   }
@@ -58,7 +58,7 @@ class UserObj extends Equatable {
   @override
   String toString() {
     // TODO: implement toString
-    return 'User: $id $name $phone $email $avatar)';
+    return 'User: $id $name $phone $email $avatar $gender $birthday)';
   }
 
   @override

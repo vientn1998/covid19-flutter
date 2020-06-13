@@ -10,6 +10,7 @@ import './bloc.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   UserRepository userRepository;
+  UserObj _userObj;
 
   AuthBloc({@required this.userRepository}) : assert(userRepository != null);
 
@@ -36,6 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           email: user.email,
           avatar: user.photoUrl);
       print(userObj.toString());
+      _userObj = userObj;
       yield Authenticated(userObj: userObj);
     } else {
       yield AuthenticateError();

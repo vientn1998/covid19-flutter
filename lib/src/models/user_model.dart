@@ -11,6 +11,14 @@ class UserObj extends Equatable {
   String phone = "";
   String gender = "";
   int birthday = 0;
+  bool isDoctor = false;
+  String address = "";
+  String about = "";
+  int yearExperience = 0;
+  List<String> majors;
+  List<String> imagesCertificate;
+
+
   UserObj({this.id, this.name, this.email, this.avatar, this.phone, this.gender, this.birthday});
 
   UserObj copyWith({String id, String name, String email, String avatar

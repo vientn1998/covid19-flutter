@@ -21,6 +21,8 @@ import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/utils/styles.dart';
 import 'package:http/http.dart' as http;
 
+import 'choose_role_screen.dart';
+
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -240,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => CreateAccountPage(),
+                                            builder: (context) => ChooseRolePage(),
                                           ));
                                     },
                                     child: Container(

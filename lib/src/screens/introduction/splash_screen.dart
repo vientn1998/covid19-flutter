@@ -39,17 +39,9 @@ class _SplashPageState extends State<SplashPage> {
         final isLogin = await widget.userRepository.isSignedIn();
         print('isLogin $isLogin');
         if (isLogin) {
-          final isSurvey = await SharePreferences().getBool(SharePreferenceKey.isApproveSuvery);
-          if (isSurvey != null && isSurvey == true) {
-            Navigator.pushReplacement(context, MaterialPageRoute(
-              builder: (context) => MainPage(),
-            ));
-          } else {
-            Navigator.pushReplacement(context, MaterialPageRoute(
-              builder: (context) => LoginScreen(),
-            ));
-
-          }
+          Navigator.pushReplacement(context, MaterialPageRoute(
+            builder: (context) => MainPage(),
+          ));
         } else {
           Navigator.pushReplacement(context, MaterialPageRoute(
             builder: (context) => LoginScreen(),

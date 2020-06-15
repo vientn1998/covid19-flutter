@@ -19,6 +19,7 @@ import 'package:template_flutter/src/widgets/text_field.dart';
 import 'package:template_flutter/src/widgets/text_field_dropdown.dart';
 
 import '../main_screen.dart';
+import 'search_location_screen.dart';
 
 class CreateDoctorPage extends StatefulWidget {
 
@@ -35,11 +36,12 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
   DateTime dateTimeBirthday;
   File _fileAvatar;
   bool isHasAvatar = false;
+  final heightSpace = 25.0;
   @override
   void initState() {
     super.initState();
-    valueGender = 'Gender';
-    valueBirthday = 'Birthday';
+    valueGender = 'Choose gender';
+    valueBirthday = 'Choose birthday';
     valueName = widget.userObj.name;
   }
 
@@ -67,7 +69,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
               }
             },
             child: Padding(
-              padding: const EdgeInsets.all(22.0),
+              padding: const EdgeInsets.only(left: 20, right: 20),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -147,7 +149,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                     SizedBox(
                       height: 50,
                     ),
-                    CustomTextField(
+                    CustomTextFieldHint(
                         hint: 'Full name',
                         value: widget.userObj.name,
                         iconData: Icons.perm_identity,
@@ -159,20 +161,19 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           });
                         }),
                     SizedBox(
-                      height: 20,
+                      height: heightSpace,
                     ),
-                    CustomTextField(
+                    CustomTextFieldHint(
+                      hint: 'Email',
                       value: widget.userObj.email,
-                      iconData: Icons.email,
                       textInputType: TextInputType.text,
                       isEnable: false,
                     ),
                     SizedBox(
-                      height: 20,
+                      height: heightSpace,
                     ),
-                    CustomTextField(
+                    CustomTextFieldHint(
                         hint: 'Phone',
-                        iconData: Icons.phone,
                         textInputType: TextInputType.phone,
                         onChanged: (value) {
                           setState(() {
@@ -180,10 +181,12 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           });
                         }),
                     SizedBox(
-                      height: 20,
+                      height: heightSpace,
                     ),
-                    TextFieldDropDown(
+                    //gender
+                    TextFieldDropDownHint(
                       value: valueGender,
+                      hint: 'Gender',
                       iconData: Icons.keyboard_arrow_down,
                       onChanged: () async {
                         final data = await showCupertinoModalPopup(
@@ -217,23 +220,45 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                       },
                     ),
                     SizedBox(
-                      height: 20,
+                      height: heightSpace,
                     ),
-                    TextFieldDropDown(
-                      value: valueBirthday,
-                      iconData: Icons.calendar_today,
+                    //experience
+                    CustomTextFieldHint(
+                        hint: 'Experiences(year)',
+                        textInputType: TextInputType.phone,
+                        onChanged: (value) {
+                          setState(() {
+                            valuePhone = value;
+                          });
+                        }),
+                    SizedBox(
+                      height: heightSpace,
+                    ),
+                    //address
+                    TextFieldDropDownHint(
+                      value: 'Choose address',
+                      hint: 'Address',
+                      iconData: Icons.location_on,
                       onChanged: () {
-                        DatePicker.showDatePicker(context,
-                            showTitleActions: true,
-                            minTime: DateTime(1975, 1, 1),
-                            maxTime: DateTime.now(), onConfirm: (date) {
-                              print(DateTimeUtils().formatDateString(date));
-                              setState(() {
-                                dateTimeBirthday = date;
-                                valueBirthday = DateTimeUtils().formatDateString(date);
-                              });
-                            }, currentTime: dateTimeBirthday ?? DateTime.now(), locale: LocaleType.en);
+
                       },
+                    ),
+                    SizedBox(
+                      height: heightSpace,
+                    ),
+                    //about
+                    CustomTextFieldHint(
+                        hint: 'About',
+                        maxLine: 3,
+                        height: 100,
+                        textInputType: TextInputType.text,
+                        onChanged: (value) {
+                          setState(() {
+                            valuePhone = value;
+                          });
+                        }),
+                    SizedBox(
+                      height: heightSpace,
                     ),
                     SizedBox(
                       height: 30,
@@ -247,29 +272,18 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           title: 'Create',
                           background: colorActive,
                           onPressed: () {
-                            final user = UserObj();
-                            user.id = widget.userObj.id;
-                            user.name = valueName;
-                            user.email = widget.userObj.email;
-                            user.phone = valuePhone;
-                            user.gender = valueGender == "Gender" ? "" : valueGender;
-                            user.birthday = valueBirthday == "Birthday" ? 0 : dateTimeBirthday.millisecondsSinceEpoch;
-                            print('data submit');
-                            print(user.toString());
-                            if (_fileAvatar == null) {
-                              if (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) {
-                                user.avatar = widget.userObj.avatar;
-                                BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user));
-                              } else {
-                                BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user));
-                              }
-                            } else {
-                              BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user, file: _fileAvatar));
-                            }
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SearchLocationPage(),
+                                ));
                           },
                         ),
                       ),
-                    )
+                    ),
+                    SizedBox(
+                      height: heightSpace,
+                    ),
                   ],
                 ),
               ),

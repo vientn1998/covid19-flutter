@@ -1,5 +1,6 @@
 import 'package:sembast/sembast.dart';
 import 'package:template_flutter/src/models/covid19/country.dart';
+import 'package:template_flutter/src/models/location_model.dart';
 
 import 'app_database.dart';
 
@@ -8,7 +9,7 @@ class Covid19Dao {
   static const String FRUIT_STORE_NAME = 'covid19';
   //A store with int keys and Map<String, dynamic> values
   //This store acts like a persistent map, values of Which a fruit object converted to Map
-  final _fruitStore = intMapStoreFactory.store(FRUIT_STORE_NAME);
+  final _covidStore = intMapStoreFactory.store(FRUIT_STORE_NAME);
 
   //Private getter to shorten the amount of code needed to get the
   //singleton instance of an opened database
@@ -18,12 +19,12 @@ class Covid19Dao {
 
   //insert
   Future insert(CountryObj countryObj ) async{
-    await _fruitStore.add(await _db, countryObj.toMap());
+    await _covidStore.add(await _db, countryObj.toMap());
   }
 
   Future delete(CountryObj countryObj) async {
     final finder = Finder(filter: Filter.byKey(countryObj.id));
-    await _fruitStore.delete(await _db, finder: finder);
+    await _covidStore.delete(await _db, finder: finder);
   }
 
   Future<List<CountryObj>> getAllSortedByName() async{
@@ -31,7 +32,7 @@ class Covid19Dao {
     final finder = Finder(sortOrders: [
       SortOrder('countryName')
     ]);
-    final recordSnapshots = await _fruitStore.find(await _db, finder:  finder);
+    final recordSnapshots = await _covidStore.find(await _db, finder:  finder);
 
     //making a list<Fruit> out of list<recordSnapshot>
     return recordSnapshots.map((snapshot) {
@@ -40,5 +41,10 @@ class Covid19Dao {
       countryObj.id = snapshot.key;
       return countryObj;
     }).toList();
+  }
+
+  //insert location
+  Future insertLocation(LocationObj countryObj ) async{
+    await _covidStore.add(await _db, countryObj.toJson());
   }
 }

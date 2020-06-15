@@ -4,7 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class LocationObj {
   double latitude = 0.0;
   double longitude = 0.0;
-  LocationObj({this.latitude, this.longitude});
+  String cityOrProvince = '';
+  String country = '';
+  String stressName = '';
+  String wardOrDistrict = '';
+  LocationObj({this.latitude, this.longitude, this.cityOrProvince, this.country, this.stressName, this.wardOrDistrict});
 
   static LocationObj fromJson(Map<String, Object> json) {
     return LocationObj(

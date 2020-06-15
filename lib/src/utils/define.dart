@@ -9,6 +9,7 @@ const double sizeBoxIcon = 45;
 const double paddingDefault = 16;
 const double paddingSmall = 8;
 const double paddingLarge = 32;
+const double heightNavigation = 64;
 
 enum SharePreferenceKey {
   isLogin,

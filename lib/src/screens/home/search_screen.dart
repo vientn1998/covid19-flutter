@@ -6,6 +6,9 @@ import 'package:template_flutter/src/models/covid19/country.dart';
 import 'package:template_flutter/src/utils/color.dart';
 
 class SearchPage extends StatefulWidget {
+
+
+
   @override
   _SearchPageState createState() => _SearchPageState();
 }

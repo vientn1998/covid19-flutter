@@ -40,6 +40,11 @@ const kBody = const TextStyle(
     fontSize: 16,
 );
 
+const kBody13 = const TextStyle(
+    color: textColor,
+    fontSize: 13,
+);
+
 const kBodyBold = const TextStyle(
     color: textColor,
     fontSize: 16,

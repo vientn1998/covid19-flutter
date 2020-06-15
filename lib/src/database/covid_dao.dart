@@ -47,4 +47,17 @@ class Covid19Dao {
   Future insertLocation(LocationObj countryObj ) async{
     await _covidStore.add(await _db, countryObj.toJson());
   }
+  //get location
+  Future<List<LocationObj>> getLocation() async {
+    final recordSnapshots = await _covidStore.find(await _db);
+    return recordSnapshots.map((snapshot) {
+      final item = LocationObj.fromJson(snapshot.value);
+      return item;
+    }).toList();
+  }
+
+  Future deleteLocation(LocationObj locationObj) async {
+    final finder = Finder(filter: Filter.byKey(locationObj.id));
+    await _covidStore.delete(await _db, finder: finder);
+  }
 }

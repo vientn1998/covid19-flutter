@@ -6,8 +6,12 @@ import 'package:template_flutter/src/utils/styles.dart';
 class NavigationCus extends StatefulWidget {
 
   Function functionBack, functionRight;
+  bool isHidenIconRight;
+  String title;
 
-  NavigationCus({this.functionBack, this.functionRight, Key key}): super(key: key);
+
+  NavigationCus({this.functionBack, this.functionRight, Key key
+    , this.isHidenIconRight = true, this.title = 'CovidApp'}): super(key: key);
 
   @override
   _NavigationCusState createState() => _NavigationCusState();
@@ -29,15 +33,24 @@ class _NavigationCusState extends State<NavigationCus> {
         ),
         child: Row(
           children: [
-            FlatButton(
-              child: Icon(Icons.arrow_back_ios),
-              onPressed: widget.functionBack,
+            Container(
+              height: heightNavigation,
+              width: heightNavigation,
+              child: FlatButton(
+                child: Icon(Icons.arrow_back_ios, color: Colors.white,),
+                onPressed: widget.functionBack,
+              ),
             ),
             Expanded(
-              child: Text('Navigation', style: kTitle,),
+              child: Text(widget.title, style: TextStyle(
+                fontSize: 18,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ), textAlign: TextAlign.center,),
             ),
-            FlatButton(
-              child: Icon(Icons.map),
+            widget.isHidenIconRight ? Container(height: heightNavigation,
+              width: heightNavigation,) : FlatButton(
+              child: Icon(Icons.map, color: Colors.white,),
               onPressed: widget.functionRight,
             ),
           ],

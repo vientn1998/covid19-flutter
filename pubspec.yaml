@@ -79,6 +79,8 @@ dependencies:
   cached_network_image: ^2.2.0+1
   #map
   google_maps_flutter: ^0.5.28+1
+  #flutter toast
+  fluttertoast: ^4.0.0
 
 dev_dependencies:
   flutter_test:

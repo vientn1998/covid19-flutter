@@ -28,7 +28,7 @@ class _TextFieldDropDownState extends State<TextFieldDropDown> {
           child: Row(
             children: <Widget>[
               SizedBox(width: 15,),
-              Text(widget.value, style: kTitle,),
+              Text(widget.value, style: kBody,),
               Spacer(),
               Icon(widget.iconData, color: colorIcon,),
               SizedBox(width: 15,),
@@ -62,7 +62,7 @@ class _TextFieldDropDownHintState extends State<TextFieldDropDownHint> {
       children: [
         Row(
           children: [
-            Text(widget.hint ?? '', style: kTitle,),
+            Text(widget.hint ?? '', style: kBody,),
           ],
         ),
         SizedBox(height: 10,),
@@ -78,8 +78,7 @@ class _TextFieldDropDownHintState extends State<TextFieldDropDownHint> {
               child: Row(
                 children: <Widget>[
                   SizedBox(width: 15,),
-                  Text(widget.value, style: kTitle,),
-                  Spacer(),
+                  Flexible(child: Text(widget.value, style: kBody, maxLines: 1, overflow: TextOverflow.ellipsis,), fit: FlexFit.tight),
                   Icon(widget.iconData, color: colorIcon,),
                   SizedBox(width: 15,),
                 ],

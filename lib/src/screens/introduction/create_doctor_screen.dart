@@ -8,13 +8,18 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 import 'package:loading_hud/loading_hud.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
+import 'package:template_flutter/src/models/location_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
+import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/image_picker.dart';
 import 'package:template_flutter/src/utils/size_config.dart';
+import 'package:template_flutter/src/utils/styles.dart';
+import 'package:template_flutter/src/utils/validator.dart';
 import 'package:template_flutter/src/widgets/button.dart';
+import 'package:template_flutter/src/widgets/navigation_cus.dart';
 import 'package:template_flutter/src/widgets/text_field.dart';
 import 'package:template_flutter/src/widgets/text_field_dropdown.dart';
 
@@ -32,8 +37,10 @@ class CreateDoctorPage extends StatefulWidget {
 }
 
 class _CreateDoctorState extends State<CreateDoctorPage> {
-  String valueGender, valueBirthday, valueName, valueEmail,valuePhone;
+  String valueGender, valueBirthday, valueName, valueEmail, valuePhone, valueAddress, valueAbout;
+  int valueExperience = 0;
   DateTime dateTimeBirthday;
+  LocationObj _locationObj;
   File _fileAvatar;
   bool isHasAvatar = false;
   final heightSpace = 25.0;
@@ -42,7 +49,12 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     super.initState();
     valueGender = 'Choose gender';
     valueBirthday = 'Choose birthday';
+    valueAddress = 'Choose address';
     valueName = widget.userObj.name;
+    valueEmail = widget.userObj.email;
+    valuePhone = '';
+    valueExperience = 0;
+    valueAbout = '';
   }
 
   @override
@@ -68,225 +80,275 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                 print('Create error');
               }
             },
-            child: Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    SizedBox(
-                      height: 23,
-                    ),
-                    Material(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.blueAccent),
-                          borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
-                        ),
-                        height: _widthHeightAvatar,
-                        width: _widthHeightAvatar,
-                        child: Stack(
-                          children: <Widget>[
-                            Container(
+            child: Column(
+              children: <Widget>[
+                NavigationCus(title: 'Create a doctor',isHidenIconRight: true,functionBack: () {
+                  Navigator.pop(context);
+                },),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(paddingNavi),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          SizedBox(
+                            height: 23,
+                          ),
+                          Material(
+                            child: Container(
+
                               decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                      (_widthHeightAvatar) / 2)),
+                                border: Border.all(color: Colors.blueAccent),
+                                borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
+                              ),
                               height: _widthHeightAvatar,
                               width: _widthHeightAvatar,
-                              child: ClipOval(
-                                child: loadAvatar(_fileAvatar,widget.userObj.avatar),
+                              child: Stack(
+                                children: <Widget>[
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                            (_widthHeightAvatar) / 2)),
+                                    height: _widthHeightAvatar,
+                                    width: _widthHeightAvatar,
+                                    child: ClipOval(
+                                      child: loadAvatar(_fileAvatar,widget.userObj.avatar),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment(0, 0),
+                                    child: isHasAvatar ? null :Icon(Icons.perm_identity, size: 30, color: Colors.blue),
+                                  )
+                                ],
                               ),
                             ),
-                            Align(
-                              alignment: Alignment(0, 0),
-                              child: isHasAvatar ? null :Icon(Icons.perm_identity, size: 30, color: Colors.blue),
-                            )
-                          ],
-                        ),
-                      ),
-                      borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
-                      elevation: 0,
-                      color: backgroundSearch,
-                    ),
-                    FlatButton(
-                      child: (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) || _fileAvatar != null ? Text('Edit avatar') : Text('Add avatar'),
-                      onPressed: () async {
-                        final data = await showCupertinoModalPopup(
-                          context: context,
-                          builder: (context) => CupertinoActionSheet(
-                              cancelButton: CupertinoActionSheetAction(
-                                isDefaultAction: true,
-                                child: const Text('Cancel', style: TextStyle(color: Colors.red),),
+                            borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
+                            elevation: 0,
+                            color: backgroundSearch,
+                          ),
+                          FlatButton(
+                            child: (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) || _fileAvatar != null ? Text('Edit avatar') : Text('Add avatar'),
+                            onPressed: () async {
+                              final data = await showCupertinoModalPopup(
+                                context: context,
+                                builder: (context) => CupertinoActionSheet(
+                                    cancelButton: CupertinoActionSheetAction(
+                                      isDefaultAction: true,
+                                      child: const Text('Cancel', style: TextStyle(color: Colors.red),),
 
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    actions: <Widget>[
+                                      CupertinoActionSheetAction(
+                                          child: const Text('Take a photo'), onPressed: () async {
+                                        Navigator.pop(context);
+                                        final file = await ImagePickUtils().getImageCamera();
+                                        setState(() {
+                                          _fileAvatar = file;
+                                        });
+                                      }),
+                                      CupertinoActionSheetAction(
+                                          child: const Text('Choose from gallery'), onPressed: () async {
+                                        Navigator.pop(context);
+                                        final file = await ImagePickUtils().getImageGallery();
+                                        setState(() {
+                                          _fileAvatar = file;
+                                        });
+                                      }),
+                                    ]),
+                              );
+
+                              print(data);
+                            },
+                          ),
+                          SizedBox(
+                            height: 50,
+                          ),
+                          //full name
+                          CustomTextFieldHint(
+                              title: 'Full name',
+                              value: valueName,
+                              iconData: Icons.perm_identity,
+                              textInputType: TextInputType.text,
+                              textCapitalization: TextCapitalization.words,
+                              onChanged: (value) {
+                                setState(() {
+                                  valueName = value;
+                                });
+                              }),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
+                          //email
+                          CustomTextFieldHint(
+                            title: 'Email',
+                            value: valueEmail,
+                            textInputType: TextInputType.text,
+                            isEnable: false,
+                          ),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
+                          CustomTextFieldHint(
+                              title: 'Phone',
+                              textInputType: TextInputType.phone,
+                              onChanged: (value) {
+                                setState(() {
+                                  valuePhone = value;
+                                });
+                              }),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
+                          //gender
+                          TextFieldDropDownHint(
+                            value: valueGender,
+                            hint: 'Gender(optional)',
+                            iconData: Icons.keyboard_arrow_down,
+                            onChanged: () async {
+                              final data = await showCupertinoModalPopup(
+                                context: context,
+                                builder: (context) => CupertinoActionSheet(
+                                    cancelButton: CupertinoActionSheetAction(
+                                      isDefaultAction: true,
+                                      child: const Text('Cancel', style: TextStyle(color: Colors.red),),
+
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    actions: <Widget>[
+                                      CupertinoActionSheetAction(
+                                          child: const Text('Male'), onPressed: () {
+                                        Navigator.pop(context, 'Male');
+                                      }),
+                                      CupertinoActionSheetAction(
+                                          child: const Text('Female'), onPressed: () {
+                                        Navigator.pop(context, 'Female');
+                                      }),
+                                    ]),
+                              );
+                              setState(() {
+                                if (data != null) {
+                                  valueGender = data;
+                                }
+                              });
+                              print(data);
+                            },
+                          ),
+
+                          SizedBox(
+                            height: heightSpace,
+                          ),
+                          //address
+                          TextFieldDropDownHint(
+                            value: valueAddress,
+                            hint: 'Address',
+                            iconData: Icons.location_on,
+                            onChanged: () async {
+                              final location = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SearchLocationPage(),
+                                  )) as LocationObj;
+                              if (location != null) {
+                                setState(() {
+                                  _locationObj = location;
+                                  valueAddress = location.address;
+                                });
+                              }
+                            },
+                          ),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
+                          //major
+                          TextFieldDropDownHint(
+                            value: valueAddress,
+                            hint: 'Major',
+                            iconData: Icons.keyboard_arrow_down,
+                            onChanged: () async {
+                              showMyDialog(context);
+                            },
+                          ),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
+                          //experience
+                          CustomTextFieldHint(
+                              title: 'Experiences(year)',
+                              hint: '0',
+                              textInputType: TextInputType.phone,
+                              onChanged: (value) {
+                                setState(() {
+                                  valueExperience = int.parse(value);
+                                });
+                              }),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
+                          //about
+                          CustomTextFieldHint(
+                              title: 'About(optional)',
+                              maxLine: 3,
+                              height: 100,
+                              textInputType: TextInputType.text,
+                              onChanged: (value) {
+                                setState(() {
+                                  valueAbout = value;
+                                });
+                              }),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          Container(
+                            height: 50,
+                            width: double.infinity,
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                              child: ButtonCustom(
+                                title: 'Create',
+                                background: colorActive,
                                 onPressed: () {
-                                  Navigator.pop(context);
+                                  if (valueName.length == 0) {
+                                    toast('Please input name');
+                                    return;
+                                  }
+                                  if (valuePhone.length == 0) {
+                                    toast('Please input phone');
+                                    return;
+                                  }
+                                  final rs = phoneNumberValidator(valuePhone);
+                                  if (rs != null) {
+                                    toast(rs);
+                                    return;
+                                  }
+                                  if (valueExperience == 0) {
+                                    toast('Please input experiences');
+                                  }
+                                  if (valueAddress.length == 0) {
+                                    toast('Please input address');
+                                  }
                                 },
                               ),
-                              actions: <Widget>[
-                                CupertinoActionSheetAction(
-                                    child: const Text('Take a photo'), onPressed: () async {
-                                  Navigator.pop(context);
-                                  final file = await ImagePickUtils().getImageCamera();
-                                  setState(() {
-                                    _fileAvatar = file;
-                                  });
-                                }),
-                                CupertinoActionSheetAction(
-                                    child: const Text('Choose from gallery'), onPressed: () async {
-                                  Navigator.pop(context);
-                                  final file = await ImagePickUtils().getImageGallery();
-                                  setState(() {
-                                    _fileAvatar = file;
-                                  });
-                                }),
-                              ]),
-                        );
-
-                        print(data);
-                      },
-                    ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    CustomTextFieldHint(
-                        hint: 'Full name',
-                        value: widget.userObj.name,
-                        iconData: Icons.perm_identity,
-                        textInputType: TextInputType.text,
-                        textCapitalization: TextCapitalization.words,
-                        onChanged: (value) {
-                          setState(() {
-                            valueName = value;
-                          });
-                        }),
-                    SizedBox(
-                      height: heightSpace,
-                    ),
-                    CustomTextFieldHint(
-                      hint: 'Email',
-                      value: widget.userObj.email,
-                      textInputType: TextInputType.text,
-                      isEnable: false,
-                    ),
-                    SizedBox(
-                      height: heightSpace,
-                    ),
-                    CustomTextFieldHint(
-                        hint: 'Phone',
-                        textInputType: TextInputType.phone,
-                        onChanged: (value) {
-                          setState(() {
-                            valuePhone = value;
-                          });
-                        }),
-                    SizedBox(
-                      height: heightSpace,
-                    ),
-                    //gender
-                    TextFieldDropDownHint(
-                      value: valueGender,
-                      hint: 'Gender',
-                      iconData: Icons.keyboard_arrow_down,
-                      onChanged: () async {
-                        final data = await showCupertinoModalPopup(
-                          context: context,
-                          builder: (context) => CupertinoActionSheet(
-                              cancelButton: CupertinoActionSheetAction(
-                                isDefaultAction: true,
-                                child: const Text('Cancel', style: TextStyle(color: Colors.red),),
-
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                              actions: <Widget>[
-                                CupertinoActionSheetAction(
-                                    child: const Text('Male'), onPressed: () {
-                                  Navigator.pop(context, 'Male');
-                                }),
-                                CupertinoActionSheetAction(
-                                    child: const Text('Female'), onPressed: () {
-                                  Navigator.pop(context, 'Female');
-                                }),
-                              ]),
-                        );
-                        setState(() {
-                          if (data != null) {
-                            valueGender = data;
-                          }
-                        });
-                        print(data);
-                      },
-                    ),
-                    SizedBox(
-                      height: heightSpace,
-                    ),
-                    //experience
-                    CustomTextFieldHint(
-                        hint: 'Experiences(year)',
-                        textInputType: TextInputType.phone,
-                        onChanged: (value) {
-                          setState(() {
-                            valuePhone = value;
-                          });
-                        }),
-                    SizedBox(
-                      height: heightSpace,
-                    ),
-                    //address
-                    TextFieldDropDownHint(
-                      value: 'Choose address',
-                      hint: 'Address',
-                      iconData: Icons.location_on,
-                      onChanged: () {
-
-                      },
-                    ),
-                    SizedBox(
-                      height: heightSpace,
-                    ),
-                    //about
-                    CustomTextFieldHint(
-                        hint: 'About',
-                        maxLine: 3,
-                        height: 100,
-                        textInputType: TextInputType.text,
-                        onChanged: (value) {
-                          setState(() {
-                            valuePhone = value;
-                          });
-                        }),
-                    SizedBox(
-                      height: heightSpace,
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    Container(
-                      height: 50,
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-                        child: ButtonCustom(
-                          title: 'Create',
-                          background: colorActive,
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => SearchLocationPage(),
-                                ));
-                          },
-                        ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(
-                      height: heightSpace,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -311,5 +373,92 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     } else {
       return null;
     }
+  }
+
+  final List<String> myList = ["abc", "bcd", "cde", "def", "efg", "fgh", "ghi", "hij", "bcd", "cde", "def", "efg", "fgh", "ghi", "hij"];
+
+  List<Widget> getMyList(){
+    return myList.map((x){
+      return ListTile(
+        title: new Text(x),
+        leading: Checkbox(
+          value: true,
+          onChanged: (value) {
+
+          },
+        ),
+        onTap: () {
+
+        },
+      );
+    }).toList();
+  }
+
+  void showMyDialog(BuildContext context) async{
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(16.0))),
+            title: Text('Choose major', style: kTitleBold, textAlign: TextAlign.center,),
+            titlePadding: EdgeInsets.only(top: 15, bottom: 10),
+            contentPadding: EdgeInsets.all(0.0),
+            content: Container(
+              width: SizeConfig.screenWidth,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(22)
+              ),
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: getMyList(),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16, left: 16, bottom: 16, top: 16),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          Expanded(
+                            child: Container(
+                              height: 42,
+                              child: FlatButton(
+                                color: colorActive,
+                                textColor: Colors.white,
+                                shape: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                        color: Colors.blue,
+                                        width: 1,
+                                        style: BorderStyle.solid
+                                    )
+                                ),
+                                child: Text("Done", style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white
+                                ),),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ]
+              ),
+            ),
+          );
+        }
+    );
   }
 }

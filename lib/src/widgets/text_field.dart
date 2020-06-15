@@ -54,9 +54,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           Icon(widget.iconData, color: Colors.black38,),
           Expanded(
             child: TextField(
-              style: TextStyle(
-                fontSize: 17,
-              ),
+              style: kBody,
               controller: textEditingController,
               onChanged: widget.onChanged,
               enabled: widget.isEnable,
@@ -80,7 +78,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 class CustomTextFieldHint extends StatefulWidget {
 
   final TextInputType textInputType;
-  final String hint;
+  final String hint, title;
   String value = '';
   final IconData iconData;
   final TextCapitalization textCapitalization;
@@ -91,7 +89,7 @@ class CustomTextFieldHint extends StatefulWidget {
 
   CustomTextFieldHint({this.iconData, this.hint, this.textInputType
     , this.textCapitalization = TextCapitalization.sentences, this.isEnable = true,
-    this.value, this.onChanged, this.maxLine, this.height = 50
+    this.value, this.onChanged, this.maxLine, this.height = 50, this.title
   });
 
   @override
@@ -118,7 +116,7 @@ class _CustomTextFieldLableState extends State<CustomTextFieldHint> {
       children: [
         Row(
           children: [
-            Text(widget.hint ?? '', style: kTitle,),
+            Text(widget.title ?? '', style: kBody,),
           ],
         ),
         SizedBox(height: 10,),
@@ -134,9 +132,7 @@ class _CustomTextFieldLableState extends State<CustomTextFieldHint> {
             children: <Widget>[
               Expanded(
                 child: TextField(
-                  style: TextStyle(
-                    fontSize: 17,
-                  ),
+                  style: kBody,
                   controller: textEditingController,
                   onChanged: widget.onChanged,
                   enabled: widget.isEnable,
@@ -146,7 +142,7 @@ class _CustomTextFieldLableState extends State<CustomTextFieldHint> {
                   decoration: InputDecoration(
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(horizontal: 10),
-//                      hintText: widget.hint
+                      hintText: widget.hint
                   ),
                 ),
               ),

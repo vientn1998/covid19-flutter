@@ -81,6 +81,8 @@ dependencies:
   google_maps_flutter: ^0.5.28+1
   #flutter toast
   fluttertoast: ^4.0.0
+  #multi image
+  multi_image_picker: ^4.6.7
 
 dev_dependencies:
   flutter_test:

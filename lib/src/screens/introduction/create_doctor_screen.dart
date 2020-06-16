@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 import 'package:loading_hud/loading_hud.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:template_flutter/src/blocs/major/bloc.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/database/covid_dao.dart';
@@ -41,21 +42,24 @@ class CreateDoctorPage extends StatefulWidget {
 }
 
 class _CreateDoctorState extends State<CreateDoctorPage> {
-  String valueGender, valueBirthday, valueName, valueEmail, valuePhone, valueAddress, valueAbout;
+  String valueGender, valueBirthday, valueName, valueEmail, valuePhone, valueAddress, valueAbout, valueMajor;
   int valueExperience = 0;
   DateTime dateTimeBirthday;
   LocationObj _locationObj;
   File _fileAvatar;
   bool isHasAvatar = false;
   final heightSpace = 25.0;
-  List<KeyValueObj> listMajor;
+  List<KeyValueObj> listMajor = [];
   Covid19Dao _covid19dao = Covid19Dao();
+  List<Asset> images = List<Asset>();
+  String _error = 'No Error Dectected';
   @override
   void initState() {
     super.initState();
     valueGender = 'Choose gender';
     valueBirthday = 'Choose birthday';
     valueAddress = 'Choose address';
+    valueMajor = 'Choose major';
     valueName = widget.userObj.name;
     valueEmail = widget.userObj.email;
     valuePhone = '';
@@ -65,10 +69,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
   }
 
   checkData() async {
-    listMajor = await _covid19dao.getMajors();
-    if (listMajor.length == 0) {
-      BlocProvider.of<MajorBloc>(context).add(FetchMajor());
-    }
+    BlocProvider.of<MajorBloc>(context).add(FetchMajor());
   }
 
   @override
@@ -104,13 +105,10 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                     showLoading(context);
                   } else if (state is LoadedSuccessMajor) {
                     final list = state.list;
-                    print('LoadedSuccessMajor: ${list.length}');
-                    if (list.length > 0) {
-                      await widget._covid19dao.insertMajors(list);
-                    }
-//                    setState(() {
-//                      listMajor.addAll(list);
-//                    });
+                    print('count: ${list.length}');
+                    setState(() {
+                      listMajor.addAll(list);
+                    });
                     dismissLoading(context);
                   } else if (state is LoadedErrorMajor) {
                     dismissLoading(context);
@@ -306,11 +304,36 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           ),
                           //major
                           TextFieldDropDownHint(
-                            value: valueAddress,
+                            value: valueMajor,
                             hint: 'Major',
                             iconData: Icons.keyboard_arrow_down,
                             onChanged: () async {
-                              showMyDialog(context);
+                              final count = await showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return MyDialogMajor(listMajor);
+                                },
+                              );
+                              print('count $count');
+                              if (count > 0) {
+                                setState(() {
+                                  valueMajor = '$count item';
+                                });
+                              } else {
+                                setState(() {
+                                  valueMajor = 'Choose major';
+                                });
+                              }
+
+                            },
+                          ),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
+                          FlatButton(
+                            child: Text('add'),
+                            onPressed: () {
+                              loadAssets();
                             },
                           ),
                           SizedBox(
@@ -394,6 +417,39 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     );
   }
 
+  Future<void> loadAssets() async {
+    List<Asset> resultList = List<Asset>();
+    String error = 'No Error Dectected';
+
+    try {
+      resultList = await MultiImagePicker.pickImages(
+        maxImages: 5,
+        enableCamera: true,
+        selectedAssets: images,
+        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
+        materialOptions: MaterialOptions(
+          actionBarColor: "#abcdef",
+          actionBarTitle: "Gallery",
+          allViewTitle: "All Photos",
+          useDetailsView: false,
+          selectCircleStrokeColor: "#000000",
+        ),
+      );
+    } on Exception catch (e) {
+      error = e.toString();
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      images = resultList;
+      _error = error;
+    });
+  }
+
   Widget loadAvatar(File file, String url) {
     if (file != null) {
       setState(() {
@@ -412,89 +468,105 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
       return null;
     }
   }
+}
 
-  List<Widget> buildCheckBoxMajor(){
-    return listMajor.map((item){
-      return ListTile(
-        title: new Text(item.value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),),
-        leading: Checkbox(
-          value: true,
-          onChanged: (value) {
+class MyDialogMajor extends StatefulWidget {
+  List<KeyValueObj> listMajor;
+  MyDialogMajor(this.listMajor);
+  @override
+  _MyDialogMajorState createState() => _MyDialogMajorState();
+}
 
-          },
-        ),
-        onTap: () {
+class _MyDialogMajorState extends State<MyDialogMajor> {
 
-        },
-      );
-    }).toList();
+  @override
+  void initState() {
+    super.initState();
   }
 
-  void showMyDialog(BuildContext context) async{
-    showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            elevation: 1,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(16.0))),
-            title: Text('Choose major', style: kTitleBold, textAlign: TextAlign.center,),
-            titlePadding: EdgeInsets.only(top: 15, bottom: 10),
-            contentPadding: EdgeInsets.all(0.0),
-            content: Container(
-              width: SizeConfig.screenWidth,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(22)
+  @override
+  Widget build(BuildContext context) {
+    final count = widget.listMajor.where((element) => element.isSelected).length;
+    return AlertDialog(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16.0))),
+      title: Text('Choose major', style: kTitleBold, textAlign: TextAlign.center,),
+      titlePadding: EdgeInsets.only(top: 15, bottom: 10),
+      contentPadding: EdgeInsets.all(0.0),
+      content: Container(
+        width: SizeConfig.screenWidth,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22)
+        ),
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Expanded(
+                child: ListView.builder(
+                  itemBuilder: (context, index) {
+                    final item = widget.listMajor[index];
+                    return ListTile(
+                      title: new Text(item.value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),),
+                      leading: Checkbox(
+                        value: item.isSelected,
+                        onChanged: (value) {
+                          print('change: $index $value');
+                          setState(() {
+                            widget.listMajor[index].isSelected = value;
+                          });
+                        },
+                      ),
+                    );
+                  },
+                  itemCount: widget.listMajor.length,
+                  shrinkWrap: true,
+                ),
               ),
-              child: Column(
-                  mainAxisSize: MainAxisSize.min,
+              Padding(
+                padding: const EdgeInsets.only(right: 16, left: 16, bottom: 16, top: 16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    Flexible(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: buildCheckBoxMajor(),
+                    Expanded(
+                      child: Container(
+                        height: 42,
+                        child: FlatButton(
+                          color: colorActive,
+                          textColor: Colors.white,
+                          shape: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                  color: Colors.blue,
+                                  width: 1,
+                                  style: BorderStyle.solid
+                              )
+                          ),
+                          child: Text("Done ${count > 0 ? '$count item' : ''}", style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white
+                          ),),
+                          onPressed: () {
+                            Navigator.pop(context, count);
+                          },
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16, left: 16, bottom: 16, top: 16),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: <Widget>[
-                          Expanded(
-                            child: Container(
-                              height: 42,
-                              child: FlatButton(
-                                color: colorActive,
-                                textColor: Colors.white,
-                                shape: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide(
-                                        color: Colors.blue,
-                                        width: 1,
-                                        style: BorderStyle.solid
-                                    )
-                                ),
-                                child: Text("Done", style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white
-                                ),),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
                     )
-                  ]
-              ),
-            ),
-          );
-        }
+                  ],
+                ),
+              )
+            ]
+        ),
+      ),
     );
   }
 }
+
+
+//child: SingleChildScrollView(
+//child: Column(
+//mainAxisAlignment: MainAxisAlignment.start,
+//children: buildCheckBoxMajor(),
+//),
+//),

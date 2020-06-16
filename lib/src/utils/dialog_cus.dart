@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:loading_hud/loading_hud.dart';
 import 'package:template_flutter/src/utils/styles.dart';
 
 class DialogCus {
@@ -37,4 +38,12 @@ toast(String message) {
 //      textColor: Colors.white,
       fontSize: 15.0
   );
+}
+
+showLoading(BuildContext context) {
+  var loading = LoadingHud(context, cancelable: true, canceledOnTouchOutside: false);
+  loading.show();
+}
+dismissLoading(BuildContext context) {
+  LoadingHud(context).dismiss();
 }

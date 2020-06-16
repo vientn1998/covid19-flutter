@@ -8,10 +8,12 @@ import 'package:template_flutter/src/blocs/common/bloc.dart';
 import 'package:template_flutter/src/blocs/covid19/bloc.dart';
 import 'package:template_flutter/src/blocs/death/bloc.dart';
 import 'package:template_flutter/src/blocs/local_search/bloc.dart';
+import 'package:template_flutter/src/blocs/major/bloc.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/database/covid_dao.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_api_client.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_repository.dart';
+import 'package:template_flutter/src/repositories/major_repository.dart';
 import 'package:template_flutter/src/repositories/user_repository.dart';
 import 'package:template_flutter/src/screens/introduction/splash_screen.dart';
 import 'package:template_flutter/src/utils/define.dart';
@@ -27,6 +29,7 @@ import 'src/screens/introduction/introduction_screen.dart';
   final Covid19Repository covid19repository = Covid19Repository(
       covid19apiClient: Covid19ApiClient()
   );
+  final majorRepository = MajorRepository();
 
   final userRepository = UserRepository();
   runApp(
@@ -50,6 +53,10 @@ import 'src/screens/introduction/introduction_screen.dart';
           ),
           BlocProvider<UserBloc>(
             create: (context) => UserBloc(userRepository: userRepository),
+          ),
+          BlocProvider<MajorBloc>(
+            create: (context) =>
+                MajorBloc(majorRepository),
           ),
         ],
         child: MaterialApp(

@@ -7,7 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 import 'package:loading_hud/loading_hud.dart';
+import 'package:template_flutter/src/blocs/major/bloc.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
+import 'package:template_flutter/src/database/covid_dao.dart';
 import 'package:template_flutter/src/models/location_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/utils/color.dart';
@@ -29,6 +31,7 @@ import 'search_location_screen.dart';
 class CreateDoctorPage extends StatefulWidget {
 
   final UserObj userObj;
+  final Covid19Dao _covid19dao = Covid19Dao();
 
   CreateDoctorPage({Key key, this.userObj});
 
@@ -55,6 +58,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     valuePhone = '';
     valueExperience = 0;
     valueAbout = '';
+    BlocProvider.of<MajorBloc>(context).add(FetchMajor());
   }
 
   @override
@@ -65,21 +69,41 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
       gestures: [GestureType.onTap, GestureType.onPanUpdateDownDirection],
       child: Scaffold(
         body: SafeArea(
-          child: BlocListener<UserBloc, UserState>(
-            listener: (context, state) {
-              if (state is UserCreateLoading) {
-                LoadingHud(context).show();
-                print('Create Loading');
-              } else if (state is UserCreateSuccess) {
-                LoadingHud(context).dismiss();
-                Navigator.pushReplacement(context, MaterialPageRoute(
-                  builder: (context) => MainPage(),
-                ));
-              } else if (state is UserCreateError) {
-                LoadingHud(context).dismiss();
-                print('Create error');
-              }
-            },
+          child: MultiBlocListener(
+            listeners: [
+              BlocListener<UserBloc, UserState>(
+                listener: (context, state) {
+                  if (state is UserCreateLoading) {
+                    LoadingHud(context).show();
+                    print('Create Loading');
+                  } else if (state is UserCreateSuccess) {
+                    LoadingHud(context).dismiss();
+                    Navigator.pushReplacement(context, MaterialPageRoute(
+                      builder: (context) => MainPage(),
+                    ));
+                  } else if (state is UserCreateError) {
+                    LoadingHud(context).dismiss();
+                    print('Create error');
+                  }
+                },
+
+              ),
+              BlocListener<MajorBloc, MajorState>(
+                listener: (context, state) {
+                  if (state is LoadingMajor) {
+//                    showLoading(context);
+                  } else if (state is LoadedSuccessMajor) {
+                    final list = state.list;
+                    if (list.length > 0) {
+                      widget._covid19dao.insertMajors(list);
+                    }
+                    dismissLoading(context);
+                  } else if (state is LoadedErrorMajor) {
+                    dismissLoading(context);
+                  }
+                },
+              )
+            ],
             child: Column(
               children: <Widget>[
                 NavigationCus(title: 'Create a doctor',isHidenIconRight: true,functionBack: () {

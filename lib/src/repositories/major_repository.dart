@@ -16,15 +16,8 @@ class MajorRepository {
     return isSuccess;
   }
 
-  Future<List<KeyValueObj>> getListMajor() async {
-    List<KeyValueObj> list = [];
-    await majorCollection.snapshots().listen((queySnapshot) {
-      queySnapshot.documents.map((e) {
-        print(e.documentID);
-        list.add(KeyValueObj.fromDocument(e));
-      }).toList();
-    });
-    print('object' + list.length.toString());
-    return list;
+  Future<QuerySnapshot> getListMajor() async {
+    print('getListMajor');
+    return await majorCollection.getDocuments();
   }
 }

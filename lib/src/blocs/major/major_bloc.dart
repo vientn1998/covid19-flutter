@@ -24,9 +24,16 @@ class MajorBloc extends Bloc<MajorEvent, MajorState> {
 
   Stream<MajorState> _mapFetchDataMajorToState() async* {
     yield LoadingMajor();
-    final list = await majorRepository.getListMajor();
-    print('size: ' + list.length.toString());
-    LoadedSuccessMajor(list: list);
-
+    print('_mapFetchDataMajorToState');
+    List<KeyValueObj> list = [];
+    await majorRepository.getListMajor().then((value) {
+      final item = value.documents.map((document) => KeyValueObj.fromDocument(document)).toList();
+      print('LoadedSuccessMajor ${item.length}');
+      list.addAll(item);
+    }).catchError((error) {
+      LoadedErrorMajor();
+    });
+    yield LoadedSuccessMajor(list: list);
+    print('_mapFetchDataMajorToState');
   }
 }

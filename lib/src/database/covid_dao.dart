@@ -2,6 +2,7 @@ import 'package:sembast/sembast.dart';
 import 'package:template_flutter/src/models/covid19/country.dart';
 import 'package:template_flutter/src/models/key_value_model.dart';
 import 'package:template_flutter/src/models/location_model.dart';
+import 'package:template_flutter/src/models/major_model.dart';
 
 import 'app_database.dart';
 
@@ -63,11 +64,20 @@ class Covid19Dao {
   }
 
   //insert major
-  Future insertMajors(List<KeyValueObj> list ) async{
-    Map<String, dynamic> data = list.map((item) {
-      return item.toJson();
-    }).toList(growable: false) as Map<String,dynamic>;
-    print(data.toString());
-    await _covidStore.add(await _db, data);
+  Future insertMajors(List<KeyValueObj> list) async{
+//    final data = list.map((item) {
+//      return item.toJson();
+//    });
+//    print(data.toString());
+    final obj = MajorObj(list: list);
+    await _covidStore.add(await _db, obj.toJson());
+  }
+  //get majors
+  Future<List<KeyValueObj>> getMajors() async {
+    final recordSnapshots = await _covidStore.find(await _db);
+    return recordSnapshots.map((snapshot) {
+      final item = KeyValueObj.fromJson(snapshot.value);
+      return item;
+    }).toList();
   }
 }

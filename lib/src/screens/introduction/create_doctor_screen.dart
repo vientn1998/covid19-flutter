@@ -10,6 +10,7 @@ import 'package:loading_hud/loading_hud.dart';
 import 'package:template_flutter/src/blocs/major/bloc.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/database/covid_dao.dart';
+import 'package:template_flutter/src/models/key_value_model.dart';
 import 'package:template_flutter/src/models/location_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/utils/color.dart';
@@ -47,6 +48,8 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
   File _fileAvatar;
   bool isHasAvatar = false;
   final heightSpace = 25.0;
+  List<KeyValueObj> listMajor;
+  Covid19Dao _covid19dao = Covid19Dao();
   @override
   void initState() {
     super.initState();
@@ -58,7 +61,14 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     valuePhone = '';
     valueExperience = 0;
     valueAbout = '';
-    BlocProvider.of<MajorBloc>(context).add(FetchMajor());
+    checkData();
+  }
+
+  checkData() async {
+    listMajor = await _covid19dao.getMajors();
+    if (listMajor.length == 0) {
+      BlocProvider.of<MajorBloc>(context).add(FetchMajor());
+    }
   }
 
   @override
@@ -89,14 +99,18 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
 
               ),
               BlocListener<MajorBloc, MajorState>(
-                listener: (context, state) {
+                listener: (context, state) async {
                   if (state is LoadingMajor) {
-//                    showLoading(context);
+                    showLoading(context);
                   } else if (state is LoadedSuccessMajor) {
                     final list = state.list;
+                    print('LoadedSuccessMajor: ${list.length}');
                     if (list.length > 0) {
-                      widget._covid19dao.insertMajors(list);
+                      await widget._covid19dao.insertMajors(list);
                     }
+//                    setState(() {
+//                      listMajor.addAll(list);
+//                    });
                     dismissLoading(context);
                   } else if (state is LoadedErrorMajor) {
                     dismissLoading(context);
@@ -399,12 +413,10 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     }
   }
 
-  final List<String> myList = ["abc", "bcd", "cde", "def", "efg", "fgh", "ghi", "hij", "bcd", "cde", "def", "efg", "fgh", "ghi", "hij"];
-
-  List<Widget> getMyList(){
-    return myList.map((x){
+  List<Widget> buildCheckBoxMajor(){
+    return listMajor.map((item){
       return ListTile(
-        title: new Text(x),
+        title: new Text(item.value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),),
         leading: Checkbox(
           value: true,
           onChanged: (value) {
@@ -441,7 +453,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                       child: SingleChildScrollView(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
-                          children: getMyList(),
+                          children: buildCheckBoxMajor(),
                         ),
                       ),
                     ),

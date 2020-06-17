@@ -5,6 +5,8 @@ import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/styles.dart';
 import 'package:template_flutter/src/widgets/button.dart';
 
+import 'create_account_screen.dart';
+
 enum RoleApp {
   doctor,
   user
@@ -54,17 +56,19 @@ class _ChooseRolePageState extends State<ChooseRolePage> {
                     title: 'Create',
                     background: colorActive,
                     onPressed: () {
-                      final user = UserObj();
-                      user.id = "1234";
-                      user.name = "Vien";
-                      user.email = "vientn1998@gmail.com";
-                      user.phone = "123456789";
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-
-                            builder: (context) => CreateDoctorPage(userObj: user,),
-                          ));
+                      if (_roleApp == RoleApp.user) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreateAccountPage(userObj: widget.userObj,),
+                            ));
+                      } else {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreateDoctorPage(userObj: widget.userObj,),
+                            ));
+                      }
                     },
                   ),
                 ),

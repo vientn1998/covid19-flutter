@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 
 abstract class UserEvent extends Equatable {
@@ -14,7 +15,8 @@ abstract class UserEvent extends Equatable {
 class UserCreate extends UserEvent {
   final UserObj userObj;
   final File file;
-  UserCreate({@required this.userObj, this.file}) : assert(userObj != null);
+  final List<Asset> listAsset;
+  UserCreate({@required this.userObj, this.file, this.listAsset}) : assert(userObj != null);
 }
 
 class CheckUserExists extends UserEvent {

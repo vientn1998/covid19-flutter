@@ -19,10 +19,14 @@ class UserRepository {
 
   Future<bool> addAccount(UserObj userObj) async {
     bool isSuccess = false;
-    await userCollection.document(userObj.id).setData(userObj.toJson()).then(
+    print(userObj.toString());
+    final data = userObj.toJson();
+    print('submit $data');
+    await userCollection.document(userObj.id).setData(data).then(
         (value) {
           isSuccess = true;
     }, onError: (error) {
+          print(error.toString());
       return false;
     });
     return isSuccess;
@@ -101,26 +105,34 @@ class UserRepository {
     return currentUser != null;
   }
 
-  Future<dynamic> postImageAsset(Asset imageFile) async {
+  Future<String> postImageAsset(Asset imageFile) async {
     String fileName = "certificate/" + DateTime.now().toString() + ".jpg";
     StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
     StorageUploadTask uploadTask = reference.putData((await imageFile.getByteData()).buffer.asUint8List());
     StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
     print(storageTaskSnapshot.ref.getDownloadURL());
-    return storageTaskSnapshot.ref.getDownloadURL();
+    String url = "";
+    await storageTaskSnapshot.ref.getDownloadURL().then((fileURL) {
+      print('File Uploaded $fileURL');
+      url = fileURL;
+    });
+    return url;
   }
 
-  Future<dynamic> uploadMuliImagesAsset(List<Asset> images) {
+  Future<List<String>> uploadMuliImagesAsset(List<Asset> images) async {
     List<String> imageUrls = [];
     for (var imageFile in images) {
-      postImageAsset(imageFile).then((downloadUrl) {
+      await postImageAsset(imageFile).then((downloadUrl) {
         imageUrls.add(downloadUrl.toString());
         if (imageUrls.length == images.length) {
-          return imageUrls;
+          print('uploadMuliImagesAsset $imageUrls');
+
         }
       }).catchError((err) {
         print(err);
+        return "";
       });
     }
+    return imageUrls;
   }
 }

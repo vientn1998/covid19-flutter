@@ -14,6 +14,7 @@ import 'package:template_flutter/src/utils/date_time.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/image_picker.dart';
 import 'package:template_flutter/src/utils/size_config.dart';
+import 'package:template_flutter/src/utils/validator.dart';
 import 'package:template_flutter/src/widgets/button.dart';
 import 'package:template_flutter/src/widgets/text_field.dart';
 import 'package:template_flutter/src/widgets/text_field_dropdown.dart';
@@ -247,11 +248,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                           title: 'Create',
                           background: colorActive,
                           onPressed: () {
+                            validateDataSubmit();
                             final user = UserObj();
                             user.id = widget.userObj.id;
                             user.name = valueName;
                             user.email = widget.userObj.email;
                             user.phone = valuePhone;
+                            user.isDoctor = false;
                             user.gender = valueGender == "Gender" ? "" : valueGender;
                             user.birthday = valueBirthday == "Birthday" ? 0 : dateTimeBirthday.millisecondsSinceEpoch;
                             print('data submit');
@@ -278,6 +281,21 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         ),
       ),
     );
+  }
+  validateDataSubmit() {
+    if (valueName.length == 0) {
+      toast('Please input name');
+      return;
+    }
+    if (valuePhone.length == 0) {
+      toast('Please input phone');
+      return;
+    }
+    final rs = phoneNumberValidator(valuePhone);
+    if (rs != null) {
+      toast(rs);
+      return;
+    }
   }
 
   Widget loadAvatar(File file, String url) {

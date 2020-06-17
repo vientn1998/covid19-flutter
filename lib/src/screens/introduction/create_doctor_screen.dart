@@ -34,7 +34,6 @@ import 'search_location_screen.dart';
 class CreateDoctorPage extends StatefulWidget {
 
   final UserObj userObj;
-  final Covid19Dao _covid19dao = Covid19Dao();
 
   CreateDoctorPage({Key key, this.userObj});
 
@@ -283,12 +282,34 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           SizedBox(
                             height: heightSpace,
                           ),
+                          //birthday
+                          TextFieldDropDownHint(
+                            hint: 'Birthday(option)',
+                            value: valueBirthday,
+                            iconData: Icons.calendar_today,
+                            onChanged: () {
+                              DatePicker.showDatePicker(context,
+                                  showTitleActions: true,
+                                  minTime: DateTime(1975, 1, 1),
+                                  maxTime: DateTime.now(), onConfirm: (date) {
+                                    print(DateTimeUtils().formatDateString(date));
+                                    setState(() {
+                                      dateTimeBirthday = date;
+                                      valueBirthday = DateTimeUtils().formatDateString(date);
+                                    });
+                                  }, currentTime: dateTimeBirthday ?? DateTime.now(), locale: LocaleType.en);
+                            },
+                          ),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
                           //address
                           TextFieldDropDownHint(
                             value: valueAddress,
                             hint: 'Address',
                             iconData: Icons.location_on,
                             onChanged: () async {
+                              FocusScope.of(context).unfocus();
                               final location = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -437,36 +458,26 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                                 });
                               }),
                           SizedBox(
-                            height: heightSpace,
+                            height: 10,
                           ),
-                          SizedBox(
-                            height: 30,
-                          ),
-                          Container(
-                            height: 50,
-                            width: double.infinity,
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-                              child: ButtonCustom(
-                                title: 'Create',
-                                background: colorActive,
-                                onPressed: () {
-//                                  Navigator.push(
-//                                      context,
-//                                      MaterialPageRoute(
-//                                        builder: (context) => MainPage(),
-//                                      ));
-//                                  return;
-                                  validateDataSubmit();
-                                },
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: heightSpace,
-                          ),
+
                         ],
                       ),
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.all(paddingNavi),
+                  height: 50,
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                    child: ButtonCustom(
+                      title: 'Create',
+                      background: colorActive,
+                      onPressed: () {
+                        validateDataSubmit();
+                      },
                     ),
                   ),
                 ),
@@ -510,9 +521,37 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     }
     if (valueExperience == 0) {
       toast('Please input experiences');
+      return;
     }
     if (valueAddress.length == 0) {
       toast('Please input address');
+      return;
+    }
+    final user = UserObj();
+    user.id = widget.userObj.id;
+    user.name = valueName;
+    user.email = widget.userObj.email;
+    user.phone = valuePhone;
+    user.gender = valueGender.contains('Choose') ? "" : valueGender;
+    user.timeline = valueTimeline.contains('Choose') ? "" : valueTimeline;
+    user.location = valueAddress.contains('Choose') ? null : _locationObj;//location
+    user.birthday = valueBirthday.contains('Choose') ? 0 : dateTimeBirthday.millisecondsSinceEpoch;
+    user.majors = listMajor.where((element) => element.isSelected).toList();
+    user.yearExperience = valueExperience;
+    user.about = valueAbout;
+    user.isDoctor = true;
+    user.imagesCertificate = [];
+    print('data submit');
+    print(user.toString());
+    if (_fileAvatar == null) {
+      if (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) {
+        user.avatar = widget.userObj.avatar;
+        BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user, listAsset: images));
+      } else {
+        BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user, listAsset: images));
+      }
+    } else {
+      BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user, file: _fileAvatar, listAsset: images));
     }
   }
 
@@ -690,6 +729,11 @@ class _MyDialogMajorState extends State<MyDialogMajor> {
                           });
                         },
                       ),
+                      onTap: () {
+                        setState(() {
+                          widget.listMajor[index].isSelected = !widget.listMajor[index].isSelected;
+                        });
+                      },
                     );
                   },
                   itemCount: widget.listMajor.length,

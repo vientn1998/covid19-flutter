@@ -26,9 +26,6 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     } else if (event is CheckUserExists) {
       yield* _mapCheckExistUserToState(event);
     }
-//    else if (event is GetDetailsUser) {
-//      yield* _mapGetDetailsUserToState();
-//    }
   }
 
   Stream<UserState> _mapCreateUserToState(UserCreate event) async* {
@@ -37,6 +34,11 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     if (event.file != null) {
       final urlAvatar = await userRepository.uploadFileToServer("avatar", event.file);
       event.userObj.avatar = urlAvatar;
+      if (event.listAsset != null && event.listAsset.length > 0) {
+        final imageCertificate = await userRepository.uploadMuliImagesAsset(event.listAsset);
+        final images = imageCertificate.map((e) => e.toString());
+        event.userObj.imagesCertificate.addAll(images);
+      }
       final isSuccess = await userRepository.addAccount(event.userObj);
       if (isSuccess != null && isSuccess == true) {
         yield UserCreateSuccess();
@@ -44,6 +46,15 @@ class UserBloc extends Bloc<UserEvent, UserState> {
         yield UserCreateError();
       }
     } else {
+      if (event.listAsset != null && event.listAsset.length > 0) {
+        final imageCertificate = await userRepository.uploadMuliImagesAsset(event.listAsset);
+        final images = imageCertificate.map((e) {
+          return e.toString();
+        });
+        print('images: ${images.length}');
+        event.userObj.imagesCertificate.addAll(images);
+      }
+      print('call addAccount');
       final isSuccess = await userRepository.addAccount(event.userObj);
       print('status create account $isSuccess');
       if (isSuccess != null && isSuccess == true) {
@@ -60,12 +71,5 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     print('isExists: $isExists');
     SharePreferences().saveString(SharePreferenceKey.uuid, event.uuid);
     yield UserCheckExistsSuccess(isExists ?? false);
-
-//  Stream<UserState> _mapGetDetailsUserToState() async* {
-//    yield UserCreateLoading();
-//    userRepository.getListUser().listen((event) {
-//      print('length: ${event.length}');
-//      GetListUserSuccess(list: event);
-//    });
   }
 }

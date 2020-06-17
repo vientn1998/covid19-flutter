@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => CreateAccountPage(userObj: user,),
+                                builder: (context) => ChooseRolePage(userObj: user,),
                               ));
                         }
                       }
@@ -239,11 +239,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: GestureDetector(
                                     onTap: () {
 //                                      _signInWithFacebook();
-                                      Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => ChooseRolePage(),
-                                          ));
+//                                      Navigator.pushReplacement(
+//                                          context,
+//                                          MaterialPageRoute(
+//                                            builder: (context) => ChooseRolePage(),
+//                                          ));
+                                      BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(

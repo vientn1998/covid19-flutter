@@ -26,13 +26,13 @@ class _SearchLocationPageState extends State<SearchLocationPage> {
   LocationObj _locationObj;
   checkPermission() async {
     final result = await Permission.locationWhenInUse.request();
+    print('granted location: ${result.isGranted}');
     if (result.isGranted) {
       try {
         final Position position = await Geolocator().getLastKnownPosition(desiredAccuracy: LocationAccuracy.low);
         if (position != null && position.latitude != null && position.latitude != null) {
           List<Placemark> placemark = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
           print('location device: ${placemark[0].toJson()}');
-
           final location = LocationObj(latitude: position.latitude, longitude: position.longitude,
               street: placemark[0].subThoroughfare + ' ' + placemark[0].thoroughfare,
               cityOrProvince: placemark[0].administrativeArea, country: placemark[0].country);
@@ -119,15 +119,13 @@ class _SearchLocationPageState extends State<SearchLocationPage> {
     return KeyboardDismisser(
       gestures: [GestureType.onTap, GestureType.onPanUpdateDownDirection],
       child: Scaffold(
+        appBar: AppBar(
+          title: Text('Search location'),
+        ),
         body: SafeArea(
           child: Center(
             child: Column(
               children: [
-                NavigationCus(title: 'Search location ', isHidenIconRight: false,functionBack: () {
-                  Navigator.pop(context);
-                }, functionRight: () {
-
-                },),
                 Expanded(
                   child: Column(
                     children: <Widget>[
@@ -144,12 +142,15 @@ class _SearchLocationPageState extends State<SearchLocationPage> {
                               children: <Widget>[
                                 Icon(Icons.location_searching),
                                 SizedBox(width: heightSpaceSmall,),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(stressValue ?? '', style: kBodyBoldW600,),
-                                    Text(fullAddress ?? '', style: kBody13,),
-                                  ],
+                                Flexible(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(stressValue ?? '', style: kBodyBoldW600,),
+                                      Text(fullAddress ?? '', style: kBody13, overflow: TextOverflow.clip),
+                                    ],
+                                  ),
                                 )
                               ],
                             ),

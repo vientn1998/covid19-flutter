@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:loading_hud/loading_hud.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 
 class UserRepository {
@@ -97,5 +99,28 @@ class UserRepository {
     print('isSignedIn');
     print(currentUser != null);
     return currentUser != null;
+  }
+
+  Future<dynamic> postImageAsset(Asset imageFile) async {
+    String fileName = "certificate/" + DateTime.now().toString() + ".jpg";
+    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
+    StorageUploadTask uploadTask = reference.putData((await imageFile.getByteData()).buffer.asUint8List());
+    StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
+    print(storageTaskSnapshot.ref.getDownloadURL());
+    return storageTaskSnapshot.ref.getDownloadURL();
+  }
+
+  Future<dynamic> uploadMuliImagesAsset(List<Asset> images) {
+    List<String> imageUrls = [];
+    for (var imageFile in images) {
+      postImageAsset(imageFile).then((downloadUrl) {
+        imageUrls.add(downloadUrl.toString());
+        if (imageUrls.length == images.length) {
+          return imageUrls;
+        }
+      }).catchError((err) {
+        print(err);
+      });
+    }
   }
 }

@@ -43,7 +43,8 @@ class _HomePageState extends State<HomePage> {
   ];
 
   checkPermission() async {
-    final result = await Permission.locationWhenInUse.request();
+//    final result = await Permission.locationWhenInUse.request();
+    final result = await Permission.location.request();
     if (result.isGranted) {
       try {
         final Position position = await Geolocator().getLastKnownPosition(desiredAccuracy: LocationAccuracy.low);

@@ -1,6 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:template_flutter/src/models/location_model.dart';
 
 class UserObj extends Equatable {
 
@@ -12,12 +13,12 @@ class UserObj extends Equatable {
   String gender = "";
   int birthday = 0;
   bool isDoctor = false;
-  String address = "";
-  String about = "";
+  String timeline = "";
+  LocationObj location;
   int yearExperience = 0;
   List<String> majors;
   List<String> imagesCertificate;
-
+  String about = "";
 
   UserObj({this.id, this.name, this.email, this.avatar, this.phone, this.gender, this.birthday});
 
@@ -35,6 +36,8 @@ class UserObj extends Equatable {
       avatar: json["avatar"] as String,
       phone: json["phone"] as String,
       gender: json["gender"] as String,
+      about: json["about"] as String,
+      yearExperience: json["yearExperience"] as int,
       birthday: json["birthday"] as int,
     );
   }

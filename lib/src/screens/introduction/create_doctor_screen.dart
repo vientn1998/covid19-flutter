@@ -43,7 +43,7 @@ class CreateDoctorPage extends StatefulWidget {
 }
 
 class _CreateDoctorState extends State<CreateDoctorPage> {
-  String valueGender, valueBirthday, valueName, valueEmail, valuePhone, valueAddress, valueAbout, valueMajor;
+  String valueGender, valueBirthday, valueName, valueEmail, valuePhone, valueAddress, valueAbout, valueMajor, valueTimeline;
   int valueExperience = 0;
   DateTime dateTimeBirthday;
   LocationObj _locationObj;
@@ -62,6 +62,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     valueBirthday = 'Choose birthday';
     valueAddress = 'Choose address';
     valueMajor = 'Choose major';
+    valueTimeline = 'Choose timeline';
     valueName = widget.userObj.name;
     valueEmail = widget.userObj.email;
     valuePhone = '';
@@ -81,6 +82,9 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     return KeyboardDismisser(
       gestures: [GestureType.onTap, GestureType.onPanUpdateDownDirection],
       child: Scaffold(
+        appBar: AppBar(
+          title: Text('Create a doctor'),
+        ),
         body: SafeArea(
           child: MultiBlocListener(
             listeners: [
@@ -99,7 +103,6 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                     print('Create error');
                   }
                 },
-
               ),
               BlocListener<MajorBloc, MajorState>(
                 listener: (context, state) async {
@@ -120,9 +123,6 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
             ],
             child: Column(
               children: <Widget>[
-                NavigationCus(title: 'Create a doctor',isHidenIconRight: true,functionBack: () {
-                  Navigator.pop(context);
-                },),
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
@@ -305,6 +305,48 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           SizedBox(
                             height: heightSpace,
                           ),
+                          //time
+                          TextFieldDropDownHint(
+                            value: valueTimeline,
+                            hint: 'Timeline',
+                            iconData: Icons.calendar_today,
+                            onChanged: () async {
+                              final data = await showCupertinoModalPopup(
+                                context: context,
+                                builder: (context) => CupertinoActionSheet(
+                                    cancelButton: CupertinoActionSheetAction(
+                                      isDefaultAction: true,
+                                      child: const Text('Cancel', style: TextStyle(color: Colors.red),),
+
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    actions: <Widget>[
+                                      CupertinoActionSheetAction(
+                                          child: const Text('All day'), onPressed: () {
+                                        Navigator.pop(context, 'All day');
+                                      }),
+                                      CupertinoActionSheetAction(
+                                          child: const Text('Weekend'), onPressed: () {
+                                        Navigator.pop(context, 'Weekend');
+                                      }),
+                                      CupertinoActionSheetAction(
+                                          child: const Text('Other'), onPressed: () {
+                                        Navigator.pop(context, 'Other');
+                                      }),
+                                    ]),
+                              );
+                              setState(() {
+                                if (data != null) {
+                                  valueTimeline = data;
+                                }
+                              });
+                            },
+                          ),
+                          SizedBox(
+                            height: heightSpace,
+                          ),
                           //major
                           TextFieldDropDownHint(
                             value: valueMajor,
@@ -340,7 +382,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text('Image certificate', style: kBody,),
-                              InkWell(
+                              images.length == 0 ? Container() : InkWell(
                                 child: Container(
                                   height: 35,
                                   width: 35,
@@ -364,7 +406,9 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           SizedBox(
                             height: 10,
                           ),
-                          images.length == 0 ? SizedBox(height: 0,) : buildImageCertificate(),
+                          images.length == 0
+                              ? buildAddImage()
+                              : buildImageCertificate(),
                           SizedBox(
                             height: heightSpace,
                           ),
@@ -407,25 +451,13 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                                 title: 'Create',
                                 background: colorActive,
                                 onPressed: () {
-                                  if (valueName.length == 0) {
-                                    toast('Please input name');
-                                    return;
-                                  }
-                                  if (valuePhone.length == 0) {
-                                    toast('Please input phone');
-                                    return;
-                                  }
-                                  final rs = phoneNumberValidator(valuePhone);
-                                  if (rs != null) {
-                                    toast(rs);
-                                    return;
-                                  }
-                                  if (valueExperience == 0) {
-                                    toast('Please input experiences');
-                                  }
-                                  if (valueAddress.length == 0) {
-                                    toast('Please input address');
-                                  }
+//                                  Navigator.push(
+//                                      context,
+//                                      MaterialPageRoute(
+//                                        builder: (context) => MainPage(),
+//                                      ));
+//                                  return;
+                                  validateDataSubmit();
                                 },
                               ),
                             ),
@@ -446,10 +478,79 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     );
   }
 
+  validateDataSubmit() {
+    if (valueName.length == 0) {
+      toast('Please input name');
+      return;
+    }
+    if (valuePhone.length == 0) {
+      toast('Please input phone');
+      return;
+    }
+    final rs = phoneNumberValidator(valuePhone);
+    if (rs != null) {
+      toast(rs);
+      return;
+    }
+    if (valueAddress.contains('Choose')) {
+      toast('Please choose address');
+      return;
+    }
+    if (valueTimeline.contains('Choose')) {
+      toast('Please choose timeline');
+      return;
+    }
+    if (valueMajor.contains('Choose')) {
+      toast('Please choose major');
+      return;
+    }
+    if (images.length == 0) {
+      toast('Please choose image certificate');
+      return;
+    }
+    if (valueExperience == 0) {
+      toast('Please input experiences');
+    }
+    if (valueAddress.length == 0) {
+      toast('Please input address');
+    }
+  }
+
+  buildAddImage() {
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        InkWell(
+          child: Container(
+            margin: EdgeInsets.only(top: 5),
+            height: 100,
+            width: 100,
+            decoration: BoxDecoration(
+                color: backgroundSearch,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: borderColor, width: 1),
+            ),
+            child: Icon(Icons.add, size: 40,),
+          ),
+          onTap: () async {
+            final list = await loadAssets();
+            setState(() {
+              if (list.length > 0) {
+                images = list;
+              }
+            });
+          },
+        )
+      ],
+    );
+  }
+
   buildImageCertificate() {
     return GridView.count(
       crossAxisCount: 3,
       shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
       scrollDirection: Axis.vertical,
       crossAxisSpacing: 10,
       childAspectRatio: 1/1,
@@ -504,7 +605,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     List<Asset> resultList = List<Asset>();
     try {
       resultList = await MultiImagePicker.pickImages(
-        maxImages: 5,
+        maxImages: 6,
         enableCamera: true,
         selectedAssets: images,
         materialOptions: MaterialOptions(
@@ -519,11 +620,6 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     } on Exception catch (e) {
       print(e.toString());
     }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-//    if (!mounted) return;
     return resultList;
   }
 

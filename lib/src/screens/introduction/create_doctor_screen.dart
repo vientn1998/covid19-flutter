@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
@@ -53,6 +54,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
   Covid19Dao _covid19dao = Covid19Dao();
   List<Asset> images = List<Asset>();
   String _error = 'No Error Dectected';
+
   @override
   void initState() {
     super.initState();
@@ -229,6 +231,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           SizedBox(
                             height: heightSpace,
                           ),
+                          //phone
                           CustomTextFieldHint(
                               title: 'Phone',
                               textInputType: TextInputType.phone,
@@ -328,14 +331,40 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                             },
                           ),
                           SizedBox(
-                            height: heightSpace,
+                            height: 20,
                           ),
-                          FlatButton(
-                            child: Text('add'),
-                            onPressed: () {
-                              loadAssets();
-                            },
+                          //image certificate
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Text('Image certificate', style: kBody,),
+                              InkWell(
+                                child: Container(
+                                  height: 35,
+                                  width: 35,
+                                  child: Icon(Icons.add, size: 24, color: Colors.white,),
+                                  decoration: BoxDecoration(
+                                      color: colorActive,
+                                      borderRadius: BorderRadius.circular(8)
+                                  ),
+                                ),
+                                onTap: () async {
+                                  final list = await loadAssets();
+                                  setState(() {
+                                    if (list.length > 0) {
+                                      images = list;
+                                    }
+                                  });
+                                },
+                              )
+                            ],
                           ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          images.length == 0 ? SizedBox(height: 0,) : buildImageCertificate(),
                           SizedBox(
                             height: heightSpace,
                           ),
@@ -417,37 +446,85 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     );
   }
 
-  Future<void> loadAssets() async {
-    List<Asset> resultList = List<Asset>();
-    String error = 'No Error Dectected';
+  buildImageCertificate() {
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      scrollDirection: Axis.vertical,
+      crossAxisSpacing: 10,
+      childAspectRatio: 1/1,
+      mainAxisSpacing: 10,
+      children: List.generate(images.length, (index) {
+        Asset asset = images[index];
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: borderColor, width: 1),
+          ),
+          child: Stack(
+            children: <Widget>[
+              InkWell(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: AssetThumb(
+                    asset: asset,
+                    width: 300,
+                    height: 300,
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 5,
+                right: 5,
+                child: InkWell(
+                  child: Container(
+                    height: 20,
+                    width: 20,
+                    child: Icon(Icons.close, size: 16,),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle
+                    ),
+                  ),
+                  onTap: () {
+                    setState(() {
+                      images.removeAt(index);
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
+    );
+  }
 
+  Future<List<Asset>> loadAssets() async {
+    List<Asset> resultList = List<Asset>();
     try {
       resultList = await MultiImagePicker.pickImages(
         maxImages: 5,
         enableCamera: true,
         selectedAssets: images,
-        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
         materialOptions: MaterialOptions(
-          actionBarColor: "#abcdef",
+          actionBarColor: "#9059FF",
           actionBarTitle: "Gallery",
           allViewTitle: "All Photos",
           useDetailsView: false,
-          selectCircleStrokeColor: "#000000",
+          selectCircleStrokeColor: "#9059FF",
+          selectionLimitReachedText: "You can't select any more.",
         ),
       );
     } on Exception catch (e) {
-      error = e.toString();
+      print(e.toString());
     }
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      images = resultList;
-      _error = error;
-    });
+//    if (!mounted) return;
+    return resultList;
   }
 
   Widget loadAvatar(File file, String url) {
@@ -562,11 +639,3 @@ class _MyDialogMajorState extends State<MyDialogMajor> {
     );
   }
 }
-
-
-//child: SingleChildScrollView(
-//child: Column(
-//mainAxisAlignment: MainAxisAlignment.start,
-//children: buildCheckBoxMajor(),
-//),
-//),

@@ -39,9 +39,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   @override
   void initState() {
     super.initState();
-    valueGender = 'Gender';
-    valueBirthday = 'Birthday';
+    valueGender = 'Choose gender';
+    valueBirthday = 'Choose birthday';
     valueName = widget.userObj.name;
+    valuePhone = '';
   }
 
   @override
@@ -148,8 +149,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     SizedBox(
                       height: 50,
                     ),
-                    CustomTextField(
-                        hint: 'Full name',
+                    CustomTextFieldHint(
+                        title: 'Full name',
                         value: widget.userObj.name,
                         iconData: Icons.perm_identity,
                         textInputType: TextInputType.text,
@@ -162,7 +163,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     SizedBox(
                       height: 20,
                     ),
-                    CustomTextField(
+                    CustomTextFieldHint(
+                      title: 'Email',
                       value: widget.userObj.email,
                       iconData: Icons.email,
                       textInputType: TextInputType.text,
@@ -171,8 +173,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     SizedBox(
                       height: 20,
                     ),
-                    CustomTextField(
-                        hint: 'Phone',
+                    CustomTextFieldHint(
+                        title: 'Phone',
                         iconData: Icons.phone,
                         textInputType: TextInputType.phone,
                         onChanged: (value) {
@@ -183,7 +185,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     SizedBox(
                       height: 20,
                     ),
-                    TextFieldDropDown(
+                    TextFieldDropDownHint(
+                      hint: 'Gender(optional)',
                       value: valueGender,
                       iconData: Icons.keyboard_arrow_down,
                       onChanged: () async {
@@ -220,7 +223,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     SizedBox(
                       height: 20,
                     ),
-                    TextFieldDropDown(
+                    TextFieldDropDownHint(
+                      hint: 'Birthday(option)',
                       value: valueBirthday,
                       iconData: Icons.calendar_today,
                       onChanged: () {

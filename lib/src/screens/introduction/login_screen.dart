@@ -33,10 +33,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final facebookLogin = FacebookLogin();
-
+  String phoneNo, verificationId, smsCode, valuePhoneNumber;
+  bool codeSent = false;
+  TextEditingController textEditingController;
   @override
   void initState() {
     super.initState();
+    textEditingController = TextEditingController(text: valuePhoneNumber);
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
         setState(() {
@@ -143,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 context,
                                                 MaterialPageRoute(
                                                     builder: (context) =>
-                                                        MyApp(),
+                                                        MainPage(),
                                                     fullscreenDialog:
                                                     true));
                                           },
@@ -197,6 +200,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 WhitelistingTextInputFormatter(
                                                     RegExp('[0-9]'))
                                               ],
+                                              onChanged: (phone) {
+                                                setState(() {
+                                                  valuePhoneNumber = phone;
+                                                });
+                                              },
+                                              controller: textEditingController,
                                               maxLines: 1,
                                               keyboardType:
                                               TextInputType.phone,
@@ -238,13 +247,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                   BorderRadius.circular(4),
                                   child: GestureDetector(
                                     onTap: () {
-//                                      _signInWithFacebook();
-//                                      Navigator.pushReplacement(
-//                                          context,
-//                                          MaterialPageRoute(
-//                                            builder: (context) => ChooseRolePage(),
-//                                          ));
-                                      BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
+//                                      BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
+
                                     },
                                     child: Container(
                                       decoration: BoxDecoration(
@@ -355,7 +359,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                     style: kTitle,
                                   ),
                                   onPressed: () async {
-                                    BlocProvider.of<UserBloc>(context).add(GetDetailsUser());
+                                    if (codeSent) {
+                                      signInWithOTP(valuePhoneNumber,verificationId);
+                                    } else {
+                                      verifyPhone('+84$valuePhoneNumber');
+                                    }
+
                                   },
                                 ),
                               ),
@@ -371,6 +380,47 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       );
+
+  signInWithOTP(smsCode, verId) {
+    AuthCredential authCreds = PhoneAuthProvider.getCredential(
+        verificationId: verId, smsCode: smsCode);
+    FirebaseAuth.instance.signInWithCredential(authCreds);
+  }
+
+  Future<void> verifyPhone(phoneNo) async {
+    print('phone enter: $phoneNo');
+    setState(() {
+      valuePhoneNumber = '';
+    });
+    final PhoneVerificationCompleted verified = (AuthCredential authResult) {
+      FirebaseAuth.instance.signInWithCredential(authResult);
+    };
+
+    final PhoneVerificationFailed verificationfailed =
+        (AuthException authException) {
+      print('${authException.message}');
+    };
+
+    final PhoneCodeSent smsSent = (String verId, [int forceResend]) {
+      this.verificationId = verId;
+      setState(() {
+        this.codeSent = true;
+        print('code : true');
+      });
+    };
+
+    final PhoneCodeAutoRetrievalTimeout autoTimeout = (String verId) {
+      this.verificationId = verId;
+    };
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNo,
+        timeout: const Duration(seconds: 5),
+        verificationCompleted: verified,
+        verificationFailed: verificationfailed,
+        codeSent: smsSent,
+        codeAutoRetrievalTimeout: autoTimeout);
+  }
 
   Future<void> _signInWithFacebook() async {
     await facebookLogin.logIn(['email', 'public_profile']).then((result) async {

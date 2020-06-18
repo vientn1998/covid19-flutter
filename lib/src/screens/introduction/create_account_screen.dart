@@ -11,6 +11,7 @@ import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
+import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/image_picker.dart';
 import 'package:template_flutter/src/utils/size_config.dart';
@@ -24,7 +25,6 @@ import '../main_screen.dart';
 class CreateAccountPage extends StatefulWidget {
 
   final UserObj userObj;
-
   CreateAccountPage({Key key, @required this.userObj}): assert(userObj != null);
 
   @override
@@ -36,13 +36,16 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   DateTime dateTimeBirthday;
   File _fileAvatar;
   bool isHasAvatar = false;
+  bool isAuthPhone;
   @override
   void initState() {
     super.initState();
     valueGender = 'Choose gender';
     valueBirthday = 'Choose birthday';
-    valueName = widget.userObj.name;
-    valuePhone = '';
+    valueEmail = widget.userObj.email == null ? '' : widget.userObj.email;
+    valueName = widget.userObj.name == null ? '' : widget.userObj.name;
+    valuePhone = widget.userObj.phone == null ? '' : widget.userObj.phone;
+    isAuthPhone = widget.userObj.phone != null && widget.userObj.phone.length > 0;
   }
 
   @override
@@ -52,6 +55,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     return KeyboardDismisser(
       gestures: [GestureType.onTap, GestureType.onPanUpdateDownDirection],
       child: Scaffold(
+        appBar: AppBar(
+          title: Text('Create a user'),
+          centerTitle: true,
+        ),
         body: SafeArea(
           child: BlocListener<UserBloc, UserState>(
             listener: (context, state) {
@@ -69,15 +76,12 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               }
             },
             child: Padding(
-              padding: const EdgeInsets.all(22.0),
+              padding: const EdgeInsets.only(left: paddingNavi, right: paddingNavi, bottom: paddingNavi),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    SizedBox(
-                      height: 23,
-                    ),
                     Material(
                       child: Container(
                         decoration: BoxDecoration(
@@ -151,7 +155,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     ),
                     CustomTextFieldHint(
                         title: 'Full name',
-                        value: widget.userObj.name,
+                        value: valueName,
                         iconData: Icons.perm_identity,
                         textInputType: TextInputType.text,
                         textCapitalization: TextCapitalization.words,
@@ -164,19 +168,26 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       height: 20,
                     ),
                     CustomTextFieldHint(
-                      title: 'Email',
-                      value: widget.userObj.email,
+                      title: isAuthPhone ? 'Email(optional)' : 'Email',
+                      value: valueEmail,
                       iconData: Icons.email,
                       textInputType: TextInputType.text,
-                      isEnable: false,
+                      isEnable: isAuthPhone,
+                      onChanged: (value) {
+                        setState(() {
+                          valueEmail = value;
+                        });
+                      },
                     ),
                     SizedBox(
                       height: 20,
                     ),
                     CustomTextFieldHint(
                         title: 'Phone',
+                        value: valuePhone,
                         iconData: Icons.phone,
                         textInputType: TextInputType.phone,
+                        isEnable: !isAuthPhone,
                         onChanged: (value) {
                           setState(() {
                             valuePhone = value;
@@ -259,8 +270,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                             user.email = widget.userObj.email;
                             user.phone = valuePhone;
                             user.isDoctor = false;
-                            user.gender = valueGender == "Gender" ? "" : valueGender;
-                            user.birthday = valueBirthday == "Birthday" ? 0 : dateTimeBirthday.millisecondsSinceEpoch;
+                            user.gender = valueGender.contains("Choose") ? "" : valueGender;
+                            user.birthday = valueBirthday.contains("Choose") ? 0 : dateTimeBirthday.millisecondsSinceEpoch;
                             print('data submit');
                             print(user.toString());
                             if (_fileAvatar == null) {

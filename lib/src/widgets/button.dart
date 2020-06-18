@@ -7,8 +7,9 @@ class ButtonCustom extends StatelessWidget {
   VoidCallback onPressed;
   Color background;
   double textSize, borderRadius;
+  bool isEnable;
 
-  ButtonCustom({Key key, @required this.title, @required this.onPressed, this.background, this.textSize, this.borderRadius = 8}) : super(key: key);
+  ButtonCustom({Key key, @required this.title, @required this.onPressed, this.background, this.textSize, this.borderRadius = 8, this.isEnable = true}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class ButtonCustom extends StatelessWidget {
       color: background,
       textColor: Colors.white,
       child: Text(title, style: TextStyle(fontSize: textSize, fontWeight: FontWeight.bold),),
-      onPressed: onPressed,
+      onPressed: isEnable ? onPressed : null,
     );
   }
 }

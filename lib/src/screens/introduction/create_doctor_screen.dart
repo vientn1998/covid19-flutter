@@ -52,8 +52,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
   List<KeyValueObj> listMajor = [];
   Covid19Dao _covid19dao = Covid19Dao();
   List<Asset> images = List<Asset>();
-  String _error = 'No Error Dectected';
-
+  bool isAuthPhone;
   @override
   void initState() {
     super.initState();
@@ -62,11 +61,12 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     valueAddress = 'Choose address';
     valueMajor = 'Choose major';
     valueTimeline = 'Choose timeline';
-    valueName = widget.userObj.name;
-    valueEmail = widget.userObj.email;
-    valuePhone = '';
+    valueName = widget.userObj.name == null ? '' : widget.userObj.name;
+    valueEmail = widget.userObj.email == null ? '' : widget.userObj.email;
+    valuePhone = widget.userObj.phone == null ? '' : widget.userObj.phone;
     valueExperience = 0;
     valueAbout = '';
+    isAuthPhone = widget.userObj.phone != null && widget.userObj.phone.length > 0;
     checkData();
   }
 
@@ -83,6 +83,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text('Create a doctor'),
+          centerTitle: true,
         ),
         body: SafeArea(
           child: MultiBlocListener(
@@ -222,10 +223,15 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           ),
                           //email
                           CustomTextFieldHint(
-                            title: 'Email',
+                            title: isAuthPhone ? 'Email(optional)' : 'Email',
                             value: valueEmail,
                             textInputType: TextInputType.text,
-                            isEnable: false,
+                            isEnable: isAuthPhone,
+                            onChanged: (value) {
+                              setState(() {
+                                valueEmail = value;
+                              });
+                            },
                           ),
                           SizedBox(
                             height: heightSpace,
@@ -233,7 +239,9 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           //phone
                           CustomTextFieldHint(
                               title: 'Phone',
+                              value: valuePhone,
                               textInputType: TextInputType.phone,
+                              isEnable: !isAuthPhone,
                               onChanged: (value) {
                                 setState(() {
                                   valuePhone = value;
@@ -468,7 +476,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                 ),
                 Container(
                   margin: EdgeInsets.all(paddingNavi),
-                  height: 50,
+                  height: heightButton,
                   width: double.infinity,
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
@@ -498,6 +506,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
       toast('Please input phone');
       return;
     }
+    print('phone $valuePhone');
     final rs = phoneNumberValidator(valuePhone);
     if (rs != null) {
       toast(rs);

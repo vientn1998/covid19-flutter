@@ -383,7 +383,7 @@ class _HomePageState extends State<HomePage> {
             return '';
           },
           reservedSize: 20,
-          margin: 12,
+          margin: 20,
         ),
       ),
       borderData:

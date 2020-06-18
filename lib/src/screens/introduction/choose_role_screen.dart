@@ -14,7 +14,8 @@ enum RoleApp {
 
 class ChooseRolePage extends StatefulWidget {
   final UserObj userObj;
-  ChooseRolePage({Key key, this.userObj}): super(key: key);
+  final String phoneNumber;
+  ChooseRolePage({Key key, this.userObj, this.phoneNumber}): super(key: key);
   @override
   _ChooseRolePageState createState() => _ChooseRolePageState();
 }

@@ -72,7 +72,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             Text('Have you had a test for\nCOVID-19?', style: kTitleSurvey,),
                             SizedBox(height: heightSpaceLarge,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonCustom(title: 'Yes',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -84,7 +84,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             ),
                             SizedBox(height: heightSpaceNormal,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonOutlineCustom(title: 'No',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -109,7 +109,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             Text('Are you currently experiencing a high temperature?', style: kTitleSurvey,),
                             SizedBox(height: heightSpaceLarge,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonCustom(title: 'Yes',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -121,7 +121,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             ),
                             SizedBox(height: heightSpaceNormal,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonOutlineCustom(title: 'No',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -145,7 +145,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             Text('Coughing a lot for more than hour or 3 episodes in the past 24hrs?', style: kTitleSurvey,),
                             SizedBox(height: heightSpaceLarge,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonCustom(title: 'Yes',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -157,7 +157,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             ),
                             SizedBox(height: heightSpaceNormal,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonOutlineCustom(title: 'No',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -181,7 +181,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             Text('Did you test positive for COVID-19?', style: kTitleSurvey,),
                             SizedBox(height: heightSpaceLarge,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonCustom(title: 'Yes',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -193,7 +193,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             ),
                             SizedBox(height: heightSpaceNormal,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonOutlineCustom(title: 'No',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -217,7 +217,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             Text('Try to let us know how you\'re felling right now?', style: kTitleSurvey,),
                             SizedBox(height: heightSpaceLarge,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonCustom(title: 'Great',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -229,7 +229,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             ),
                             SizedBox(height: heightSpaceNormal,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonCustom(title: 'Normal',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -238,7 +238,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             ),
                             SizedBox(height: heightSpaceNormal,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonCustom(title: 'Not Good',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -247,7 +247,7 @@ class _SurveyPageState extends State<SurveyPage> {
                             ),
                             SizedBox(height: heightSpaceNormal,),
                             Container(
-                              height: heightButton,
+                              height: heightButtonSuvery,
                               margin: EdgeInsets.only(bottom: 0),
                               width: double.infinity,
                               child: ButtonOutlineCustom(title: 'Awful',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -311,7 +311,7 @@ class _ThanksForSurveyState extends State<ThanksForSurvey> {
               SizedBox(height: heightSpaceNormal,),
               SizedBox(height: heightSpaceLarge,),
               Container(
-                height: heightButton,
+                height: heightButtonSuvery,
                 margin: EdgeInsets.only(bottom: 0),
                 width: double.infinity,
                 child: ButtonCustom(title: 'Share This App',textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {
@@ -320,7 +320,7 @@ class _ThanksForSurveyState extends State<ThanksForSurvey> {
               ),
               SizedBox(height: heightSpaceNormal,),
               Container(
-                height: heightButton,
+                height: heightButtonSuvery,
                 margin: EdgeInsets.only(bottom: 0),
                 width: double.infinity,
                 child: ButtonOutlineCustom(title: 'Go Back Home',color: Colors.white,textSize: 16,borderRadius: borderRadiusButtonOutline, background: colorButtonSurvey, onPressed: () {

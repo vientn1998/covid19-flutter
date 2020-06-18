@@ -11,6 +11,7 @@ import 'package:template_flutter/src/blocs/auth/auth_bloc.dart';
 import 'package:template_flutter/src/blocs/auth/bloc.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/screens/introduction/create_account_screen.dart';
+import 'package:template_flutter/src/screens/introduction/enter_code_sms_screen.dart';
 import 'package:template_flutter/src/screens/main_screen.dart';
 import 'package:template_flutter/src/screens/survey/suvery_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
@@ -270,7 +271,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     return;
                   }
                   LoadingHud(context).show();
-                  BlocProvider.of<AuthBloc>(context).add(AuthPhoneNumberPressed('+84$valuePhoneNumber'));
+                  verifyPhone('+84$valuePhoneNumber');
+                  //BlocProvider.of<AuthBloc>(context).add(AuthPhoneNumberPressed('+84$valuePhoneNumber'));
                 },
               ),
             ),
@@ -301,7 +303,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: GestureDetector(
                   onTap: () {
                     //facebook
-                     BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
+                    _signInWithFacebook();
+
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -310,7 +313,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       BorderRadius.all(
                           Radius.circular(4)),
                     ),
-                    height: 50,
+                    height: heightButton,
                     child: Padding(
                       padding:
                       const EdgeInsets.all(8.0),
@@ -362,7 +365,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       BorderRadius.all(
                           Radius.circular(4)),
                     ),
-                    height: 50,
+                    height: heightButton,
                     child: Padding(
                       padding:
                       const EdgeInsets.all(8.0),
@@ -398,13 +401,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  signInWithOTP(smsCode, verId) {
-    AuthCredential authCredential = PhoneAuthProvider.getCredential(
-        verificationId: verId, smsCode: smsCode);
-    FirebaseAuth.instance.signInWithCredential(authCredential);
-  }
-
-
   Future<void> verifyPhone(phoneNo) async {
     print('phone enter: $phoneNo');
     setState(() {
@@ -419,12 +415,15 @@ class _LoginScreenState extends State<LoginScreen> {
       print('${authException.message}');
       toast('${authException.message}');
     };
-
+    final phone = '0${phoneNo.substring(3)}';
     final PhoneCodeSent smsSent = (String verId, [int forceResend]) {
       this.verificationId = verId;
       setState(() {
         this.codeSent = true;
-        print('code : true');
+        LoadingHud(context).dismiss();
+        Navigator.push(context, MaterialPageRoute(
+          builder: (context) => EnterOTPPage(phoneNumber: phone, verificationId: this.verificationId,),
+        ));
       });
     };
 

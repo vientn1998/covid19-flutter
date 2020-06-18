@@ -28,11 +28,11 @@ class DialogCus {
   }
 }
 
-toast(String message) {
+toast(String message,{ToastGravity gravity = ToastGravity.CENTER}) {
   Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
+      gravity: gravity,
       timeInSecForIosWeb: 1,
 //      backgroundColor: Colors.red,
 //      textColor: Colors.white,

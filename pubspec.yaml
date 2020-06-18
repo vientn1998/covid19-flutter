@@ -83,6 +83,8 @@ dependencies:
   fluttertoast: ^4.0.0
   #multi image
   multi_image_picker: ^4.6.7
+  #pin code
+  pin_code_fields: ^3.1.2
 
 dev_dependencies:
   flutter_test:

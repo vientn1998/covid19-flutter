@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:loading_hud/loading_hud.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:template_flutter/src/models/key_value_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 
 class UserRepository {
@@ -17,11 +18,70 @@ class UserRepository {
       : this._firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn();
 
+  Future<FirebaseUser> signWithGoogle() async {
+    print('signWithGoogle');
+    final GoogleSignInAccount googleSignInAccount =
+    await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleSignInAuthentication =
+    await googleSignInAccount.authentication;
+    final AuthCredential authCredential = GoogleAuthProvider.getCredential(
+        idToken: googleSignInAuthentication.idToken,
+        accessToken: googleSignInAuthentication.accessToken);
+    final AuthResult authResult =
+    await _firebaseAuth.signInWithCredential(authCredential);
+    return authResult.user;
+  }
+
+  Future<dynamic> signInWithPhoneNumber(String phoneNumber) async {
+    String verificationId;
+    int forceResendToken;
+    final PhoneVerificationCompleted verified = (AuthCredential authResult) {
+      print('$authResult');
+      FirebaseAuth.instance.signInWithCredential(authResult);
+    };
+    final PhoneVerificationFailed verificationFailed =
+        (AuthException authException) {
+      print('AuthException ${authException.message}');
+      return authException;
+    };
+    final PhoneCodeSent smsSent = (String verId, [int forceResend]) {
+      print('was send code to my phone');
+      verificationId = verId;
+      forceResendToken = forceResend;
+      return KeyValueObj(verificationId: verId, forceResend: forceResend);
+    };
+
+    PhoneCodeAutoRetrievalTimeout autoTimeout = (String verId) {
+      print('autoTimeout');
+    };
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 30),
+        verificationCompleted: verified,
+        verificationFailed: verificationFailed,
+        codeSent: smsSent,
+        codeAutoRetrievalTimeout: autoTimeout);
+  }
+
+  Future<void> signOut() async {
+    print('signOut');
+    return Future.wait([_firebaseAuth.signOut(), _googleSignIn.signOut()]);
+  }
+
+  Future<bool> isSignedIn() async {
+    final currentUser = await _firebaseAuth.currentUser();
+    print('isSignedIn');
+    print(currentUser != null);
+    return currentUser != null;
+  }
+
+
   Future<bool> addAccount(UserObj userObj) async {
     bool isSuccess = false;
     print(userObj.toString());
     final data = userObj.toJson();
-    print('submit $data');
+    print('addAccount $data');
     await userCollection.document(userObj.id).setData(data).then(
         (value) {
           isSuccess = true;
@@ -30,6 +90,32 @@ class UserRepository {
       return false;
     });
     return isSuccess;
+  }
+
+  Future<bool> checkExist(String uuid) async {
+    bool isExists = false;
+    await userCollection.document(uuid).get().then((value) {
+      if (value.exists) {
+        isExists = true;
+      } else {
+        isExists = false;
+      }
+    });
+    return isExists;
+  }
+
+  Future<Stream<UserObj>> getUser(String id) async {
+    return userCollection.document(id).snapshots().map((document) {
+      return UserObj.fromSnapshot(document);
+    });
+  }
+
+  Stream<List<UserObj>> getListUser() {
+    return userCollection.snapshots().map((snapshot) {
+      return snapshot.documents
+          .map((doc) => UserObj.fromSnapshot(doc))
+          .toList();
+    });
   }
 
   Future<String> uploadFileToServer(String folder, File file) async {
@@ -55,55 +141,6 @@ class UserRepository {
     }
   }
 
-  Future<bool> checkExist(String uuid) async {
-    bool isExists = false;
-    await userCollection.document(uuid).get().then((value) {
-      if (value.exists) {
-        isExists = true;
-      } else {
-        isExists = false;
-      }
-    });
-    return isExists;
-  }
-
-  Stream<List<UserObj>> getListUser() {
-    return userCollection.snapshots().map((snapshot) {
-      return snapshot.documents
-          .map((doc) => UserObj.fromSnapshot(doc))
-          .toList();
-    });
-  }
-
-  Future<Stream<UserObj>> getUser(String id) async {
-    return userCollection.document(id).snapshots().map((document) {
-      return UserObj.fromSnapshot(document);
-    });
-  }
-
-  Future<FirebaseUser> signWithGoogle() async {
-    final GoogleSignInAccount googleSignInAccount =
-        await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
-    final AuthCredential authCredential = GoogleAuthProvider.getCredential(
-        idToken: googleSignInAuthentication.idToken,
-        accessToken: googleSignInAuthentication.accessToken);
-    final AuthResult authResult =
-        await _firebaseAuth.signInWithCredential(authCredential);
-    return authResult.user;
-  }
-
-  Future<void> signOut() async {
-    return Future.wait([_firebaseAuth.signOut(), _googleSignIn.signOut()]);
-  }
-
-  Future<bool> isSignedIn() async {
-    final currentUser = await _firebaseAuth.currentUser();
-    print('isSignedIn');
-    print(currentUser != null);
-    return currentUser != null;
-  }
 
   Future<String> postImageAsset(Asset imageFile) async {
     String fileName = "certificate/" + DateTime.now().toString() + ".jpg";

@@ -3,6 +3,7 @@ import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:template_flutter/src/models/key_value_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/repositories/user_repository.dart';
 import './bloc.dart';
@@ -25,6 +26,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield* _mapGoogleSignToState();
     } else if (event is AuthLogoutGoogle) {
       userRepository.signOut();
+    } else if (event is AuthPhoneNumberPressed) {
+      yield* _mapPhoneLoginToState(event);
     }
   }
 
@@ -39,6 +42,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       print(userObj.toString());
       _userObj = userObj;
       yield Authenticated(userObj: userObj);
+    } else {
+      yield AuthenticateError();
+    }
+  }
+
+  Stream<AuthState> _mapPhoneLoginToState(AuthPhoneNumberPressed event) async* {
+    yield AuthLoading();
+    final data = await userRepository.signInWithPhoneNumber(event.phoneNumber);
+    print('_mapPhoneLoginToState $data');
+    if (data is KeyValueObj) {
+      yield SenCodeWasSuccessful(data);
     } else {
       yield AuthenticateError();
     }

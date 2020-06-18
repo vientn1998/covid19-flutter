@@ -16,6 +16,7 @@ import 'package:template_flutter/src/screens/survey/suvery_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/loading_dialog.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/utils/styles.dart';
@@ -30,8 +31,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isKeyboardAppear = false;
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
   final facebookLogin = FacebookLogin();
   String phoneNo, verificationId, smsCode, valuePhoneNumber;
   bool codeSent = false;
@@ -39,6 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    valuePhoneNumber = '';
     textEditingController = TextEditingController(text: valuePhoneNumber);
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
@@ -62,9 +62,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (state is UnAuthenticated ||
                     state is UnInitialized ||
                     state is AuthenticateError) {
+                    LoadingHud(context).dismiss();
                     print('init');
                   } else if (state is Authenticated) {
                     BlocProvider.of<UserBloc>(context).add(CheckUserExists(uuid: state.userObj.id));
+                  } else if (state is SenCodeWasSuccessful) {
+                    LoadingHud(context).dismiss();
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MainPage(),
+                        ));
                   }
                 }),
                 BlocListener<UserBloc, UserState>(
@@ -227,151 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      !isKeyboardAppear
-                          ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            'Or continue with a social account',
-                            style: kTitle,
-                          ),
-                          SizedBox(
-                            height: 30,
-                          ),
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: Material(
-                                  elevation: 2,
-                                  borderRadius:
-                                  BorderRadius.circular(4),
-                                  child: GestureDetector(
-                                    onTap: () {
-//                                      BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
-
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: colorFacebook,
-                                        borderRadius:
-                                        BorderRadius.all(
-                                            Radius.circular(4)),
-                                      ),
-                                      height: 50,
-                                      child: Padding(
-                                        padding:
-                                        const EdgeInsets.all(8.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment
-                                              .center,
-                                          children: <Widget>[
-                                            Image(
-                                              image: AssetImage(
-                                                  'assets/images/ic_facebook.png'),
-                                            ),
-                                            SizedBox(
-                                              width: 15,
-                                            ),
-                                            Text(
-                                              'Facebook',
-                                              style: TextStyle(
-                                                  fontSize: 17,
-                                                  color:
-                                                  Colors.white),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 16,
-                              ),
-                              Expanded(
-                                child: Material(
-                                  elevation: 2,
-                                  borderRadius:
-                                  BorderRadius.circular(4),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      //sign google
-                                      //_signInWithGoogle().whenComplete(() => print('success login'));
-                                      BlocProvider.of<AuthBloc>(
-                                          context)
-                                          .add(AuthGooglePressed());
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: colorGoogle,
-                                        borderRadius:
-                                        BorderRadius.all(
-                                            Radius.circular(4)),
-                                      ),
-                                      height: 50,
-                                      child: Padding(
-                                        padding:
-                                        const EdgeInsets.all(8.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment
-                                              .center,
-                                          children: <Widget>[
-                                            Image(
-                                              image: AssetImage(
-                                                  'assets/images/ic_google.png'),
-                                            ),
-                                            SizedBox(
-                                              width: 15,
-                                            ),
-                                            Text(
-                                              'Google',
-                                              style: TextStyle(
-                                                  fontSize: 17,
-                                                  color:
-                                                  Colors.white),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      )
-                          : Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: <Widget>[
-                              Expanded(
-                                child: FlatButton(
-                                  child: Text(
-                                    'continue',
-                                    style: kTitle,
-                                  ),
-                                  onPressed: () async {
-                                    if (codeSent) {
-                                      signInWithOTP(valuePhoneNumber,verificationId);
-                                    } else {
-                                      verifyPhone('+84$valuePhoneNumber');
-                                    }
-
-                                  },
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      )
+                      isKeyboardAppear ? buildWidgetKeyboardAppear() : buildWidgetKeyboardDismiss()
                     ],
                   ),
                 ),
@@ -381,11 +245,165 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
 
-  signInWithOTP(smsCode, verId) {
-    AuthCredential authCreds = PhoneAuthProvider.getCredential(
-        verificationId: verId, smsCode: smsCode);
-    FirebaseAuth.instance.signInWithCredential(authCreds);
+  buildWidgetKeyboardAppear() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: FlatButton(
+                child: Text(
+                  'continue',
+                  style: kTitle,
+                ),
+                onPressed: () async {
+                  if (valuePhoneNumber.isEmpty) {
+                    toast('Please input phone number');
+                    return;
+                  }
+                  if (valuePhoneNumber.length != 9) {
+                    toast('Invalid phone number');
+                    return;
+                  }
+                  LoadingHud(context).show();
+                  BlocProvider.of<AuthBloc>(context).add(AuthPhoneNumberPressed('+84$valuePhoneNumber'));
+                },
+              ),
+            ),
+          ],
+        )
+      ],
+    );
   }
+
+  buildWidgetKeyboardDismiss() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          'Or continue with a social account',
+          style: kTitle,
+        ),
+        SizedBox(
+          height: 30,
+        ),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Material(
+                elevation: 2,
+                borderRadius:
+                BorderRadius.circular(4),
+                child: GestureDetector(
+                  onTap: () {
+                    //facebook
+                     BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: colorFacebook,
+                      borderRadius:
+                      BorderRadius.all(
+                          Radius.circular(4)),
+                    ),
+                    height: 50,
+                    child: Padding(
+                      padding:
+                      const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment
+                            .center,
+                        children: <Widget>[
+                          Image(
+                            image: AssetImage(
+                                'assets/images/ic_facebook.png'),
+                          ),
+                          SizedBox(
+                            width: 15,
+                          ),
+                          Text(
+                            'Facebook',
+                            style: TextStyle(
+                                fontSize: 17,
+                                color:
+                                Colors.white),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 16,
+            ),
+            Expanded(
+              child: Material(
+                elevation: 2,
+                borderRadius:
+                BorderRadius.circular(4),
+                child: GestureDetector(
+                  onTap: () {
+                    //google
+                    BlocProvider.of<AuthBloc>(
+                        context)
+                        .add(AuthGooglePressed());
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: colorGoogle,
+                      borderRadius:
+                      BorderRadius.all(
+                          Radius.circular(4)),
+                    ),
+                    height: 50,
+                    child: Padding(
+                      padding:
+                      const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment
+                            .center,
+                        children: <Widget>[
+                          Image(
+                            image: AssetImage(
+                                'assets/images/ic_google.png'),
+                          ),
+                          SizedBox(
+                            width: 15,
+                          ),
+                          Text(
+                            'Google',
+                            style: TextStyle(
+                                fontSize: 17,
+                                color:
+                                Colors.white),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  signInWithOTP(smsCode, verId) {
+    AuthCredential authCredential = PhoneAuthProvider.getCredential(
+        verificationId: verId, smsCode: smsCode);
+    FirebaseAuth.instance.signInWithCredential(authCredential);
+  }
+
 
   Future<void> verifyPhone(phoneNo) async {
     print('phone enter: $phoneNo');
@@ -396,9 +414,10 @@ class _LoginScreenState extends State<LoginScreen> {
       FirebaseAuth.instance.signInWithCredential(authResult);
     };
 
-    final PhoneVerificationFailed verificationfailed =
+    final PhoneVerificationFailed verificationFailed =
         (AuthException authException) {
       print('${authException.message}');
+      toast('${authException.message}');
     };
 
     final PhoneCodeSent smsSent = (String verId, [int forceResend]) {
@@ -415,9 +434,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     await FirebaseAuth.instance.verifyPhoneNumber(
         phoneNumber: phoneNo,
-        timeout: const Duration(seconds: 5),
+        timeout: const Duration(seconds: 30),
         verificationCompleted: verified,
-        verificationFailed: verificationfailed,
+        verificationFailed: verificationFailed,
         codeSent: smsSent,
         codeAutoRetrievalTimeout: autoTimeout);
   }

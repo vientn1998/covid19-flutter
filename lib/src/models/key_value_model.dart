@@ -7,8 +7,10 @@ class KeyValueObj extends Equatable{
   String key;
   String value;
   bool isSelected = false;
+  String verificationId;
+  int forceResend;
 
-  KeyValueObj({this.key, this.value, this.isSelected = false});
+  KeyValueObj({this.key, this.value, this.isSelected = false, this.verificationId, this.forceResend});
 
   KeyValueObj copyWith({String key, String value}) {
     return KeyValueObj(key: key, value: value);

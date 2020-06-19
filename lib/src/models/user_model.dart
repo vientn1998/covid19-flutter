@@ -10,8 +10,9 @@ class UserObj extends Equatable {
   String avatar = "";
   String phone = "";
   String gender = "";
+  String accessTokenFb = "";
   int birthday = 0;
-  bool isDoctor = false;
+  bool isDoctor = false, isVerifyPhone = false, isAuthFb;
   String timeline = "";
   LocationObj location;
   int yearExperience = 0;
@@ -32,7 +33,9 @@ class UserObj extends Equatable {
       this.location,
       this.imagesCertificate,
       this.isDoctor,
-      this.majors,
+      this.isAuthFb,
+      this.accessTokenFb,
+      this.majors, this.isVerifyPhone,
       this.timeline});
 
   UserObj copyWith(
@@ -64,8 +67,11 @@ class UserObj extends Equatable {
       birthday: json["birthday"] as int,
       timeline: json["timeline"] as String,
       about: json["about"] as String,
+      accessTokenFb: json["accessTokenFb"] as String,
       yearExperience: json["yearExperience"] as int,
       isDoctor: json["isDoctor"] as bool,
+      isVerifyPhone: json["isVerifyPhone"] as bool,
+      isAuthFb: json["isAuthFb"] as bool,
       majors: json["majors"] as List<KeyValueObj>,
       imagesCertificate: json["imagesCertificate"] as List<String>,
     );
@@ -81,9 +87,12 @@ class UserObj extends Equatable {
         birthday: snap.data['birthday'],
         avatar: snap.data['avatar'],
         about: snap.data['about'],
+        accessTokenFb: snap.data['accessTokenFb'],
+        isAuthFb: snap.data['isAuthFb'],
         timeline: snap.data['timeline'],
         yearExperience: snap.data['yearExperience'],
         isDoctor: snap.data['isDoctor'],
+      isVerifyPhone: snap.data['isVerifyPhone'],
         location: LocationObj.fromJson(snap.data['location']),
         imagesCertificate: List.from(snap.data['imagesCertificate']),
         majors: snap.data['majors'].map<KeyValueObj>((item) {
@@ -112,6 +121,9 @@ class UserObj extends Equatable {
         "about": about,
         "timeline": timeline,
         "isDoctor": isDoctor,
+        "isAuthFb": isAuthFb,
+        "isVerifyPhone": isVerifyPhone,
+        "accessTokenFb": accessTokenFb,
         "yearExperience": yearExperience,
         "location": location != null ? location.toJson() : null,
         "imagesCertificate": imagesCertificate,
@@ -129,7 +141,10 @@ class UserObj extends Equatable {
         "avatar": avatar,
         "about": about,
         "timeline": timeline,
+        "accessTokenFb": accessTokenFb,
+        "isAuthFb": isAuthFb,
         "isDoctor": isDoctor,
+        "isVerifyPhone": isVerifyPhone,
         "yearExperience": yearExperience,
         "location": location != null ? location.toJson() : null,
         "imagesCertificate": imagesCertificate,
@@ -144,8 +159,8 @@ class UserObj extends Equatable {
   String toString() {
     // TODO: implement toString
     return 'User: id:$id name:$name phone:$phone email:$email '
-        'avatar:$avatar gender:$gender birthday:$birthday isDoctor:$isDoctor timeline:$timeline '
-        'yearExperience:$yearExperience location:$location imagesCertificate:$imagesCertificate majors:$majors)';
+        'avatar:$avatar gender:$gender birthday:$birthday isDoctor:$isDoctor isVerifyPhone:$isVerifyPhone timeline:$timeline '
+        'yearExperience:$yearExperience isAuthFb: $isAuthFb accessTokenFb:$accessTokenFb location:$location imagesCertificate:$imagesCertificate majors:$majors)';
   }
 
   @override

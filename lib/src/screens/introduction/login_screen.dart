@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +12,7 @@ import 'package:template_flutter/src/app/my_app.dart';
 import 'package:template_flutter/src/blocs/auth/auth_bloc.dart';
 import 'package:template_flutter/src/blocs/auth/bloc.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
+import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/introduction/create_account_screen.dart';
 import 'package:template_flutter/src/screens/introduction/enter_code_sms_screen.dart';
 import 'package:template_flutter/src/screens/main_screen.dart';
@@ -31,20 +34,21 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool isKeyboardAppear = false;
+  bool isKeyboardAppear = false, isEnableButtonPhone = false;
   final facebookLogin = FacebookLogin();
   String phoneNo, verificationId, smsCode, valuePhoneNumber;
   bool codeSent = false;
   TextEditingController textEditingController;
   @override
   void initState() {
-    super.initState();
     valuePhoneNumber = '';
+    isEnableButtonPhone = false;
     textEditingController = TextEditingController(text: valuePhoneNumber);
+    super.initState();
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
+        print('isKeyboardAppear : $visible');
         setState(() {
-          print('aaaa $visible');
           isKeyboardAppear = visible;
         });
       },
@@ -64,7 +68,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     state is UnInitialized ||
                     state is AuthenticateError) {
                     LoadingHud(context).dismiss();
-                    print('init');
                   } else if (state is Authenticated) {
                     BlocProvider.of<UserBloc>(context).add(CheckUserExists(uuid: state.userObj.id));
                   } else if (state is SenCodeWasSuccessful) {
@@ -79,7 +82,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 BlocListener<UserBloc, UserState>(
                   listener: (buildContext, state) async {
                     if (state is UserLoading) {
-                      print('UserLoading');
                       LoadingHud(context).show();
                     } else if (state is UserCheckExistsSuccess) {
                       print('UserCheckExistsSuccess ${state.isExist}');
@@ -102,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       }
                     } else if (state is UserCheckExistsError) {
                       print('UserCheckExistsError');
-//                      LoadingDialog(context).loadingHud.dismiss();
+                      LoadingHud(context).dismiss();
                     }
                   },
                 ),
@@ -150,14 +152,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     child: Row(
                                       children: <Widget>[
                                         InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        MainPage(),
-                                                    fullscreenDialog:
-                                                    true));
+                                          onTap: () async {
+                                            await facebookLogin.logOut();
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(
@@ -212,6 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               onChanged: (phone) {
                                                 setState(() {
                                                   valuePhoneNumber = phone;
+                                                  isEnableButtonPhone = (phone != null && phone.length == 9);
                                                 });
                                               },
                                               controller: textEditingController,
@@ -448,12 +445,25 @@ class _LoginScreenState extends State<LoginScreen> {
           final graphResponse = await http.get(
               'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${result.accessToken.token}');
           print(graphResponse.body);
+          final profile = json.decode(graphResponse.body);
+          final user = UserObj();
+          user.id = profile["id"];
+          user.name = profile["name"];
+          user.email = profile["email"];
+          user.accessTokenFb = result.accessToken.token;
+          user.isAuthFb = true;
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChooseRolePage(userObj: user,),
+              ));
           break;
         case FacebookLoginStatus.cancelledByUser:
           print('login fb cancelled by user');
+          DialogCus(context).show(message: 'Login fb cancelled by user');
           break;
         case FacebookLoginStatus.error:
-          print('login fb error');
+          DialogCus(context).show(message: 'Login fb error');
           break;
       }
     }).catchError((e) {

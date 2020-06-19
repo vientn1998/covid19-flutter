@@ -64,7 +64,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
             listener: (context, state) {
               if (state is UserCreateLoading) {
                 LoadingHud(context).show();
-                print('Create Loading');
               } else if (state is UserCreateSuccess) {
                 LoadingHud(context).dismiss();
                 Navigator.pushReplacement(context, MaterialPageRoute(
@@ -72,224 +71,218 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 ));
               } else if (state is UserCreateError) {
                 LoadingHud(context).dismiss();
-                print('Create error');
+                DialogCus(context).show(message: 'Error create account');
               }
             },
             child: Padding(
-              padding: const EdgeInsets.only(left: paddingNavi, right: paddingNavi, bottom: paddingNavi),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Material(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.blueAccent),
-                          borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
-                        ),
-                        height: _widthHeightAvatar,
-                        width: _widthHeightAvatar,
-                        child: Stack(
-                          children: <Widget>[
-                            Container(
+              padding: const EdgeInsets.only(left: paddingNavi, right: paddingNavi),
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          SizedBox(height: heightSpaceNormal,),
+                          Material(
+                            child: Container(
                               decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                      (_widthHeightAvatar) / 2)),
+                                border: Border.all(color: Colors.blueAccent),
+                                borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
+                              ),
                               height: _widthHeightAvatar,
                               width: _widthHeightAvatar,
-                              child: ClipOval(
-                                child: loadAvatar(_fileAvatar,widget.userObj.avatar),
+                              child: Stack(
+                                children: <Widget>[
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(
+                                            (_widthHeightAvatar) / 2)),
+                                    height: _widthHeightAvatar,
+                                    width: _widthHeightAvatar,
+                                    child: ClipOval(
+                                      child: loadAvatar(_fileAvatar,widget.userObj.avatar),
+                                    ),
+                                  ),
+                                  Align(
+                                    alignment: Alignment(0, 0),
+                                    child: isHasAvatar ? null :Icon(Icons.perm_identity, size: 30, color: Colors.blue),
+                                  )
+                                ],
                               ),
                             ),
-                            Align(
-                              alignment: Alignment(0, 0),
-                              child: isHasAvatar ? null :Icon(Icons.perm_identity, size: 30, color: Colors.blue),
-                            )
-                          ],
-                        ),
-                      ),
-                      borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
-                      elevation: 0,
-                      color: backgroundSearch,
-                    ),
-                    FlatButton(
-                      child: (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) || _fileAvatar != null ? Text('Edit avatar') : Text('Add avatar'),
-                      onPressed: () async {
-                        final data = await showCupertinoModalPopup(
-                          context: context,
-                          builder: (context) => CupertinoActionSheet(
-                              cancelButton: CupertinoActionSheetAction(
-                                isDefaultAction: true,
-                                child: const Text('Cancel', style: TextStyle(color: Colors.red),),
+                            borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
+                            elevation: 0,
+                            color: backgroundSearch,
+                          ),
+                          FlatButton(
+                            child: (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) || _fileAvatar != null ? Text('Edit avatar') : Text('Add avatar'),
+                            onPressed: () async {
+                              FocusScope.of(context).unfocus();
+                              final data = await showCupertinoModalPopup(
+                                context: context,
+                                builder: (context) => CupertinoActionSheet(
+                                    cancelButton: CupertinoActionSheetAction(
+                                      isDefaultAction: true,
+                                      child: const Text('Cancel', style: TextStyle(color: Colors.red),),
 
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                              actions: <Widget>[
-                                CupertinoActionSheetAction(
-                                    child: const Text('Take a photo'), onPressed: () async {
-                                  Navigator.pop(context);
-                                  final file = await ImagePickUtils().getImageCamera();
-                                  setState(() {
-                                    _fileAvatar = file;
-                                  });
-                                }),
-                                CupertinoActionSheetAction(
-                                    child: const Text('Choose from gallery'), onPressed: () async {
-                                  Navigator.pop(context);
-                                  final file = await ImagePickUtils().getImageGallery();
-                                  setState(() {
-                                    _fileAvatar = file;
-                                  });
-                                }),
-                              ]),
-                        );
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    actions: <Widget>[
+                                      CupertinoActionSheetAction(
+                                          child: const Text('Take a photo'), onPressed: () async {
+                                        Navigator.pop(context);
+                                        final file = await ImagePickUtils().getImageCamera();
+                                        setState(() {
+                                          _fileAvatar = file;
+                                        });
+                                      }),
+                                      CupertinoActionSheetAction(
+                                          child: const Text('Choose from gallery'), onPressed: () async {
+                                        Navigator.pop(context);
+                                        final file = await ImagePickUtils().getImageGallery();
+                                        setState(() {
+                                          _fileAvatar = file;
+                                        });
+                                      }),
+                                    ]),
+                              );
 
-                        print(data);
-                      },
-                    ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    CustomTextFieldHint(
-                        title: 'Full name',
-                        value: valueName,
-                        iconData: Icons.perm_identity,
-                        textInputType: TextInputType.text,
-                        textCapitalization: TextCapitalization.words,
-                        onChanged: (value) {
-                          setState(() {
-                            valueName = value;
-                          });
-                        }),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    CustomTextFieldHint(
-                      title: isAuthPhone ? 'Email(optional)' : 'Email',
-                      value: valueEmail,
-                      iconData: Icons.email,
-                      textInputType: TextInputType.text,
-                      isEnable: isAuthPhone,
-                      onChanged: (value) {
-                        setState(() {
-                          valueEmail = value;
-                        });
-                      },
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    CustomTextFieldHint(
-                        title: 'Phone',
-                        value: valuePhone,
-                        iconData: Icons.phone,
-                        textInputType: TextInputType.phone,
-                        isEnable: !isAuthPhone,
-                        onChanged: (value) {
-                          setState(() {
-                            valuePhone = value;
-                          });
-                        }),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    TextFieldDropDownHint(
-                      hint: 'Gender(optional)',
-                      value: valueGender,
-                      iconData: Icons.keyboard_arrow_down,
-                      onChanged: () async {
-                        final data = await showCupertinoModalPopup(
-                          context: context,
-                          builder: (context) => CupertinoActionSheet(
-                              cancelButton: CupertinoActionSheetAction(
-                                isDefaultAction: true,
-                                child: const Text('Cancel', style: TextStyle(color: Colors.red),),
-
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                              actions: <Widget>[
-                                CupertinoActionSheetAction(
-                                    child: const Text('Male'), onPressed: () {
-                                  Navigator.pop(context, 'Male');
-                                }),
-                                CupertinoActionSheetAction(
-                                    child: const Text('Female'), onPressed: () {
-                                  Navigator.pop(context, 'Female');
-                                }),
-                              ]),
-                        );
-                        setState(() {
-                          if (data != null) {
-                            valueGender = data;
-                          }
-                        });
-                        print(data);
-                      },
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    TextFieldDropDownHint(
-                      hint: 'Birthday(option)',
-                      value: valueBirthday,
-                      iconData: Icons.calendar_today,
-                      onChanged: () {
-                        DatePicker.showDatePicker(context,
-                            showTitleActions: true,
-                            minTime: DateTime(1975, 1, 1),
-                            maxTime: DateTime.now(), onConfirm: (date) {
-                              print(DateTimeUtils().formatDateString(date));
+                              print(data);
+                            },
+                          ),
+                          SizedBox(
+                            height: 50,
+                          ),
+                          //full name
+                          CustomTextFieldHint(
+                              title: 'Full name',
+                              value: valueName,
+                              iconData: Icons.perm_identity,
+                              textInputType: TextInputType.text,
+                              textCapitalization: TextCapitalization.words,
+                              onChanged: (value) {
+                                setState(() {
+                                  valueName = value;
+                                });
+                              }),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          //email
+                          CustomTextFieldHint(
+                            title: isAuthPhone ? 'Email(optional)' : 'Email',
+                            value: valueEmail,
+                            iconData: Icons.email,
+                            textInputType: TextInputType.text,
+                            isEnable: isAuthPhone,
+                            onChanged: (value) {
                               setState(() {
-                                dateTimeBirthday = date;
-                                valueBirthday = DateTimeUtils().formatDateString(date);
+                                valueEmail = value;
                               });
-                            }, currentTime: dateTimeBirthday ?? DateTime.now(), locale: LocaleType.en);
-                      },
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    Container(
-                      height: 50,
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-                        child: ButtonCustom(
-                          title: 'Create',
-                          background: colorActive,
-                          onPressed: () {
-                            validateDataSubmit();
-                            final user = UserObj();
-                            user.id = widget.userObj.id;
-                            user.name = valueName;
-                            user.email = widget.userObj.email;
-                            user.phone = valuePhone;
-                            user.isDoctor = false;
-                            user.gender = valueGender.contains("Choose") ? "" : valueGender;
-                            user.birthday = valueBirthday.contains("Choose") ? 0 : dateTimeBirthday.millisecondsSinceEpoch;
-                            print('data submit');
-                            print(user.toString());
-                            if (_fileAvatar == null) {
-                              if (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) {
-                                user.avatar = widget.userObj.avatar;
-                                BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user));
-                              } else {
-                                BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user));
-                              }
-                            } else {
-                              BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user, file: _fileAvatar));
-                            }
-                          },
-                        ),
+                            },
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          //phone
+                          CustomTextFieldHint(
+                              title: isAuthPhone ? 'Phone' : 'Phone(optional)',
+                              value: valuePhone,
+                              iconData: Icons.phone,
+                              textInputType: TextInputType.phone,
+                              isEnable: !isAuthPhone,
+                              onChanged: (value) {
+                                setState(() {
+                                  valuePhone = value;
+                                });
+                              }),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          //gender
+                          TextFieldDropDownHint(
+                            hint: 'Gender(optional)',
+                            value: valueGender,
+                            iconData: Icons.keyboard_arrow_down,
+                            onChanged: () async {
+                              FocusScope.of(context).unfocus();
+                              final data = await showCupertinoModalPopup(
+                                context: context,
+                                builder: (context) => CupertinoActionSheet(
+                                    cancelButton: CupertinoActionSheetAction(
+                                      isDefaultAction: true,
+                                      child: const Text('Cancel', style: TextStyle(color: Colors.red),),
+
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                    actions: <Widget>[
+                                      CupertinoActionSheetAction(
+                                          child: const Text('Male'), onPressed: () {
+                                        Navigator.pop(context, 'Male');
+                                      }),
+                                      CupertinoActionSheetAction(
+                                          child: const Text('Female'), onPressed: () {
+                                        Navigator.pop(context, 'Female');
+                                      }),
+                                    ]),
+                              );
+                              setState(() {
+                                if (data != null) {
+                                  valueGender = data;
+                                }
+                              });
+                              print(data);
+                            },
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          //birthday
+                          TextFieldDropDownHint(
+                            hint: 'Birthday(optional)',
+                            value: valueBirthday,
+                            iconData: Icons.calendar_today,
+                            onChanged: () {
+                              FocusScope.of(context).unfocus();
+                              DatePicker.showDatePicker(context,
+                                  showTitleActions: true,
+                                  minTime: DateTime(1975, 1, 1),
+                                  maxTime: DateTime.now(), onConfirm: (date) {
+                                    print(DateTimeUtils().formatDateString(date));
+                                    setState(() {
+                                      dateTimeBirthday = date;
+                                      valueBirthday = DateTimeUtils().formatDateString(date);
+                                    });
+                                  }, currentTime: dateTimeBirthday ?? DateTime.now(), locale: LocaleType.en);
+                            },
+                          ),
+                        ],
                       ),
-                    )
-                  ],
-                ),
+                    ),
+                  ),
+                  //button
+                  Container(
+                    margin: EdgeInsets.only(top: paddingNavi, bottom: paddingNavi),
+                    height: heightButton,
+                    width: double.infinity,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                      child: ButtonCustom(
+                        title: 'Create',
+                        background: colorActive,
+                        onPressed: () {
+                          validateDataSubmit();
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -302,14 +295,41 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       toast('Please input name');
       return;
     }
-    if (valuePhone.length == 0) {
-      toast('Please input phone');
-      return;
+    if (isAuthPhone) {
+      if (valuePhone.length == 0) {
+        toast('Please input phone');
+        return;
+      }
+      final rs = phoneNumberValidator(valuePhone);
+      if (rs != null) {
+        toast(rs);
+        return;
+      }
     }
-    final rs = phoneNumberValidator(valuePhone);
-    if (rs != null) {
-      toast(rs);
-      return;
+
+    final user = UserObj();
+    user.id = widget.userObj.id;
+    user.name = valueName;
+    user.email = widget.userObj.email;
+    if (widget.userObj.isAuthFb) {
+      user.accessTokenFb = widget.userObj.accessTokenFb;
+      user.isAuthFb = true;
+    }
+    user.phone = valuePhone;
+    user.isDoctor = false;
+    user.isVerifyPhone = isAuthPhone;
+    user.gender = valueGender.contains("Choose") ? "" : valueGender;
+    user.birthday = valueBirthday.contains("Choose") ? 0 : dateTimeBirthday.millisecondsSinceEpoch;
+    print('data submit ${user.toString()}');
+    if (_fileAvatar == null) {
+      if (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) {
+        user.avatar = widget.userObj.avatar;
+        BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user));
+      } else {
+        BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user));
+      }
+    } else {
+      BlocProvider.of<UserBloc>(context).add(UserCreate(userObj: user, file: _fileAvatar));
     }
   }
 

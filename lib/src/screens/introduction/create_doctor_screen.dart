@@ -50,7 +50,6 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
   bool isHasAvatar = false;
   final heightSpace = 25.0;
   List<KeyValueObj> listMajor = [];
-  Covid19Dao _covid19dao = Covid19Dao();
   List<Asset> images = List<Asset>();
   bool isAuthPhone;
   @override
@@ -67,10 +66,10 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     valueExperience = 0;
     valueAbout = '';
     isAuthPhone = widget.userObj.phone != null && widget.userObj.phone.length > 0;
-    checkData();
+    fetchDataMajor();
   }
 
-  checkData() async {
+  fetchDataMajor() async {
     BlocProvider.of<MajorBloc>(context).add(FetchMajor());
   }
 
@@ -92,7 +91,6 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                 listener: (context, state) {
                   if (state is UserCreateLoading) {
                     LoadingHud(context).show();
-                    print('Create Loading');
                   } else if (state is UserCreateSuccess) {
                     LoadingHud(context).dismiss();
                     Navigator.pushReplacement(context, MaterialPageRoute(
@@ -100,7 +98,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                     ));
                   } else if (state is UserCreateError) {
                     LoadingHud(context).dismiss();
-                    print('Create error');
+                    DialogCus(context).show(message: 'Error create account');
                   }
                 },
               ),
@@ -110,7 +108,6 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                     showLoading(context);
                   } else if (state is LoadedSuccessMajor) {
                     final list = state.list;
-                    print('count: ${list.length}');
                     setState(() {
                       listMajor.addAll(list);
                     });
@@ -136,7 +133,6 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           ),
                           Material(
                             child: Container(
-
                               decoration: BoxDecoration(
                                 border: Border.all(color: Colors.blueAccent),
                                 borderRadius: BorderRadius.circular(_widthHeightAvatar / 2),
@@ -169,6 +165,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           FlatButton(
                             child: (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) || _fileAvatar != null ? Text('Edit avatar') : Text('Add avatar'),
                             onPressed: () async {
+                              FocusScope.of(context).unfocus();
                               final data = await showCupertinoModalPopup(
                                 context: context,
                                 builder: (context) => CupertinoActionSheet(
@@ -238,7 +235,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           ),
                           //phone
                           CustomTextFieldHint(
-                              title: 'Phone',
+                              title: isAuthPhone ? 'Phone' : 'Phone(optional)',
                               value: valuePhone,
                               textInputType: TextInputType.phone,
                               isEnable: !isAuthPhone,
@@ -256,6 +253,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                             hint: 'Gender(optional)',
                             iconData: Icons.keyboard_arrow_down,
                             onChanged: () async {
+                              FocusScope.of(context).unfocus();
                               final data = await showCupertinoModalPopup(
                                 context: context,
                                 builder: (context) => CupertinoActionSheet(
@@ -292,10 +290,11 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           ),
                           //birthday
                           TextFieldDropDownHint(
-                            hint: 'Birthday(option)',
+                            hint: 'Birthday(optional)',
                             value: valueBirthday,
                             iconData: Icons.calendar_today,
                             onChanged: () {
+                              FocusScope.of(context).unfocus();
                               DatePicker.showDatePicker(context,
                                   showTitleActions: true,
                                   minTime: DateTime(1975, 1, 1),
@@ -340,6 +339,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                             hint: 'Timeline',
                             iconData: Icons.calendar_today,
                             onChanged: () async {
+                              FocusScope.of(context).unfocus();
                               final data = await showCupertinoModalPopup(
                                 context: context,
                                 builder: (context) => CupertinoActionSheet(
@@ -382,6 +382,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                             hint: 'Major',
                             iconData: Icons.keyboard_arrow_down,
                             onChanged: () async {
+                              FocusScope.of(context).unfocus();
                               final count = await showDialog(
                                 context: context,
                                 builder: (context) {
@@ -402,7 +403,20 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                             },
                           ),
                           SizedBox(
-                            height: 20,
+                            height: heightSpace,
+                          ),
+                          //experience
+                          CustomTextFieldHint(
+                              title: 'Experience',
+                              hint: 'Year',
+                              textInputType: TextInputType.phone,
+                              onChanged: (value) {
+                                setState(() {
+                                  valueExperience = int.parse(value);
+                                });
+                              }),
+                          SizedBox(
+                            height: 25,
                           ),
                           //image certificate
                           Row(
@@ -422,6 +436,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                                   ),
                                 ),
                                 onTap: () async {
+                                  FocusScope.of(context).unfocus();
                                   final list = await loadAssets();
                                   setState(() {
                                     if (list.length > 0) {
@@ -438,19 +453,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                           images.length == 0
                               ? buildAddImage()
                               : buildImageCertificate(),
-                          SizedBox(
-                            height: heightSpace,
-                          ),
-                          //experience
-                          CustomTextFieldHint(
-                              title: 'Experiences(year)',
-                              hint: '0',
-                              textInputType: TextInputType.phone,
-                              onChanged: (value) {
-                                setState(() {
-                                  valueExperience = int.parse(value);
-                                });
-                              }),
+
                           SizedBox(
                             height: heightSpace,
                           ),
@@ -465,9 +468,6 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                                   valueAbout = value;
                                 });
                               }),
-                          SizedBox(
-                            height: 10,
-                          ),
 
                         ],
                       ),
@@ -502,15 +502,16 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
       toast('Please input name');
       return;
     }
-    if (valuePhone.length == 0) {
-      toast('Please input phone');
-      return;
-    }
-    print('phone $valuePhone');
-    final rs = phoneNumberValidator(valuePhone);
-    if (rs != null) {
-      toast(rs);
-      return;
+    if (isAuthPhone) {
+      if (valuePhone.length == 0) {
+        toast('Please input phone');
+        return;
+      }
+      final rs = phoneNumberValidator(valuePhone);
+      if (rs != null) {
+        toast(rs);
+        return;
+      }
     }
     if (valueAddress.contains('Choose')) {
       toast('Please choose address');
@@ -524,16 +525,12 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
       toast('Please choose major');
       return;
     }
-    if (images.length == 0) {
-      toast('Please choose image certificate');
-      return;
-    }
     if (valueExperience == 0) {
       toast('Please input experiences');
       return;
     }
-    if (valueAddress.length == 0) {
-      toast('Please input address');
+    if (images.length == 0) {
+      toast('Please choose image certificate');
       return;
     }
     final user = UserObj();
@@ -549,9 +546,13 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     user.yearExperience = valueExperience;
     user.about = valueAbout;
     user.isDoctor = true;
+    user.isVerifyPhone = isAuthPhone;
+    if (widget.userObj.isAuthFb) {
+      user.accessTokenFb = widget.userObj.accessTokenFb;
+      user.isAuthFb = true;
+    }
     user.imagesCertificate = [];
-    print('data submit');
-    print(user.toString());
+    print('data submit ${user.toString()}');
     if (_fileAvatar == null) {
       if (widget.userObj.avatar != null && widget.userObj.avatar.isNotEmpty) {
         user.avatar = widget.userObj.avatar;
@@ -582,6 +583,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
             child: Icon(Icons.add, size: 40,),
           ),
           onTap: () async {
+            FocusScope.of(context).unfocus();
             final list = await loadAssets();
             setState(() {
               if (list.length > 0) {
@@ -636,6 +638,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
                     ),
                   ),
                   onTap: () {
+                    FocusScope.of(context).unfocus();
                     setState(() {
                       images.removeAt(index);
                     });

@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="template_flutter"
+        android:label="Kin Health"
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <!-- Facebook Login configuration -->

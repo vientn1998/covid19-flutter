@@ -127,7 +127,9 @@ class _HomePageState extends State<HomePage> {
                       IconBox(
                         iconData: Icons.search,
                         onPressed: () async {
-                          final item = await Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade, child: SearchPage())) as CountryObj;
+                          final item = await Navigator.push(context, MaterialPageRoute(
+                            builder: (context) => SearchPage(),
+                          )) as CountryObj;
                           if (item != null) {
                             print('search return: ${item.countrySearch}');
                             setState(() {
@@ -609,10 +611,10 @@ class _HomePageState extends State<HomePage> {
                         newCase: data.newCases),
                     onTap: () async {
                       if (!isChooseCountry) {
-//                        await Navigator.push(context, MaterialPageRoute(
-//                          builder: (context) => NewCasePage(isNewCase: true,),
-//                        ));
-                      await Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade, child: NewCasePage(isNewCase: true)));
+                        await Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => NewCasePage(isNewCase: true,),
+                        ));
+//                      await Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade, child: NewCasePage(isNewCase: true)));
                         BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
                       }
                     },
@@ -658,7 +660,10 @@ class _HomePageState extends State<HomePage> {
                     child: widgetDeath(colorDeath, 'Deaths', data.totalDeaths,
                         newCase: data.newDeaths),
                     onTap: () async {
-                      await Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade, child: NewCasePage(isNewCase: false)));
+                      await Navigator.push(context, MaterialPageRoute(
+                        builder: (context) => NewCasePage(isNewCase: false,),
+                      ));
+                      //await Navigator.push(context, PageTransition(type: PageTransitionType.rightToLeftWithFade, child: NewCasePage(isNewCase: false)));
                       BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
                     },
                   ),

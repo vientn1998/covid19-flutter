@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:loading_hud/loading_hud.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
@@ -32,37 +33,6 @@ class UserRepository {
     return authResult.user;
   }
 
-  Future<dynamic> signInWithPhoneNumber(String phoneNumber) async {
-    String verificationId;
-    int forceResendToken;
-    final PhoneVerificationCompleted verified = (AuthCredential authResult) {
-      print('$authResult');
-      FirebaseAuth.instance.signInWithCredential(authResult);
-    };
-    final PhoneVerificationFailed verificationFailed =
-        (AuthException authException) {
-      print('AuthException ${authException.message}');
-      return authException;
-    };
-    final PhoneCodeSent smsSent = (String verId, [int forceResend]) {
-      print('was send code to my phone');
-      verificationId = verId;
-      forceResendToken = forceResend;
-      return KeyValueObj(verificationId: verId, forceResend: forceResend);
-    };
-
-    PhoneCodeAutoRetrievalTimeout autoTimeout = (String verId) {
-      print('autoTimeout');
-    };
-
-    await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        timeout: const Duration(seconds: 30),
-        verificationCompleted: verified,
-        verificationFailed: verificationFailed,
-        codeSent: smsSent,
-        codeAutoRetrievalTimeout: autoTimeout);
-  }
 
   Future<void> signOut() async {
     print('signOut');
@@ -71,7 +41,6 @@ class UserRepository {
 
   Future<bool> isSignedIn() async {
     final currentUser = await _firebaseAuth.currentUser();
-    print('isSignedIn');
     print(currentUser != null);
     return currentUser != null;
   }
@@ -101,6 +70,24 @@ class UserRepository {
         isExists = false;
       }
     });
+    return isExists;
+  }
+
+  Future<bool> checkPhoneExists(String phone) async {
+    bool isExists = false;
+    try {
+      await userCollection.where("phone", isEqualTo: phone).getDocuments().then((querySnapshot) {
+        if (querySnapshot != null && querySnapshot.documents != null && querySnapshot.documents.length > 0) {
+          print('count data ${querySnapshot.documents.length}');
+          isExists = true;
+        } else {
+          isExists = false;
+        }
+      });
+    } catch (error) {
+      isExists = false;
+    }
+
     return isExists;
   }
 

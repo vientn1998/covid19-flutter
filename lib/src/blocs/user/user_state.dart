@@ -22,6 +22,14 @@ class UserCheckExistsSuccess extends UserState {
   List<Object> get props => [isExist];
 }
 
+class UserCheckPhoneSuccess extends UserState {
+  bool isExist = false;
+  String phoneNumber = "";
+  UserCheckPhoneSuccess(this.isExist, this.phoneNumber);
+  @override
+  List<Object> get props => [isExist, this.phoneNumber];
+}
+
 class UserCheckExistsError extends UserState {}
 
 class UserCreateLoading extends UserState {}

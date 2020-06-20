@@ -92,7 +92,7 @@ class UserObj extends Equatable {
         timeline: snap.data['timeline'],
         yearExperience: snap.data['yearExperience'],
         isDoctor: snap.data['isDoctor'],
-      isVerifyPhone: snap.data['isVerifyPhone'],
+        isVerifyPhone: snap.data['isVerifyPhone'],
         location: LocationObj.fromJson(snap.data['location']),
         imagesCertificate: List.from(snap.data['imagesCertificate']),
         majors: snap.data['majors'].map<KeyValueObj>((item) {
@@ -165,5 +165,5 @@ class UserObj extends Equatable {
 
   @override
   List<Object> get props =>
-      [this.avatar, this.id, this.email, this.name, this.phone];
+      [this.avatar, this.id, this.email, this.name, this.phone, this.email, this.isVerifyPhone];
 }

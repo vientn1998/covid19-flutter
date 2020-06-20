@@ -27,6 +27,17 @@ class CheckUserExists extends UserEvent {
   @override
   List<Object> get props => [uuid];
 }
+
+class CheckPhoneExists extends UserEvent {
+
+  final String phone;
+
+  CheckPhoneExists({@required this.phone}) : assert(phone != null);
+  @override
+  List<Object> get props => [phone];
+}
+
+
 class GetDetailsUser extends UserEvent {
   GetDetailsUser();
 }

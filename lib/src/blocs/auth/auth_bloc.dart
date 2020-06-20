@@ -26,8 +26,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       yield* _mapGoogleSignToState();
     } else if (event is AuthLogoutGoogle) {
       userRepository.signOut();
-    } else if (event is AuthPhoneNumberPressed) {
-      yield* _mapPhoneLoginToState(event);
     }
   }
 
@@ -42,17 +40,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       print(userObj.toString());
       _userObj = userObj;
       yield Authenticated(userObj: userObj);
-    } else {
-      yield AuthenticateError();
-    }
-  }
-
-  Stream<AuthState> _mapPhoneLoginToState(AuthPhoneNumberPressed event) async* {
-    yield AuthLoading();
-    final data = await userRepository.signInWithPhoneNumber(event.phoneNumber);
-    print('_mapPhoneLoginToState $data');
-    if (data is KeyValueObj) {
-      yield SenCodeWasSuccessful(data);
     } else {
       yield AuthenticateError();
     }

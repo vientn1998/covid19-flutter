@@ -102,6 +102,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               ));
                         }
                       }
+                    } else if (state is UserCheckPhoneSuccess) {
+                      print('Phone exists: ${state.isExist}');
+                      if (state.isExist) {
+                        LoadingHud(context).dismiss();
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MainPage(),
+                            ));
+                      } else {
+                        verifyPhone(state.phoneNumber);
+                      }
                     } else if (state is UserCheckExistsError) {
                       print('UserCheckExistsError');
                       LoadingHud(context).dismiss();
@@ -268,7 +280,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     return;
                   }
                   LoadingHud(context).show();
-                  verifyPhone('+84$valuePhoneNumber');
+                  final phone = '0$valuePhoneNumber';
+                  print('phone number: $phone');
+                  BlocProvider.of<UserBloc>(context).add(CheckPhoneExists(phone: phone));
+
                   //BlocProvider.of<AuthBloc>(context).add(AuthPhoneNumberPressed('+84$valuePhoneNumber'));
                 },
               ),
@@ -399,7 +414,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> verifyPhone(phoneNo) async {
-    print('phone enter: $phoneNo');
+    final phone = '+84${valuePhoneNumber.substring(0)}';
+    print('phone verify $phone');
     setState(() {
       valuePhoneNumber = '';
     });
@@ -412,14 +428,14 @@ class _LoginScreenState extends State<LoginScreen> {
       print('${authException.message}');
       toast('${authException.message}');
     };
-    final phone = '0${phoneNo.substring(3)}';
+
     final PhoneCodeSent smsSent = (String verId, [int forceResend]) {
       this.verificationId = verId;
       setState(() {
         this.codeSent = true;
         LoadingHud(context).dismiss();
         Navigator.push(context, MaterialPageRoute(
-          builder: (context) => EnterOTPPage(phoneNumber: phone, verificationId: this.verificationId,),
+          builder: (context) => EnterOTPPage(phoneNumber: phoneNo, verificationId: this.verificationId,),
         ));
       });
     };
@@ -429,7 +445,7 @@ class _LoginScreenState extends State<LoginScreen> {
     };
 
     await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: phoneNo,
+        phoneNumber: phone,
         timeout: const Duration(seconds: 30),
         verificationCompleted: verified,
         verificationFailed: verificationFailed,

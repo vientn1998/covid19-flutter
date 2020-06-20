@@ -311,7 +311,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     user.id = widget.userObj.id;
     user.name = valueName;
     user.email = widget.userObj.email;
-    if (widget.userObj.isAuthFb) {
+    if (widget.userObj.isAuthFb != null && widget.userObj.isAuthFb) {
       user.accessTokenFb = widget.userObj.accessTokenFb;
       user.isAuthFb = true;
     }

@@ -547,7 +547,7 @@ class _CreateDoctorState extends State<CreateDoctorPage> {
     user.about = valueAbout;
     user.isDoctor = true;
     user.isVerifyPhone = isAuthPhone;
-    if (widget.userObj.isAuthFb) {
+    if (widget.userObj.isAuthFb != null && widget.userObj.isAuthFb) {
       user.accessTokenFb = widget.userObj.accessTokenFb;
       user.isAuthFb = true;
     }

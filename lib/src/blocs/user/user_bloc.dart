@@ -27,6 +27,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       yield* _mapCheckExistUserToState(event);
     } else if (event is CheckPhoneExists) {
       yield* _mapCheckExistPhoneToState(event);
+    } else if (event is GetDetailsUser) {
+      yield* _mapUserToState(event);
     }
   }
 
@@ -81,5 +83,14 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     print('is Phone Exists: $isExists');
     SharePreferences().saveString(SharePreferenceKey.phone, event.phone);
     yield UserCheckPhoneSuccess(isExists ?? false, event.phone);
+  }
+
+  Stream<UserState> _mapUserToState(GetDetailsUser event) async*{
+    final user = await userRepository.getUser(event.uuid);
+    if (user != null && user.id != null) {
+      yield GetDetailsSuccessfully(userObj: user);
+    } else {
+      yield GetDetailsError();
+    }
   }
 }

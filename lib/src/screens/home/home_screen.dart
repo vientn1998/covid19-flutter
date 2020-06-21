@@ -21,6 +21,7 @@ import 'package:template_flutter/src/services/permission_service.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/hex_color.dart';
+import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/utils/styles.dart';
 import 'package:template_flutter/src/widgets/icon.dart';
 import 'package:geolocator/geolocator.dart';
@@ -80,6 +81,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    SharePreferences().saveBool(SharePreferenceKey.isLogged, true);
+    print('main isLogged: true');
     super.initState();
     Timer(Duration(seconds: 1), () {
       checkPermission();

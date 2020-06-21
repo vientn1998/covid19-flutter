@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:loading_hud/loading_hud.dart';
@@ -43,21 +44,19 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     valuePhoneNumber = '';
     isEnableButtonPhone = false;
+    isKeyboardAppear = false;
     textEditingController = TextEditingController(text: valuePhoneNumber);
     super.initState();
-    KeyboardVisibilityNotification().addNewListener(
-      onChange: (bool visible) {
-        print('isKeyboardAppear : $visible');
-        setState(() {
-          isKeyboardAppear = visible;
-        });
-      },
-    );
+    KeyboardVisibility.onChange.listen((visible) {
+      print('isKeyboardAppear : $visible');
+      setState(() {
+        isKeyboardAppear = visible;
+      });
+    });
   }
 
   @override
-  Widget build(BuildContext context) => KeyboardDismisser(
-        gestures: [GestureType.onTap, GestureType.onPanUpdateDownDirection],
+  Widget build(BuildContext context) => KeyboardDismissOnTap(
         child: Scaffold(
           body: Center(
             child: MultiBlocListener(
@@ -67,7 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (state is UnAuthenticated ||
                     state is UnInitialized ||
                     state is AuthenticateError) {
-                    LoadingHud(context).dismiss();
                   } else if (state is Authenticated) {
                     BlocProvider.of<UserBloc>(context).add(CheckUserExists(uuid: state.userObj.id));
                   } else if (state is SenCodeWasSuccessful) {
@@ -86,7 +84,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     } else if (state is UserCheckExistsSuccess) {
                       print('UserCheckExistsSuccess ${state.isExist}');
                       LoadingHud(context).dismiss();
+                      final user = (BlocProvider.of<AuthBloc>(context).state as Authenticated).userObj;
                       if (state.isExist) {
+                        SharePreferences().saveString(SharePreferenceKey.uuid, user.id);
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -94,7 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             ));
                       } else {
                         if (BlocProvider.of<AuthBloc>(context).state is Authenticated){
-                          final user = (BlocProvider.of<AuthBloc>(context).state as Authenticated).userObj;
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
@@ -106,11 +105,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       print('Phone exists: ${state.isExist}');
                       if (state.isExist) {
                         LoadingHud(context).dismiss();
+                        SharePreferences().saveString(SharePreferenceKey.uuid, state.phoneNumber);
+                        Navigator.popUntil(context, (route) => route.isFirst);
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => MainPage(),
-                            ));
+                            )
+                        );
                       } else {
                         verifyPhone(state.phoneNumber);
                       }
@@ -165,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       children: <Widget>[
                                         InkWell(
                                           onTap: () async {
-                                            await facebookLogin.logOut();
+
                                           },
                                           child: Container(
                                             decoration: BoxDecoration(
@@ -476,7 +478,6 @@ class _LoginScreenState extends State<LoginScreen> {
           break;
         case FacebookLoginStatus.cancelledByUser:
           print('login fb cancelled by user');
-          DialogCus(context).show(message: 'Login fb cancelled by user');
           break;
         case FacebookLoginStatus.error:
           DialogCus(context).show(message: 'Login fb error');

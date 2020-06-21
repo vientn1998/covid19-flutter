@@ -93,7 +93,7 @@ class UserObj extends Equatable {
         yearExperience: snap.data['yearExperience'],
         isDoctor: snap.data['isDoctor'],
         isVerifyPhone: snap.data['isVerifyPhone'],
-        location: LocationObj.fromJson(snap.data['location']),
+        location: snap.data['location'] == null ? null : LocationObj.fromJson(snap.data['location']),
         imagesCertificate: List.from(snap.data['imagesCertificate']),
         majors: snap.data['majors'].map<KeyValueObj>((item) {
           return KeyValueObj.fromJson(item);

@@ -21,16 +21,21 @@ class UserRepository {
 
   Future<FirebaseUser> signWithGoogle() async {
     print('signWithGoogle');
-    final GoogleSignInAccount googleSignInAccount =
-    await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleSignInAuthentication =
-    await googleSignInAccount.authentication;
-    final AuthCredential authCredential = GoogleAuthProvider.getCredential(
-        idToken: googleSignInAuthentication.idToken,
-        accessToken: googleSignInAuthentication.accessToken);
-    final AuthResult authResult =
-    await _firebaseAuth.signInWithCredential(authCredential);
-    return authResult.user;
+    try{
+      final GoogleSignInAccount googleSignInAccount =
+      await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleSignInAuthentication =
+      await googleSignInAccount.authentication;
+      final AuthCredential authCredential = GoogleAuthProvider.getCredential(
+          idToken: googleSignInAuthentication.idToken,
+          accessToken: googleSignInAuthentication.accessToken);
+      final AuthResult authResult =
+      await _firebaseAuth.signInWithCredential(authCredential);
+      return authResult.user;
+    } catch (error) {
+      return null;
+    }
+
   }
 
 
@@ -91,10 +96,13 @@ class UserRepository {
     return isExists;
   }
 
-  Future<Stream<UserObj>> getUser(String id) async {
-    return userCollection.document(id).snapshots().map((document) {
-      return UserObj.fromSnapshot(document);
+  Future<UserObj> getUser(String id) async {
+    UserObj userObj;
+    await userCollection.document(id).get().then((documentSnapshot) {
+      print('documentSnapshot ${documentSnapshot.data}');
+      userObj = UserObj.fromSnapshot(documentSnapshot);
     });
+    return userObj;
   }
 
   Stream<List<UserObj>> getListUser() {

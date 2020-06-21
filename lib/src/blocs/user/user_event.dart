@@ -12,6 +12,9 @@ abstract class UserEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class UserInit extends UserEvent {
+}
+
 class UserCreate extends UserEvent {
   final UserObj userObj;
   final File file;
@@ -39,5 +42,6 @@ class CheckPhoneExists extends UserEvent {
 
 
 class GetDetailsUser extends UserEvent {
-  GetDetailsUser();
+  String uuid;
+  GetDetailsUser(this.uuid) : assert(uuid != null);
 }

@@ -1,8 +1,14 @@
+import 'dart:convert';
+
 import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/screens/doctor/doctor_screen.dart';
 import 'package:template_flutter/src/screens/map/map_screen.dart';
 import 'package:template_flutter/src/screens/profile/profile_screen.dart';
+import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/share_preferences.dart';
 
 import 'home/home_screen.dart';
 
@@ -13,19 +19,35 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    getUserDetails();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        top: false,
-        child: IndexedStack(
-          index: _selectedIndex,
-          children: <Widget>[
-            HomePage(),
-            MapPage(),
-            DoctorPage(),
-            ProfilePage(),
-          ],
+      body: BlocListener<UserBloc, UserState>(
+        listener: (context, state) {
+          if (state is GetDetailsError) {
+            print('Get user details: error');
+          } else if (state is GetDetailsSuccessfully) {
+            final user = jsonEncode(state.userObj);
+            SharePreferences().saveString(SharePreferenceKey.user, user);
+          }
+        },
+        child: SafeArea(
+          top: false,
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: <Widget>[
+              HomePage(),
+              MapPage(),
+              DoctorPage(),
+              ProfilePage(),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavyBar(
@@ -58,5 +80,10 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
     );
+  }
+
+  getUserDetails() async{
+    final uuid = await SharePreferences().getString(SharePreferenceKey.uuid) ?? '';
+    BlocProvider.of<UserBloc>(context).add(GetDetailsUser(uuid));
   }
 }

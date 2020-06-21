@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'define.dart';
@@ -23,6 +25,13 @@ class SharePreferences {
     print('save $key-$value');
   }
 
+  Future<dynamic> getObject(SharePreferenceKey key) async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    final str = _prefs.getString(key.toString());
+    print('get object:  $key-$str');
+    return jsonDecode(str);
+  }
+
   Future<bool> getBool(SharePreferenceKey key) async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     bool boolValue = _prefs.getBool(key.toString());
@@ -30,5 +39,11 @@ class SharePreferences {
     return boolValue;
   }
 
+  Future<String> getString(SharePreferenceKey key) async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    final value = _prefs.getString(key.toString());
+    print('getString $key-$value');
+    return value;
+  }
 
 }

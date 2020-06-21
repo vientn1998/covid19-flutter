@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:template_flutter/src/blocs/auth/bloc.dart';
 import 'package:template_flutter/src/blocs/local_search/bloc.dart';
+import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/repositories/user_repository.dart';
 import 'package:template_flutter/src/screens/introduction/introduction_screen.dart';
 import 'package:template_flutter/src/screens/main_screen.dart';
@@ -36,13 +38,14 @@ class _SplashPageState extends State<SplashPage> {
           builder: (context) => OnBoardingPage(),
         ));
       } else {
-        final isLogin = await widget.userRepository.isSignedIn();
-        print('isLogin $isLogin');
-        if (isLogin) {
+        final isLogged = await SharePreferences().getBool(SharePreferenceKey.isLogged);
+        print('was login:  $isLogged');
+        if (isLogged ?? false) {
           Navigator.pushReplacement(context, MaterialPageRoute(
             builder: (context) => MainPage(),
           ));
         } else {
+          BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
           Navigator.pushReplacement(context, MaterialPageRoute(
             builder: (context) => LoginScreen(),
           ));
@@ -64,30 +67,30 @@ class _SplashPageState extends State<SplashPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: HexColor("#2979FF"),
-        child: Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            Align(
-              alignment: Alignment(0, 0),
-              child:
-              Image(image: AssetImage('assets/images/ic_logo.png'),
-                height: 100,
-                width: 100,),
-            ),
-            Align(
-              alignment: Alignment(0, 0.9),
-              child: Container(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
+          color: HexColor("#2979FF"),
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              Align(
+                alignment: Alignment(0, 0),
+                child:
+                Image(image: AssetImage('assets/images/ic_logo.png'),
+                  height: 100,
+                  width: 100,),
               ),
-            )
-          ],
+              Align(
+                alignment: Alignment(0, 0.9),
+                child: Container(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
-      ),
     );
   }
 }

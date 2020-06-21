@@ -6,6 +6,9 @@ abstract class AuthEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class AuthGoogleInit extends AuthEvent {
+  AuthGoogleInit();
+}
 
 class AuthGooglePressed extends AuthEvent {
   AuthGooglePressed();

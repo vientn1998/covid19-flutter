@@ -15,10 +15,12 @@ const double heightButton = 50;
 
 
 enum SharePreferenceKey {
-  isLogin,
+  isLogged,
   isApproveSuvery,
   isIntroduce,
   uuid,
+  isBackChooseRole,
+  user,
   phone,
 }
 

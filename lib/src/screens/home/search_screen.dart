@@ -20,11 +20,12 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    if (BlocProvider.of<SearchBloc>(context).listCountryLocal.length > 0) {
-      BlocProvider.of<SearchBloc>(context).add(LoadingSearch());
-    } else {
-      BlocProvider.of<SearchBloc>(context).add(LoadingSearchFile(context: context));
-    }
+    BlocProvider.of<SearchBloc>(context).add(LoadingSearchFile(context: context));
+//    if (BlocProvider.of<SearchBloc>(context).listCountryLocal.length > 0) {
+//      BlocProvider.of<SearchBloc>(context).add(LoadingSearch());
+//    } else {
+//      BlocProvider.of<SearchBloc>(context).add(LoadingSearchFile(context: context));
+//    }
   }
 
   @override

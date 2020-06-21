@@ -35,7 +35,8 @@ dependencies:
   #loading_hub
   loading_hud: ^0.2.0
   #detech when keyboard visibility or dismiss
-  keyboard_visibility: 0.5.5
+  keyboard_visibility: 0.5.6
+  flutter_keyboard_visibility: ^3.2.0
   #keyborad dismiss when click everywhere
   keyboard_dismisser: ^1.0.2
   #share_preferences save data local

@@ -31,7 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Stream<AuthState> _mapGoogleSignToState() async* {
     final user = await userRepository.signWithGoogle();
-    if (user.uid != null && user.uid.isNotEmpty) {
+    if (user != null && user.uid != null && user.uid.isNotEmpty) {
       UserObj userObj = UserObj(
           id: user.uid,
           name: user.displayName,

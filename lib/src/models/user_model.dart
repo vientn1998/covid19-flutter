@@ -16,7 +16,7 @@ class UserObj extends Equatable {
   String timeline = "";
   LocationObj location;
   int yearExperience = 0;
-  List<KeyValueObj> majors;
+  List<KeyValueObj> majors = [];
   List<String> imagesCertificate = [];
   String about = "";
 
@@ -81,23 +81,23 @@ class UserObj extends Equatable {
     return UserObj(
         id: snap.data['id'],
         name: snap.data['name'],
-        email: snap.data['email'],
-        phone: snap.data['phone'],
-        gender: snap.data['gender'],
-        birthday: snap.data['birthday'],
-        avatar: snap.data['avatar'],
-        about: snap.data['about'],
-        accessTokenFb: snap.data['accessTokenFb'],
-        isAuthFb: snap.data['isAuthFb'],
-        timeline: snap.data['timeline'],
-        yearExperience: snap.data['yearExperience'],
-        isDoctor: snap.data['isDoctor'],
-        isVerifyPhone: snap.data['isVerifyPhone'],
+        email: snap.data['email'] ?? '',
+        phone: snap.data['phone'] ?? '',
+        gender: snap.data['gender'] ?? '',
+        birthday: snap.data['birthday'] ?? 0,
+        avatar: snap.data['avatar'] ?? '',
+        about: snap.data['about'] ?? '',
+        accessTokenFb: snap.data['accessTokenFb'] ?? '',
+        isAuthFb: snap.data['isAuthFb'] ?? false,
+        timeline: snap.data['timeline'] ?? '',
+        yearExperience: snap.data['yearExperience'] ?? 0,
+        isDoctor: snap.data['isDoctor'] ?? false,
+        isVerifyPhone: snap.data['isVerifyPhone'] ?? false,
         location: snap.data['location'] == null ? null : LocationObj.fromJson(snap.data['location']),
-        imagesCertificate: List.from(snap.data['imagesCertificate']),
-        majors: snap.data['majors'].map<KeyValueObj>((item) {
+        imagesCertificate: snap.data['imagesCertificate'] != null ? List.from(snap.data['imagesCertificate']) : [],
+        majors: snap.data['majors'] != null ? snap.data['majors'].map<KeyValueObj>((item) {
           return KeyValueObj.fromJson(item);
-        }),
+        }) : [],
     );
 
   }

@@ -74,7 +74,7 @@ class _MainPageState extends State<MainPage> {
           ),
           BottomNavyBarItem(
               icon: Icon(Icons.more_horiz),
-              title: Text('Settings'),
+              title: Text('User'),
               activeColor: Colors.purpleAccent
           ),
         ],

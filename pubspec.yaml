@@ -86,6 +86,8 @@ dependencies:
   multi_image_picker: ^4.6.7
   #pin code
   pin_code_fields: ^3.1.2
+  # font awesome
+  font_awesome_flutter: ^8.8.1
 
 dev_dependencies:
   flutter_test:

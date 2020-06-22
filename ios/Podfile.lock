@@ -274,6 +274,8 @@ PODS:
     - FBSDKCoreKit (~> 5.5)
     - FBSDKLoginKit (~> 5.5)
     - Flutter
+  - flutter_keyboard_visibility (0.0.1):
+    - Flutter
   - flutter_plugin_android_lifecycle (0.0.1):
     - Flutter
   - fluttertoast (0.0.2):
@@ -401,6 +403,7 @@ DEPENDENCIES:
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
   - flutter_facebook_login (from `.symlinks/plugins/flutter_facebook_login/ios`)
+  - flutter_keyboard_visibility (from `.symlinks/plugins/flutter_keyboard_visibility/ios`)
   - flutter_plugin_android_lifecycle (from `.symlinks/plugins/flutter_plugin_android_lifecycle/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - geolocator (from `.symlinks/plugins/geolocator/ios`)
@@ -478,6 +481,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_facebook_login:
     :path: ".symlinks/plugins/flutter_facebook_login/ios"
+  flutter_keyboard_visibility:
+    :path: ".symlinks/plugins/flutter_keyboard_visibility/ios"
   flutter_plugin_android_lifecycle:
     :path: ".symlinks/plugins/flutter_plugin_android_lifecycle/ios"
   fluttertoast:
@@ -546,6 +551,7 @@ SPEC CHECKSUMS:
   FirebaseStorage: f4f39ae834a7145963b913f54e2f24a9db1d8fac
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_facebook_login: cfb5659f686b1c575ef205c6b6fd20db9679d3c4
+  flutter_keyboard_visibility: 0339d06371254c3eb25eeb90ba8d17dca8f9c069
   flutter_plugin_android_lifecycle: dc0b544e129eebb77a6bfb1239d4d1c673a60a35
   fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a

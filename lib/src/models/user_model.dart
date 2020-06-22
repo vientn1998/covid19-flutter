@@ -79,7 +79,7 @@ class UserObj extends Equatable {
 
   static UserObj fromSnapshot(DocumentSnapshot snap) {
     return UserObj(
-        id: snap.data['id'],
+        id: snap.data['id'] ?? '',
         name: snap.data['name'],
         email: snap.data['email'] ?? '',
         phone: snap.data['phone'] ?? '',

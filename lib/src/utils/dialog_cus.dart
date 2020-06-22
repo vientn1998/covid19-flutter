@@ -26,6 +26,30 @@ class DialogCus {
       },
     );
   }
+
+  Future<void> showDialogs({@required String message,bool isDismiss = false ,
+    String titleLef,String titleRight, Function funcLeft, Function funRight}) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: isDismiss, // user must tap button!
+      builder: (BuildContext context) {
+        return CupertinoAlertDialog(
+          title: Text('Covid App'),
+          content: Text(message, style: TextStyle(fontSize: 16),),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              child: Text(titleLef),
+              onPressed: funcLeft == null ? () => Navigator.pop(context) : funcLeft,
+            ),
+            CupertinoDialogAction(
+              child: Text(titleRight),
+              onPressed: funRight == null ? () => Navigator.pop(context) : funRight,
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 toast(String message,{ToastGravity gravity = ToastGravity.CENTER}) {

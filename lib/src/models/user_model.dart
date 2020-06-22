@@ -57,6 +57,15 @@ class UserObj extends Equatable {
   }
 
   static UserObj fromJson(Map<String, Object> json) {
+    List<KeyValueObj> list = [];
+    if (json["majors"] != null) {
+      var ls = json["majors"] as List;
+      list.addAll(ls.map((item) => KeyValueObj.fromJson(item)).toList());
+    }
+    List<String> listCertificate = [];
+    if (json["imagesCertificate"] != null) {
+      listCertificate.addAll(List<String>.from(json["imagesCertificate"]));
+    }
     return UserObj(
       id: json["id"] as String,
       name: json["name"] as String,
@@ -72,12 +81,17 @@ class UserObj extends Equatable {
       isDoctor: json["isDoctor"] as bool,
       isVerifyPhone: json["isVerifyPhone"] as bool,
       isAuthFb: json["isAuthFb"] as bool,
-      majors: json["majors"] as List<KeyValueObj>,
-      imagesCertificate: json["imagesCertificate"] as List<String>,
+      majors: list,
+      imagesCertificate: listCertificate,
     );
   }
 
   static UserObj fromSnapshot(DocumentSnapshot snap) {
+    List<KeyValueObj> list = [];
+    if (snap.data["majors"] != null) {
+        var ls = snap.data["majors"] as List;
+        list.addAll(ls.map((item) => KeyValueObj.fromJson(item)).toList());
+    }
     return UserObj(
         id: snap.data['id'] ?? '',
         name: snap.data['name'],
@@ -95,9 +109,7 @@ class UserObj extends Equatable {
         isVerifyPhone: snap.data['isVerifyPhone'] ?? false,
         location: snap.data['location'] == null ? null : LocationObj.fromJson(snap.data['location']),
         imagesCertificate: snap.data['imagesCertificate'] != null ? List.from(snap.data['imagesCertificate']) : [],
-        majors: snap.data['majors'] != null ? snap.data['majors'].map<KeyValueObj>((item) {
-          return KeyValueObj.fromJson(item);
-        }) : [],
+        majors: list,
     );
 
   }

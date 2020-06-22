@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
@@ -24,16 +25,14 @@ class _ProfilePageState extends State<ProfilePage> {
   static const double sizeIcon = 22.0;
   @override
   void initState() {
-
     super.initState();
     getUser();
   }
 
   getUser() async {
-    final data = userObj = (await SharePreferences().getObject(SharePreferenceKey.user)) as UserObj;
+    final data = UserObj.fromJson((await SharePreferences().getObject(SharePreferenceKey.user)));
     setState(() {
       userObj = data;
-      name = userObj.name;
     });
   }
 
@@ -80,7 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(name == null ? '' : name, style: kTitleWelcome,),
+              Text(userObj.name != null ? userObj.name : 'N/a', style: kTitleWelcome,),
               SizedBox(height: 10,),
               Text('Edit profile', style: TextStyle(fontSize: 14, color: textColor, decoration: TextDecoration.underline),),
             ],
@@ -95,9 +94,8 @@ class _ProfilePageState extends State<ProfilePage> {
               height: heightAvatar,
               width: heightAvatar,
               child: Material(
-                child: CircleAvatar(
-                  child: FaIcon(FontAwesomeIcons.user),
-                  backgroundColor: Colors.white,
+                child: ClipOval(
+                  child: _buildImageAvatar(),
                 ),
                 elevation: 2,
                 borderRadius: BorderRadius.circular(heightAvatar/2),
@@ -109,6 +107,19 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       ),
     );
+  }
+
+  _buildImageAvatar() {
+    if (userObj.avatar != null) {
+      return CachedNetworkImage(
+        imageUrl: userObj.avatar,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => CircularProgressIndicator(),
+        errorWidget: (context, url, error) => FaIcon(FontAwesomeIcons.user),
+      );
+    } else {
+      FaIcon(FontAwesomeIcons.user);
+    }
   }
 
   _buildSection(Widget widget) {

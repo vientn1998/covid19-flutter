@@ -4,8 +4,9 @@ import 'package:template_flutter/src/utils/define.dart';
 
 class SearchCusWidget extends StatefulWidget {
   String hint;
+  bool isHiddenClear, isFocus;
   Function(String) onChange;
-  SearchCusWidget({this.onChange, this.hint});
+  SearchCusWidget({this.onChange, this.hint, this.isHiddenClear = true, this.isFocus = true});
   @override
   _SearchCusWidgetState createState() => _SearchCusWidgetState();
 }
@@ -19,8 +20,8 @@ class _SearchCusWidgetState extends State<SearchCusWidget> {
     return Container(
       margin: EdgeInsets.fromLTRB(paddingNavi, paddingNavi, paddingNavi, 0),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: borderColor
+          borderRadius: BorderRadius.circular(8),
+          color: backgroundTextInput
       ),
       child: Row(
         mainAxisSize: MainAxisSize.max,
@@ -33,7 +34,7 @@ class _SearchCusWidgetState extends State<SearchCusWidget> {
               hintText: widget.hint,
               border: InputBorder.none,
             ),
-            autofocus: true,
+            autofocus: widget.isFocus,
             textCapitalization: TextCapitalization.words,
             autocorrect: false,
             textInputAction: TextInputAction.search,
@@ -43,7 +44,7 @@ class _SearchCusWidgetState extends State<SearchCusWidget> {
 
             },
           ),),
-          InkWell(
+          !widget.isHiddenClear ? InkWell(
             child: Container(
               height: 24,
               width: 24,
@@ -56,7 +57,7 @@ class _SearchCusWidgetState extends State<SearchCusWidget> {
             onTap: () {
               print('clear search');
             },
-          ),
+          ) : Container(),
           SizedBox(width: 10,),
         ],
       ),

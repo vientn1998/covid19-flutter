@@ -87,6 +87,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
 
   Stream<UserState> _mapUserToState(GetDetailsUser event) async*{
     final user = await userRepository.getUser(event.uuid);
+    print('_mapUserToState $user');
     if (user != null && user.id != null) {
       yield GetDetailsSuccessfully(userObj: user);
     } else {

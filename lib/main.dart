@@ -7,6 +7,7 @@ import 'package:template_flutter/src/blocs/auth/auth_state.dart';
 import 'package:template_flutter/src/blocs/common/bloc.dart';
 import 'package:template_flutter/src/blocs/covid19/bloc.dart';
 import 'package:template_flutter/src/blocs/death/bloc.dart';
+import 'package:template_flutter/src/blocs/doctor/doctor_bloc.dart';
 import 'package:template_flutter/src/blocs/local_search/bloc.dart';
 import 'package:template_flutter/src/blocs/major/bloc.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
@@ -53,6 +54,9 @@ import 'src/screens/introduction/introduction_screen.dart';
           ),
           BlocProvider<UserBloc>(
             create: (context) => UserBloc(userRepository: userRepository),
+          ),
+          BlocProvider<DoctorBloc>(
+            create: (context) => DoctorBloc(userRepository: userRepository),
           ),
           BlocProvider<MajorBloc>(
             create: (context) =>

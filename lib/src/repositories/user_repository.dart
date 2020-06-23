@@ -105,6 +105,22 @@ class UserRepository {
     return userObj;
   }
 
+  //get list doctor
+  Future<List<UserObj>> getListDoctor() async{
+    List<UserObj> list = [];
+    try{
+      await userCollection.where("isDoctor", isEqualTo: true).getDocuments().then((querySnapshot){
+        print('querySnapshot : ${querySnapshot.documents.length}');
+        querySnapshot.documents.forEach((documentSnapshot) {
+          list.add(UserObj.fromSnapshot(documentSnapshot));
+        });
+      });
+    } catch (error) {
+      print('error getListDoctor : $error');
+    }
+    return list;
+  }
+
   Stream<List<UserObj>> getListUser() {
     return userCollection.snapshots().map((snapshot) {
       return snapshot.documents

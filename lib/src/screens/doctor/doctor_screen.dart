@@ -1,7 +1,12 @@
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:template_flutter/src/blocs/doctor/doctor_bloc.dart';
+import 'package:template_flutter/src/blocs/doctor/doctor_event.dart';
+import 'package:template_flutter/src/blocs/doctor/doctor_state.dart';
+import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/hex_color.dart';
@@ -15,6 +20,13 @@ class DoctorPage extends StatefulWidget {
 }
 
 class _DoctorPageState extends State<DoctorPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<DoctorBloc>(context).add(FetchListDoctor());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -251,8 +263,24 @@ class _DoctorPageState extends State<DoctorPage> {
                   ),
                 ),
                 SizedBox(height: 15,),
-                _buildTopDoctor(),
-                SizedBox(height: 50,),
+                BlocBuilder<DoctorBloc, DoctorState>(
+                    builder: (context, state) {
+                      if (state is LoadingFetchDoctor) {
+                        print('LoadingFetchDoctor');
+                        return Container();
+                      }
+                      if (state is LoadErrorFetchDoctor) {
+                        print('LoadErrorFetchDoctor');
+                        return Container();
+                      }
+                      if (state is LoadSuccessFetchDoctor) {
+                        final list = state.list;
+                        print('LoadSuccessFetchDoctor ${list.length}');
+                        return Container();
+                      }
+                      return Container();
+                    }
+                ),
                 SizedBox(height: 50,),
               ],
             ),
@@ -293,7 +321,7 @@ class _DoctorPageState extends State<DoctorPage> {
     );
   }
 
-  _buildTopDoctor() {
+  _buildTopDoctor(UserObj item) {
     return Container(
       margin: EdgeInsets.only(right: paddingNavi, left: paddingNavi),
       decoration: BoxDecoration(

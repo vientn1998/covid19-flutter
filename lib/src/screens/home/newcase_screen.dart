@@ -72,7 +72,7 @@ class _NewCasePageState extends State<NewCasePage> {
                         hintText: "Search country name...",
                         border: InputBorder.none,
                       ),
-                      autofocus: true,
+//                      autofocus: true,
                       textCapitalization: TextCapitalization.words,
                       autocorrect: false,
                       textInputAction: TextInputAction.search,

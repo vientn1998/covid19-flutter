@@ -326,13 +326,11 @@ class _HomePageState extends State<HomePage> {
     if (valueMin > 999) {
       dataSortByDeath.asMap().forEach((index, value) {
         value.totalDeaths = value.totalDeaths ~/ 1000;
-        print('result: ${value.totalDeaths}');
       });
     }
     data.forEach((element) {
       element.percent = element.totalDeaths / valueMax * data.length;
       element.date = element.date.split(" ")[1];
-      print(element.date);
     });
     data = data.reversed.toList();
     List<FlSpot> listFLSpot = [];

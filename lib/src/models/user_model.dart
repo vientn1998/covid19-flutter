@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:template_flutter/src/models/key_value_model.dart';
 import 'package:template_flutter/src/models/location_model.dart';
+import 'package:template_flutter/src/services/permission_service.dart';
 
 class UserObj extends Equatable {
   String id = "";
@@ -165,6 +166,18 @@ class UserObj extends Equatable {
       };
     }
 
+  }
+
+  String getNameMajor() {
+    if (majors.length == 1) {
+      return majors[0].value;
+    } else {
+      String result = "";
+      majors.forEach((element) {
+        result += element.value + ", ";
+      });
+      return result.substring(0, result.length - 2) + ".";
+    }
   }
 
   @override

@@ -22,7 +22,7 @@ class _ProfilePageState extends State<ProfilePage> {
   UserObj userObj = UserObj();
   String name;
   static const double heightPadding = 15.0;
-  static const double sizeIcon = 22.0;
+  static const double sizeIcon = 18.0;
   @override
   void initState() {
     super.initState();
@@ -195,11 +195,21 @@ class _ProfilePageState extends State<ProfilePage> {
     return Material(
       child: InkWell(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(heightPadding, heightPadding, 10, heightPadding),
+          padding: const EdgeInsets.fromLTRB(heightPadding, 10, 10, 10),
           child: Row(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              icon,
+              Container(
+                child: Center(
+                  child: icon,
+                ),
+                height: 35,
+                width: 35,
+                decoration: BoxDecoration(
+                  color: Colors.lightBlueAccent.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               SizedBox(width: heightPadding,),
               Text(title, style: TextStyle(fontSize: 16, color: Colors.black87),),
               Spacer(),
@@ -218,7 +228,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   logout() async {
     BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
-    SharePreferences().saveBool(SharePreferenceKey.isLogged, false);
+    await SharePreferences().saveBool(SharePreferenceKey.isLogged, false);
     await FacebookLogin().logOut();
     Navigator.pushReplacement(context, MaterialPageRoute(
       builder: (context) => LoginScreen(),

@@ -34,7 +34,7 @@ class Covid19Bloc extends Bloc<Covid19Event, Covid19State> {
       FetchAllCountryNewCase event) async* {
     yield Covid19LoadingNewCase();
     try {
-      if (event.isNewCase) {
+      if (event.isNewCase != null && event.isNewCase) {
         final list = listData
             .where((data) => ((data.newCases.trim().isNotEmpty &&
                 !data.country.trim().contains("World"))))

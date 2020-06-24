@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
+import 'package:template_flutter/src/models/key_value_model.dart';
+import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
+import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/dialog_cus.dart';
+import 'package:template_flutter/src/utils/size_config.dart';
+import 'package:template_flutter/src/utils/styles.dart';
+import 'package:template_flutter/src/widgets/button.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -26,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
   DateTime _currentDate2 = DateTime(2020, 6, 23);
   String _currentMonth = '';
   DateTime _targetDateTime = DateTime(2020, 6, 27);
-
+  KeyValueObj timeSelected;
 //  List<DateTime> _markedDate = [DateTime(2018, 9, 20), DateTime(2018, 10, 11)];
   static Widget _eventIcon = new Container(
     decoration: new BoxDecoration(
@@ -68,10 +75,19 @@ class _MyHomePageState extends State<MyHomePage> {
   );
 
   CalendarCarousel _calendarCarousel, _calendarCarouselNoHeader;
-
+  List<KeyValueObj> listData = [
+    KeyValueObj(key: '1', value: '07:00 - 08:00'),
+    KeyValueObj(key: '2', value: '08:00 - 09:00'),
+    KeyValueObj(key: '3', value: '09:00 - 10:00'),
+    KeyValueObj(key: '4', value: '10:00 - 11:00'),
+    KeyValueObj(key: '5', value: '11:00 - 12:00'),
+    KeyValueObj(key: '6', value: '13:00 - 14:00'),
+    KeyValueObj(key: '7', value: '14:00 - 15:00'),
+    KeyValueObj(key: '8', value: '15:00 - 16:00'),
+    KeyValueObj(key: '9', value: '16:00 - 17:00'),
+  ];
   @override
   void initState() {
-    /// Add more events to _markedDateMap EventList
     _markedDateMap.add(
         new DateTime(2020, 6, 27),
         new Event(
@@ -110,46 +126,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    /// Example with custom icon
-    _calendarCarousel = CalendarCarousel<Event>(
-      onDayPressed: (DateTime date, List<Event> events) {
-        this.setState(() => _currentDate = date);
-        events.forEach((event) => print(event.title));
-      },
-      weekendTextStyle: TextStyle(
-        color: Colors.red,
-      ),
-      thisMonthDayBorderColor: Colors.grey,
-//          weekDays: null, /// for pass null when you do not want to render weekDays
-      headerText: 'Custom Header',
-      weekFormat: true,
-      markedDatesMap: _markedDateMap,
-      height: 100.0,
-      selectedDateTime: _currentDate2,
-      showIconBehindDayText: true,
-//          daysHaveCircularBorder: false, /// null for not rendering any border, true for circular border, false for rectangular border
-      customGridViewPhysics: NeverScrollableScrollPhysics(),
-      markedDateShowIcon: true,
-      markedDateIconMaxShown: 2,
-      selectedDayTextStyle: TextStyle(
-        color: Colors.yellow,
-      ),
-      todayTextStyle: TextStyle(
-        color: Colors.blue,
-      ),
-      markedDateIconBuilder: (event) {
-        return event.icon;
-      },
-      minSelectedDate: _currentDate.subtract(Duration(days: 360)),
-      maxSelectedDate: _currentDate.add(Duration(days: 360)),
-      todayButtonColor: Colors.transparent,
-      todayBorderColor: Colors.green,
-      markedDateMoreShowTotal:
-      true, // null for not showing hidden events indicator
-//          markedDateIconMargin: 9,
-//          markedDateIconOffset: 3,
-    );
-
     _calendarCarouselNoHeader = CalendarCarousel<Event>(
       todayBorderColor: Colors.black54,
       todayTextStyle: TextStyle(
@@ -165,15 +141,19 @@ class _MyHomePageState extends State<MyHomePage> {
           fontWeight: FontWeight.w500,
           fontSize: 15
       ),
-//      thisMonthDayBorderColor: Colors.grey,
       weekFormat: false,
-      markedDatesMap: _markedDateMap,
+//      markedDatesMap: _markedDateMap,
       height: 450.0,
       customGridViewPhysics: NeverScrollableScrollPhysics(),
       minSelectedDate: _currentDate.subtract(Duration(days: 1)),
       maxSelectedDate: _currentDate.add(Duration(days: 30)),
-      onDayPressed: (day,listEvent ) {
-        print(listEvent);
+      onDayPressed: (day,listEvent ) async {
+        final time = await showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (context) {
+              return MyDialogCreateSchedule(day,timeSelected,listData,'');
+            }) as KeyValueObj;
       },
       daysTextStyle: TextStyle(
         color: Colors.blue,
@@ -215,4 +195,334 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ));
   }
+
+
 }
+
+class MyDialogCreateSchedule extends StatefulWidget {
+
+  final DateTime dateTime;
+  KeyValueObj timeSelected;
+  List<KeyValueObj> listData;
+  String note;
+  MyDialogCreateSchedule(this.dateTime, this.timeSelected, this.listData, this.note);
+
+  @override
+  _MyDialogCreateScheduleState createState() => _MyDialogCreateScheduleState();
+}
+
+class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
+
+  String note;
+  TextEditingController textEditingController;
+
+  @override
+  void initState() {
+    textEditingController = TextEditingController();
+    super.initState();
+  }
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12.0))),
+      contentPadding: EdgeInsets.only(top: 0.0),
+      elevation: 1,
+      content: Container(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                SizedBox(width: 35,),
+                Expanded(
+                  child: Text('Schedule', style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: textColor
+                  ), textAlign: TextAlign.center,),
+                ),
+                IconButton(
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(paddingDefault, 0, paddingDefault, 0),
+              child: Row(
+                children: <Widget>[
+                  Text('Date:', style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                  ),),
+                  SizedBox(width: heightSpaceSmall,),
+                  Text(DateTimeUtils().formatDateString(widget.dateTime), style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),)
+                ],
+              ),
+            ),
+            SizedBox(height: heightSpaceNormal,),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(paddingDefault, 0, paddingDefault, 0),
+              child: Row(
+                children: <Widget>[
+                  Text('Time:', style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                  ),),
+                  SizedBox(width: heightSpaceSmall,),
+                  Expanded(
+                    child: InkWell(
+                      child: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                            color: backgroundSearch,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(width: 1, color: backgroundTextInput)
+                        ),
+                        child: Row(
+                          children: <Widget>[
+                            SizedBox(width: 6,),
+                            Text(widget.timeSelected != null ? widget.timeSelected.value : 'Choose time', style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),),
+                            Spacer(),
+                            Icon(Icons.arrow_drop_down, color: colorIcon,)
+                          ],
+                        ),
+                      ),
+                      onTap: () async {
+                        final time = await showDialog(
+                          barrierDismissible: false,
+                            context: context,
+                            builder: (context) {
+                              return MyDialogChooseTimeSchedule(widget.listData, widget.timeSelected);
+                            }) as KeyValueObj;
+                        print('time: $time');
+                        setState(() {
+                          widget.timeSelected = time;
+                        });
+                      },
+                    ),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(height: heightSpaceNormal,),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(paddingDefault, 0, paddingDefault, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Note:', style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                  ),),
+                  SizedBox(width: heightSpaceSmall,),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: backgroundSearch,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(width: 1, color: backgroundTextInput)
+                      ),
+                      child: TextField(
+                        maxLines: 3,
+                        minLines: 3,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        controller: textEditingController,
+                        onChanged: (value) {
+                          print(value);
+                          setState(() {
+                            note = value;
+                          });
+                        },
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(horizontal: 7),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(height:5,),
+            Container(
+              margin: EdgeInsets.all(paddingDefault),
+              height: heightButton,
+              width: double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                child: ButtonCustom(
+                  title: 'Create',
+                  background: colorActive,
+                  onPressed: () async {
+                    print(widget.dateTime);
+                    print(widget.timeSelected);
+                    print(note);
+                    FocusScope.of(context).unfocus();
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+class MyDialogChooseTimeSchedule extends StatefulWidget {
+  List<KeyValueObj> listData;
+  KeyValueObj itemSelected;
+  MyDialogChooseTimeSchedule(this.listData, this.itemSelected);
+
+  @override
+  _MyDialogSchedule createState() => _MyDialogSchedule();
+}
+
+class _MyDialogSchedule extends State<MyDialogChooseTimeSchedule> {
+
+  String _currentTimeValue = '';
+  KeyValueObj itemSelected;
+
+  @override
+  void initState() {
+    _currentTimeValue = widget.itemSelected != null && widget.itemSelected.key != null ? widget.itemSelected.key : '';
+    itemSelected = widget.itemSelected;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16.0))),
+      title: Row(
+        children: <Widget>[
+          SizedBox(width: 30,),
+          Expanded(
+            child: Text('Choose time', style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: textColor
+            ), textAlign: TextAlign.center,),
+          ),
+          IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+      titlePadding: EdgeInsets.only(top: 0, bottom: 0),
+      contentPadding: EdgeInsets.all(0.0),
+      content: Container(
+        width: double.maxFinite,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22)
+        ),
+        child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              SingleChildScrollView(
+                child: ListView.builder(
+                  itemBuilder: (context, index) {
+                    final item = widget.listData[index];
+                    return ListTile(
+                      title: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Radio(
+                            groupValue: _currentTimeValue,
+                            value: item.key,
+                            onChanged: (value) {
+                              setState(() {
+                                _currentTimeValue = item.key;
+                                itemSelected = item;
+                              });
+                            },
+                          ),
+                          Text(item.value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),)
+                        ],
+                      ),
+                      onTap: () {
+                        setState(() {
+                          _currentTimeValue = item.key;
+                          itemSelected = item;
+                        });
+                      },
+                    );
+                  },
+                  itemCount: widget.listData.length,
+                  shrinkWrap: true,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: heightSpaceLarge, left: heightSpaceLarge, bottom: 16, top: 16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        height: 42,
+                        child: FlatButton(
+                          color: colorActive,
+                          textColor: Colors.white,
+                          shape: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                  color: Colors.blue,
+                                  width: 1,
+                                  style: BorderStyle.solid
+                              )
+                          ),
+                          child: Text("Done", style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white
+                          ),),
+                          onPressed: () {
+                            if (_currentTimeValue.length != 0) {
+                              Navigator.pop(context, itemSelected);
+                            } else {
+                              toast('Please choose one item');
+                            }
+                          },
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              )
+            ]
+        ),
+      ),
+    );
+  }
+}
+

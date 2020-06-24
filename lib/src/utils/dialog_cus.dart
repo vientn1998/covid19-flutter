@@ -58,8 +58,6 @@ toast(String message,{ToastGravity gravity = ToastGravity.CENTER}) {
       toastLength: Toast.LENGTH_SHORT,
       gravity: gravity,
       timeInSecForIosWeb: 1,
-//      backgroundColor: Colors.red,
-//      textColor: Colors.white,
       fontSize: 15.0
   );
 }

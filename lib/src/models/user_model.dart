@@ -165,7 +165,15 @@ class UserObj extends Equatable {
 
       };
     }
+  }
 
+  Map<String, Object> toJsonDoctor() {
+    return {
+      'id': this.id,
+      'name': this.name,
+      'phone': this.phone,
+      'phone': this.phone,
+    };
   }
 
   String getNameMajor() {

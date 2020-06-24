@@ -15,12 +15,14 @@ import 'package:template_flutter/src/database/covid_dao.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_api_client.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_repository.dart';
 import 'package:template_flutter/src/repositories/major_repository.dart';
+import 'package:template_flutter/src/repositories/schedule_repository.dart';
 import 'package:template_flutter/src/repositories/user_repository.dart';
 import 'package:template_flutter/src/screens/introduction/splash_screen.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 
 import 'src/app/my_app.dart';
+import 'src/blocs/schedule/bloc.dart';
 import 'src/screens/introduction/login_screen.dart';
 import 'src/screens/introduction/introduction_screen.dart';
 
@@ -33,6 +35,7 @@ import 'src/screens/introduction/introduction_screen.dart';
   final majorRepository = MajorRepository();
 
   final userRepository = UserRepository();
+  final scheduleRepository = ScheduleRepository();
   runApp(
       MultiBlocProvider(
         providers: [
@@ -57,6 +60,9 @@ import 'src/screens/introduction/introduction_screen.dart';
           ),
           BlocProvider<DoctorBloc>(
             create: (context) => DoctorBloc(userRepository: userRepository),
+          ),
+          BlocProvider<ScheduleBloc>(
+            create: (context) => ScheduleBloc(scheduleRepository),
           ),
           BlocProvider<MajorBloc>(
             create: (context) =>

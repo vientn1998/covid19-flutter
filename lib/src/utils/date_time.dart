@@ -7,4 +7,8 @@ class DateTimeUtils {
   String formatTimeString(DateTime dateTime) {
     return DateFormat('HH:mm').format(dateTime);
   }
+
+  String formatMonthYearString(DateTime dateTime) {
+    return DateFormat('MMM, yyyy').format(dateTime);
+  }
 }

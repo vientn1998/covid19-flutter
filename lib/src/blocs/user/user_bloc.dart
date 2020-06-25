@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
@@ -29,6 +30,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       yield* _mapCheckExistPhoneToState(event);
     } else if (event is GetDetailsUser) {
       yield* _mapUserToState(event);
+    } else if (event is GetDetailsUserByPhone) {
+      yield* _mapGetUserDetailsPhoneToState(event);
     }
   }
 
@@ -45,6 +48,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       }
       final isSuccess = await userRepository.addAccount(event.userObj);
       if (isSuccess != null && isSuccess == true) {
+        SharePreferences().saveString(SharePreferenceKey.uuid, event.userObj.id);
+        final data = jsonEncode(event.userObj);
+        SharePreferences().saveString(SharePreferenceKey.user, data);
         yield UserCreateSuccess();
       } else {
         yield UserCreateError();
@@ -62,6 +68,9 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       final isSuccess = await userRepository.addAccount(event.userObj);
       print('status create account $isSuccess');
       if (isSuccess != null && isSuccess == true) {
+        SharePreferences().saveString(SharePreferenceKey.uuid, event.userObj.id);
+        final data = jsonEncode(event.userObj);
+        SharePreferences().saveString(SharePreferenceKey.user, data);
         yield UserCreateSuccess();
       } else {
         yield UserCreateError();
@@ -88,6 +97,17 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   Stream<UserState> _mapUserToState(GetDetailsUser event) async*{
     final user = await userRepository.getUser(event.uuid);
     print('_mapUserToState $user');
+    if (user != null && user.id != null) {
+      yield GetDetailsSuccessfully(userObj: user);
+    } else {
+      yield GetDetailsError();
+    }
+  }
+
+  Stream<UserState> _mapGetUserDetailsPhoneToState(GetDetailsUserByPhone event) async*{
+    yield UserLoading();
+    final user = await userRepository.getUserByPhone(event.phone);
+    print('_mapGetUserDetailsPhoneToState $user');
     if (user != null && user.id != null) {
       yield GetDetailsSuccessfully(userObj: user);
     } else {

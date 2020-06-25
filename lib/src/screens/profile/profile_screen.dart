@@ -30,14 +30,20 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   getUser() async {
-    final data = UserObj.fromJson((await SharePreferences().getObject(SharePreferenceKey.user)));
-    setState(() {
-      userObj = data;
-    });
+    final dataMap = await SharePreferences().getObject(SharePreferenceKey.user);
+    if (dataMap != null) {
+      final data = UserObj.fromJson(dataMap);
+      if (data != null) {
+        setState(() {
+          userObj = data;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    print('build: ProfilePage  ');
     return Scaffold(
 //      appBar: AppBar(
 //        backgroundColor: Colors.white,

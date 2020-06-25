@@ -49,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     KeyboardVisibility.onChange.listen((visible) {
       print('isKeyboardAppear : $visible');
+      if (!mounted) return;
       setState(() {
         isKeyboardAppear = visible;
       });
@@ -85,6 +86,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       print('UserCheckExistsSuccess ${state.isExist}');
                       LoadingHud(context).dismiss();
                       final user = (BlocProvider.of<AuthBloc>(context).state as Authenticated).userObj;
+                      final data = jsonEncode(user);
+                      SharePreferences().saveString(SharePreferenceKey.user, data);
                       if (state.isExist) {
                         SharePreferences().saveString(SharePreferenceKey.uuid, user.id);
                         Navigator.pushReplacement(
@@ -103,22 +106,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       }
                     } else if (state is UserCheckPhoneSuccess) {
                       print('Phone exists: ${state.isExist}');
+                      LoadingHud(context).dismiss();
                       if (state.isExist) {
-                        LoadingHud(context).dismiss();
-                        SharePreferences().saveString(SharePreferenceKey.uuid, state.phoneNumber);
-                        Navigator.popUntil(context, (route) => route.isFirst);
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MainPage(),
-                            )
-                        );
+                        verifyPhone(state.phoneNumber, isPhoneExist: true);
+                        //BlocProvider.of<UserBloc>(context).add(GetDetailsUserByPhone(state.phoneNumber));
                       } else {
                         verifyPhone(state.phoneNumber);
                       }
                     } else if (state is UserCheckExistsError) {
                       print('UserCheckExistsError');
+                      toast('Error check user');
                       LoadingHud(context).dismiss();
+                    } else if (state is GetDetailsSuccessfully) {
+                      final data = jsonEncode(state.userObj);
+                      SharePreferences().saveString(SharePreferenceKey.user, data);
+                      SharePreferences().saveString(SharePreferenceKey.uuid, state.userObj.id);
+                      Navigator.popUntil(context, (route) => route.isFirst);
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MainPage(),
+                          )
+                      );
                     }
                   },
                 ),
@@ -415,7 +424,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<void> verifyPhone(phoneNo) async {
+  Future<void> verifyPhone(phoneNo, {bool isPhoneExist = false}) async {
+    FocusScope.of(context).unfocus();
     final phone = '+84${valuePhoneNumber.substring(0)}';
     print('phone verify $phone');
     setState(() {
@@ -437,7 +447,7 @@ class _LoginScreenState extends State<LoginScreen> {
         this.codeSent = true;
         LoadingHud(context).dismiss();
         Navigator.push(context, MaterialPageRoute(
-          builder: (context) => EnterOTPPage(phoneNumber: phoneNo, verificationId: this.verificationId,),
+          builder: (context) => EnterOTPPage(phoneNumber: phoneNo, verificationId: this.verificationId, isPhoneExists: isPhoneExist,),
         ));
       });
     };

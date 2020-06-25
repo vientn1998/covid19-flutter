@@ -32,21 +32,6 @@ class _ChooseRolePageState extends State<ChooseRolePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-//      appBar: AppBar(
-//        title: Text(''),
-//        backgroundColor: Colors.white,
-//        elevation: 0,
-//        leading: IconButton(
-//          icon: Icon(Icons.arrow_back_ios, color: colorActive,),
-//          onPressed: () {
-//            BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
-//            BlocProvider.of<AuthBloc>(context).add(AuthGoogleInit());
-//            BlocProvider.of<UserBloc>(context).add(UserInit());
-//            SharePreferences().saveBool(SharePreferenceKey.isBackChooseRole, true);
-//            Navigator.pop(context);
-//          },
-//        ),
-//      ),
       body: Container(
         color: Colors.white,
         child: Center(

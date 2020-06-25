@@ -25,7 +25,7 @@ class ScheduleDoctorPage extends StatefulWidget {
 }
 
 class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
-  DateTime _currentDate;
+  DateTime _currentDate = DateTime.now();
   UserObj userObjSender;
   KeyValueObj timeSelected;
 //  List<DateTime> _markedDate = [DateTime(2018, 9, 20), DateTime(2018, 10, 11)];
@@ -93,13 +93,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
 
   @override
   void initState() {
-    _currentDate = DateTime.now();
-    print('hour now ${_currentDate.hour}');
-    listDataDefault.forEach((element) {
-      if (element.timeBook > _currentDate.hour) {
-        listData.add(element);
-      }
-    });
+
 
     getUser();
     _markedDateMap.add(
@@ -344,11 +338,23 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
                         ),
                       ),
                       onTap: () async {
+                        final currentDate = DateTime.now();
+                        print('hour now ${currentDate.hour}');
+                        final list = [];
+                        if (currentDate.isAfter(widget.dateTime)) {
+                          list.addAll(widget.listData);
+                        } else {
+                          widget.listData.forEach((element) {
+                            if (element.timeBook > currentDate.hour) {
+                              list.add(element);
+                            }
+                          });
+                        }
                         final time = await showDialog(
                           barrierDismissible: false,
                             context: context,
                             builder: (context) {
-                              return MyDialogChooseTimeSchedule(widget.listData, widget.timeSelected);
+                              return MyDialogChooseTimeSchedule(list, widget.timeSelected);
                             }) as KeyValueObj;
                         print('time: $time');
                         setState(() {

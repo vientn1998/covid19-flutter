@@ -105,6 +105,16 @@ class UserRepository {
     return userObj;
   }
 
+  Future<UserObj> getUserByPhone(String phone) async {
+    UserObj userObj;
+    await userCollection.where('phone', isEqualTo: phone).getDocuments().then((querySnapshot) {
+      if (querySnapshot != null && querySnapshot.documents != null && querySnapshot.documents.length > 0) {
+        userObj = UserObj.fromSnapshot(querySnapshot.documents[0]);
+      }
+    });
+    return userObj;
+  }
+
   //get list doctor
   Future<List<UserObj>> getListDoctor() async{
     List<UserObj> list = [];

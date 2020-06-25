@@ -26,10 +26,19 @@ class SharePreferences {
   }
 
   Future<dynamic> getObject(SharePreferenceKey key) async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    final str = _prefs.getString(key.toString());
-    print('get object:  $key-$str');
-    return jsonDecode(str);
+    try{
+      SharedPreferences _prefs = await SharedPreferences.getInstance();
+      final str = _prefs.getString(key.toString());
+      print('getObject:  $key-$str');
+      if (str != null) {
+        return jsonDecode(str);
+      } else {
+        return null;
+      }
+    }catch(error) {
+      print('getObject:  $key');
+      return null;
+    }
   }
 
   Future<bool> getBool(SharePreferenceKey key) async {

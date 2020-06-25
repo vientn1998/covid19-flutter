@@ -45,3 +45,8 @@ class GetDetailsUser extends UserEvent {
   String uuid;
   GetDetailsUser(this.uuid) : assert(uuid != null);
 }
+
+class GetDetailsUserByPhone extends UserEvent {
+  String phone;
+  GetDetailsUserByPhone(this.phone) : assert(phone != null);
+}

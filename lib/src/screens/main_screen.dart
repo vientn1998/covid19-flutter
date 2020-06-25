@@ -13,6 +13,7 @@ import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'home/home_screen.dart';
 
 class MainPage extends StatefulWidget {
+
   @override
   _MainPageState createState() => _MainPageState();
 }

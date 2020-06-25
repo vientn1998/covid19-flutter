@@ -291,6 +291,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     );
   }
   validateDataSubmit() {
+    print('id: ${widget.userObj.id}');
     if (valueName.length == 0) {
       toast('Please input name');
       return;

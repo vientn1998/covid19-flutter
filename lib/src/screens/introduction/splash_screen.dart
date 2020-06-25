@@ -41,6 +41,7 @@ class _SplashPageState extends State<SplashPage> {
         final isLogged = await SharePreferences().getBool(SharePreferenceKey.isLogged);
         print('was login:  $isLogged');
         if (isLogged ?? false) {
+
           Navigator.pushReplacement(context, MaterialPageRoute(
             builder: (context) => MainPage(),
           ));

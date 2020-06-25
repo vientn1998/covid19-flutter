@@ -44,8 +44,8 @@ class _HomePageState extends State<HomePage> {
   ];
 
   checkPermission() async {
-//    final result = await Permission.locationWhenInUse.request();
-    final result = await Permission.location.request();
+    final result = await Permission.locationWhenInUse.request();
+//    final result = await Permission.location.request();
     if (result.isGranted) {
       try {
         final Position position = await Geolocator().getLastKnownPosition(desiredAccuracy: LocationAccuracy.low);
@@ -825,61 +825,3 @@ class _HomePageState extends State<HomePage> {
         });
   }
 }
-
-//Row(
-//mainAxisSize: MainAxisSize.min,
-//mainAxisAlignment: MainAxisAlignment.center,
-//children: <Widget>[
-//FlatButton(
-//shape: RoundedRectangleBorder(
-//borderRadius: BorderRadius.circular(paddingDefault),
-//),
-//child: Text(
-//'Total',
-//style: TextStyle(
-//fontWeight: (currentTab == StatusTabHome.total)
-//? FontWeight.bold
-//    : FontWeight.normal),
-//),
-//onPressed: () {
-//setState(() {
-//currentTab = StatusTabHome.total;
-//});
-//},
-//),
-//FlatButton(
-//shape: RoundedRectangleBorder(
-//borderRadius: BorderRadius.circular(paddingDefault),
-//),
-//child: Text(
-//'Today',
-//style: TextStyle(
-//fontWeight: (currentTab == StatusTabHome.today)
-//? FontWeight.bold
-//    : FontWeight.normal),
-//),
-//onPressed: () {
-//setState(() {
-//currentTab = StatusTabHome.today;
-//});
-//},
-//),
-//FlatButton(
-//shape: RoundedRectangleBorder(
-//borderRadius: BorderRadius.circular(paddingDefault),
-//),
-//child: Text(
-//'Yesterday',
-//style: TextStyle(
-//fontWeight: (currentTab == StatusTabHome.yesterday)
-//? FontWeight.bold
-//    : FontWeight.normal),
-//),
-//onPressed: () {
-//setState(() {
-//currentTab = StatusTabHome.yesterday;
-//});
-//},
-//),
-//],
-//),

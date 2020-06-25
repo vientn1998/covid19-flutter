@@ -44,9 +44,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
               IconButton(
                 icon: Icon(Icons.favorite),
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => MyHomePage(),
-                  ));
+
                 },
               )
             ],
@@ -139,19 +137,26 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                               color: backgroundSurvey
                           ),),
                           SizedBox(width: paddingDefault,),
-                          Container(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text('Open', style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.lightBlue
-                              ),),
+                          InkWell(
+                            child: Container(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text('Open', style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.lightBlue
+                                ),),
+                              ),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: borderColor.withOpacity(0.8)
+                              ),
                             ),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                color: borderColor.withOpacity(0.8)
-                            ),
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (context) => ScheduleDoctorPage(userObjReceiver: widget.userObj,),
+                              ));
+                            },
                           )
                         ],
                       ),

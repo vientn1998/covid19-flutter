@@ -172,7 +172,7 @@ class UserObj extends Equatable {
       'id': this.id,
       'name': this.name,
       'phone': this.phone,
-      'phone': this.phone,
+      'email': this.email,
     };
   }
 

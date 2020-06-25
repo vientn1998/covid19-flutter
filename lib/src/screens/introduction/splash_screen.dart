@@ -74,7 +74,7 @@ class _SplashPageState extends State<SplashPage> {
               Align(
                 alignment: Alignment(0, 0),
                 child:
-                Image(image: AssetImage('assets/images/ic_logo.png'),
+                Image(image: AssetImage('assets/images/ic_virus.png'),
                   height: 100,
                   width: 100,),
               ),

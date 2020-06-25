@@ -19,6 +19,8 @@ import 'package:template_flutter/src/utils/styles.dart';
 import 'package:template_flutter/src/widgets/icon.dart';
 import 'package:template_flutter/src/widgets/search_cus.dart';
 
+import 'choose_schedule_screen.dart';
+
 class DoctorPage extends StatefulWidget {
   @override
   _DoctorPageState createState() => _DoctorPageState();
@@ -298,6 +300,10 @@ class _DoctorPageState extends State<DoctorPage> {
                           Navigator.push(context, MaterialPageRoute(
                             builder: (context) => DoctorDetailsPage(userObj: listUser[index],),
                           ));
+                        }, () {
+                          Navigator.push(context, MaterialPageRoute(
+                            builder: (context) => ScheduleDoctorPage(userObjReceiver: listUser[index],),
+                          ));
                         });
                       }
                   ),
@@ -375,7 +381,7 @@ class _DoctorPageState extends State<DoctorPage> {
     );
   }
 
-  _buildTopDoctor(UserObj item, Function function) {
+  _buildTopDoctor(UserObj item, Function function, Function functionBook) {
     return InkWell(
       child: Container(
         margin: EdgeInsets.only(right: paddingDefault, left: paddingDefault),
@@ -451,9 +457,7 @@ class _DoctorPageState extends State<DoctorPage> {
                             child: Text('Book', style: TextStyle(
                                 fontSize: 14, color: textColor
                             ),),
-                            onPressed: () {
-
-                            },
+                            onPressed: functionBook,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(6)
                             ),

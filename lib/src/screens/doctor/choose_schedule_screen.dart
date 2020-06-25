@@ -1,38 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
+import 'package:loading_hud/loading_hud.dart';
+import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/key_value_model.dart';
+import 'package:template_flutter/src/models/schedule_model.dart';
+import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
-import 'package:template_flutter/src/utils/size_config.dart';
-import 'package:template_flutter/src/utils/styles.dart';
+import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/widgets/button.dart';
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class ScheduleDoctorPage extends StatefulWidget {
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+  final UserObj userObjReceiver;
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  ScheduleDoctorPage({Key key,@required this.userObjReceiver}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _ScheduleDoctorPageState createState() => new _ScheduleDoctorPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  DateTime _currentDate = DateTime(2020, 6, 25);
-  DateTime _currentDate2 = DateTime(2020, 6, 23);
-  String _currentMonth = '';
-  DateTime _targetDateTime = DateTime(2020, 6, 27);
+class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
+  DateTime _currentDate;
+  UserObj userObjSender;
   KeyValueObj timeSelected;
 //  List<DateTime> _markedDate = [DateTime(2018, 9, 20), DateTime(2018, 10, 11)];
   static Widget _eventIcon = new Container(
@@ -74,20 +68,40 @@ class _MyHomePageState extends State<MyHomePage> {
     },
   );
 
-  CalendarCarousel _calendarCarousel, _calendarCarouselNoHeader;
-  List<KeyValueObj> listData = [
-    KeyValueObj(key: '1', value: '07:00 - 08:00'),
-    KeyValueObj(key: '2', value: '08:00 - 09:00'),
-    KeyValueObj(key: '3', value: '09:00 - 10:00'),
-    KeyValueObj(key: '4', value: '10:00 - 11:00'),
-    KeyValueObj(key: '5', value: '11:00 - 12:00'),
-    KeyValueObj(key: '6', value: '13:00 - 14:00'),
-    KeyValueObj(key: '7', value: '14:00 - 15:00'),
-    KeyValueObj(key: '8', value: '15:00 - 16:00'),
-    KeyValueObj(key: '9', value: '16:00 - 17:00'),
+  CalendarCarousel _calendarCarouselNoHeader;
+  List<KeyValueObj> listDataDefault = [
+    KeyValueObj(id: 0, value: '06:00 - 07:00', timeBook: 6),
+    KeyValueObj(id: 1, value: '07:00 - 08:00', timeBook: 7),
+    KeyValueObj(id: 2, value: '08:00 - 09:00', timeBook: 8),
+    KeyValueObj(id: 3, value: '09:00 - 10:00', timeBook: 8),
+    KeyValueObj(id: 4, value: '10:00 - 11:00', timeBook: 10),
+    KeyValueObj(id: 5, value: '11:00 - 12:00', timeBook: 11),
+    KeyValueObj(id: 6, value: '13:00 - 14:00', timeBook: 13),
+    KeyValueObj(id: 7, value: '14:00 - 15:00', timeBook: 14),
+    KeyValueObj(id: 8, value: '15:00 - 16:00', timeBook: 15),
+    KeyValueObj(id: 9, value: '16:00 - 17:00', timeBook: 16),
   ];
+
+  List<KeyValueObj> listData = [];
+
+  getUser() async {
+    final data = UserObj.fromJson((await SharePreferences().getObject(SharePreferenceKey.user)));
+    setState(() {
+      userObjSender = data;
+    });
+  }
+
   @override
   void initState() {
+    _currentDate = DateTime.now();
+    print('hour now ${_currentDate.hour}');
+    listDataDefault.forEach((element) {
+      if (element.timeBook > _currentDate.hour) {
+        listData.add(element);
+      }
+    });
+
+    getUser();
     _markedDateMap.add(
         new DateTime(2020, 6, 27),
         new Event(
@@ -143,17 +157,21 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       weekFormat: false,
 //      markedDatesMap: _markedDateMap,
-      height: 450.0,
+      height: 380.0,
+//      weekDayBackgroundColor: Colors.red,
       customGridViewPhysics: NeverScrollableScrollPhysics(),
       minSelectedDate: _currentDate.subtract(Duration(days: 1)),
       maxSelectedDate: _currentDate.add(Duration(days: 30)),
       onDayPressed: (day,listEvent ) async {
-        final time = await showDialog(
+        final schedule = await showDialog(
             barrierDismissible: false,
             context: context,
             builder: (context) {
-              return MyDialogCreateSchedule(day,timeSelected,listData,'');
-            }) as KeyValueObj;
+              return MyDialogCreateSchedule(day,timeSelected,listData,'', userObjSender, widget.userObjReceiver);
+            }) as ScheduleModel;
+        if (schedule != null && schedule.status.isNotEmpty) {
+          BlocProvider.of<ScheduleBloc>(context).add(CreateSchedule(scheduleModel: schedule));
+        }
       },
       daysTextStyle: TextStyle(
         color: Colors.blue,
@@ -176,13 +194,23 @@ class _MyHomePageState extends State<MyHomePage> {
         print('long pressed date $date');
       },
     );
-
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text('Schedule'),
+          title: new Text(widget.userObjReceiver.name),
         ),
-        body: SingleChildScrollView(
+        body: BlocListener<ScheduleBloc, ScheduleState>(
+          listener: (context, state) {
+            if (state is ScheduleLoading) {
+              LoadingHud(context).show();
+            } else if (state is ScheduleError) {
+              LoadingHud(context).dismiss();
+            } else if (state is CreateScheduleSuccess) {
+              LoadingHud(context).dismiss();
+              toast('Create schedule successfully');
+            }
+          },
           child: Column(
+            mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
@@ -190,13 +218,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 margin: EdgeInsets.symmetric(horizontal: 16.0),
                 child: _calendarCarouselNoHeader,
               ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      Container(height: 500, color: Colors.red,),
+                      Container(height: 500, color: Colors.yellow,),
+                    ],
+                  ),
+                ),
+              )
               //
             ],
           ),
-        ));
+        )
+    );
   }
-
-
 }
 
 class MyDialogCreateSchedule extends StatefulWidget {
@@ -205,7 +242,8 @@ class MyDialogCreateSchedule extends StatefulWidget {
   KeyValueObj timeSelected;
   List<KeyValueObj> listData;
   String note;
-  MyDialogCreateSchedule(this.dateTime, this.timeSelected, this.listData, this.note);
+  final UserObj userObjSender, userObjReceiver;
+  MyDialogCreateSchedule(this.dateTime, this.timeSelected, this.listData, this.note, this.userObjSender, this.userObjReceiver);
 
   @override
   _MyDialogCreateScheduleState createState() => _MyDialogCreateScheduleState();
@@ -349,7 +387,6 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
                         ),
                         controller: textEditingController,
                         onChanged: (value) {
-                          print(value);
                           setState(() {
                             note = value;
                           });
@@ -375,10 +412,22 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
                   title: 'Create',
                   background: colorActive,
                   onPressed: () async {
-                    print(widget.dateTime);
-                    print(widget.timeSelected);
-                    print(note);
-                    FocusScope.of(context).unfocus();
+                    if (widget.timeSelected != null && widget.timeSelected.id != null) {
+                      ScheduleModel obj = ScheduleModel();
+                      obj.note = note;
+                      obj.status = 'New';
+                      obj.dateTime = widget.dateTime.millisecondsSinceEpoch;
+                      obj.timeBook = widget.timeSelected.id;
+                      obj.sender = widget.userObjSender;
+                      obj.receiver = widget.userObjReceiver;
+                      print(widget.dateTime);
+                      print(widget.timeSelected);
+                      print(note);
+                      Navigator.pop(context, obj);
+                      FocusScope.of(context).unfocus();
+                    } else {
+                      toast('Please choose time');
+                    }
                   },
                 ),
               ),
@@ -408,7 +457,7 @@ class _MyDialogSchedule extends State<MyDialogChooseTimeSchedule> {
 
   @override
   void initState() {
-    _currentTimeValue = widget.itemSelected != null && widget.itemSelected.key != null ? widget.itemSelected.key : '';
+    _currentTimeValue = widget.itemSelected != null && widget.itemSelected.id != null ? widget.itemSelected.id.toString() : '';
     itemSelected = widget.itemSelected;
     super.initState();
   }
@@ -459,10 +508,10 @@ class _MyDialogSchedule extends State<MyDialogChooseTimeSchedule> {
                         children: <Widget>[
                           Radio(
                             groupValue: _currentTimeValue,
-                            value: item.key,
+                            value: item.id.toString(),
                             onChanged: (value) {
                               setState(() {
-                                _currentTimeValue = item.key;
+                                _currentTimeValue = item.id.toString();
                                 itemSelected = item;
                               });
                             },
@@ -472,7 +521,7 @@ class _MyDialogSchedule extends State<MyDialogChooseTimeSchedule> {
                       ),
                       onTap: () {
                         setState(() {
-                          _currentTimeValue = item.key;
+                          _currentTimeValue = item.id.toString();
                           itemSelected = item;
                         });
                       },

@@ -43,7 +43,7 @@ class _MainPageState extends State<MainPage> {
             index: _selectedIndex,
             children: <Widget>[
               HomePage(),
-              MapPage(),
+//              MapPage(),
               DoctorPage(),
               ProfilePage(),
             ],
@@ -62,11 +62,11 @@ class _MainPageState extends State<MainPage> {
             title: Text('Home'),
             activeColor: Colors.purpleAccent,
           ),
-          BottomNavyBarItem(
-              icon: Icon(Icons.map),
-              title: Text('Map'),
-              activeColor: Colors.purpleAccent
-          ),
+//          BottomNavyBarItem(
+//              icon: Icon(Icons.map),
+//              title: Text('Map'),
+//              activeColor: Colors.purpleAccent
+//          ),
           BottomNavyBarItem(
               icon: Icon(Icons.enhanced_encryption),
               title: Text('Doctor'),
@@ -74,7 +74,7 @@ class _MainPageState extends State<MainPage> {
           ),
           BottomNavyBarItem(
               icon: Icon(Icons.more_horiz),
-              title: Text('User'),
+              title: Text('Profile'),
               activeColor: Colors.purpleAccent
           ),
         ],

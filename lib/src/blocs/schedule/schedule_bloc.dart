@@ -17,7 +17,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     ScheduleEvent event,
   ) async* {
     if (event is CreateSchedule) {
-      _mapCreateToState(event);
+      yield* _mapCreateToState(event);
     }
   }
 

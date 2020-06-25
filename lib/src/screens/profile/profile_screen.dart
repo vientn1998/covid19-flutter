@@ -121,10 +121,14 @@ class _ProfilePageState extends State<ProfilePage> {
         imageUrl: userObj.avatar,
         fit: BoxFit.cover,
         placeholder: (context, url) => CircularProgressIndicator(),
-        errorWidget: (context, url, error) => FaIcon(FontAwesomeIcons.user),
+        errorWidget: (context, url, error) => Center(
+          child: FaIcon(FontAwesomeIcons.user),
+        ),
       );
     } else {
-      FaIcon(FontAwesomeIcons.user);
+      return Center(
+        child: FaIcon(FontAwesomeIcons.user),
+      );
     }
   }
 

@@ -322,7 +322,7 @@ class _DoctorPageState extends State<DoctorPage> {
                   ),
                   SizedBox(height: 5,),
                   Container(
-                    height: 230,
+                    height: 240,
                     margin: EdgeInsets.only(right: paddingDefault - 7, left: paddingDefault - 7),
                     width: double.infinity,
                     child: ListView.separated(

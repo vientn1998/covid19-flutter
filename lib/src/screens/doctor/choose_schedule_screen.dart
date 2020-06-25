@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loading_hud/loading_hud.dart';
 import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/key_value_model.dart';
@@ -25,10 +26,11 @@ class ScheduleDoctorPage extends StatefulWidget {
 }
 
 class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
+
   DateTime _currentDate = DateTime.now();
   UserObj userObjSender;
   KeyValueObj timeSelected;
-//  List<DateTime> _markedDate = [DateTime(2018, 9, 20), DateTime(2018, 10, 11)];
+
   static Widget _eventIcon = new Container(
     decoration: new BoxDecoration(
         color: Colors.white,
@@ -69,8 +71,8 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
   );
 
   CalendarCarousel _calendarCarouselNoHeader;
+
   List<KeyValueObj> listDataDefault = [
-    KeyValueObj(id: 0, value: '06:00 - 07:00', timeBook: 6),
     KeyValueObj(id: 1, value: '07:00 - 08:00', timeBook: 7),
     KeyValueObj(id: 2, value: '08:00 - 09:00', timeBook: 8),
     KeyValueObj(id: 3, value: '09:00 - 10:00', timeBook: 8),
@@ -93,7 +95,6 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
 
   @override
   void initState() {
-
 
     getUser();
     _markedDateMap.add(
@@ -156,15 +157,21 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
       customGridViewPhysics: NeverScrollableScrollPhysics(),
       minSelectedDate: _currentDate.subtract(Duration(days: 1)),
       maxSelectedDate: _currentDate.add(Duration(days: 30)),
-      onDayPressed: (day,listEvent ) async {
-        final schedule = await showDialog(
-            barrierDismissible: false,
-            context: context,
-            builder: (context) {
-              return MyDialogCreateSchedule(day,timeSelected,listData,'', userObjSender, widget.userObjReceiver);
-            }) as ScheduleModel;
-        if (schedule != null && schedule.status.isNotEmpty) {
-          BlocProvider.of<ScheduleBloc>(context).add(CreateSchedule(scheduleModel: schedule));
+      onDayPressed: (dateTime,listEvent ) async {
+        final currentDate = DateTime.now();
+        if (currentDate.hour > 16 && currentDate.day == dateTime.day && currentDate.month == dateTime.month) {
+          toast('Time invalid, please choose next the day', gravity: ToastGravity.BOTTOM);
+          return;
+        } else {
+          final schedule = await showDialog(
+              barrierDismissible: false,
+              context: context,
+              builder: (context) {
+                return MyDialogCreateSchedule(dateTime,timeSelected,listDataDefault,'', userObjSender, widget.userObjReceiver);
+              }) as ScheduleModel;
+          if (schedule != null && schedule.status.isNotEmpty) {
+            BlocProvider.of<ScheduleBloc>(context).add(CreateSchedule(scheduleModel: schedule));
+          }
         }
       },
       daysTextStyle: TextStyle(
@@ -339,17 +346,27 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
                       ),
                       onTap: () async {
                         final currentDate = DateTime.now();
-                        print('hour now ${currentDate.hour}');
-                        final list = [];
-                        if (currentDate.isAfter(widget.dateTime)) {
-                          list.addAll(widget.listData);
+                        print('hour now ${currentDate}');
+                        print('hour selected ${widget.dateTime}');
+                        print('data  ${widget.listData.length}');
+                        final List<KeyValueObj> list = [];
+                        if (currentDate.hour > 16 && currentDate.day == widget.dateTime.day && currentDate.month == widget.dateTime.month) {
+                          toast('Time invalid, please choose next the day', gravity: ToastGravity.BOTTOM);
+                          return;
                         } else {
-                          widget.listData.forEach((element) {
-                            if (element.timeBook > currentDate.hour) {
-                              list.add(element);
-                            }
-                          });
+                          if (currentDate.day == widget.dateTime.day && currentDate.month == widget.dateTime.month) {
+                            print('same day');
+                            widget.listData.forEach((element) {
+                              if (element.timeBook > currentDate.hour) {
+                                list.add(element);
+                              }
+                            });
+                          } else {
+                            print('difference day');
+                            list.addAll(widget.listData);
+                          }
                         }
+                        print('size list : ${list.length}');
                         final time = await showDialog(
                           barrierDismissible: false,
                             context: context,
@@ -387,9 +404,9 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
                       child: TextField(
                         maxLines: 3,
                         minLines: 3,
+                        textCapitalization: TextCapitalization.sentences,
                         style: TextStyle(
                           fontSize: 16,
-                          fontWeight: FontWeight.w600,
                         ),
                         controller: textEditingController,
                         onChanged: (value) {

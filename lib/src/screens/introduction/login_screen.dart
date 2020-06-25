@@ -84,18 +84,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       LoadingHud(context).show();
                     } else if (state is UserCheckExistsSuccess) {
                       print('UserCheckExistsSuccess ${state.isExist}');
-                      LoadingHud(context).dismiss();
                       final user = (BlocProvider.of<AuthBloc>(context).state as Authenticated).userObj;
-                      final data = jsonEncode(user);
-                      SharePreferences().saveString(SharePreferenceKey.user, data);
                       if (state.isExist) {
                         SharePreferences().saveString(SharePreferenceKey.uuid, user.id);
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MainPage(),
-                            ));
+                        BlocProvider.of<UserBloc>(context).add(GetDetailsUser(user.id));
                       } else {
+                        LoadingHud(context).dismiss();
                         if (BlocProvider.of<AuthBloc>(context).state is Authenticated){
                           Navigator.pushReplacement(
                               context,
@@ -109,7 +103,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       LoadingHud(context).dismiss();
                       if (state.isExist) {
                         verifyPhone(state.phoneNumber, isPhoneExist: true);
-                        //BlocProvider.of<UserBloc>(context).add(GetDetailsUserByPhone(state.phoneNumber));
                       } else {
                         verifyPhone(state.phoneNumber);
                       }
@@ -120,12 +113,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     } else if (state is GetDetailsSuccessfully) {
                       final data = jsonEncode(state.userObj);
                       SharePreferences().saveString(SharePreferenceKey.user, data);
-                      SharePreferences().saveString(SharePreferenceKey.uuid, state.userObj.id);
                       Navigator.popUntil(context, (route) => route.isFirst);
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MainPage(),
+                            builder: (context) => MainPage(userObj: state.userObj,),
                           )
                       );
                     }

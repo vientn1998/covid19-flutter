@@ -28,6 +28,7 @@ class MajorBloc extends Bloc<MajorEvent, MajorState> {
     List<KeyValueObj> list = [];
     await majorRepository.getListMajor().then((value) {
       final item = value.documents.map((document) => KeyValueObj.fromDocument(document)).toList();
+      item.sort((a, b) => a.value.compareTo(b.value));
       print('LoadedSuccessMajor ${item.length}');
       list.addAll(item);
     }).catchError((error) {

@@ -93,12 +93,10 @@ class _EnterOTPPageState extends State<EnterOTPPage> {
             final data = jsonEncode(state.userObj);
             SharePreferences().saveString(SharePreferenceKey.user, data);
             SharePreferences().saveString(SharePreferenceKey.uuid, state.userObj.id);
-
-//            Navigator.popUntil(context, (route) => route.isFirst);
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => MainPage(),
+                  builder: (context) => MainPage(userObj: state.userObj,),
                 )
             );
           }

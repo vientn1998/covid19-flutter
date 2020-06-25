@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -14,6 +15,7 @@ import 'package:template_flutter/src/utils/date_time.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/image_picker.dart';
+import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/utils/size_config.dart';
 import 'package:template_flutter/src/utils/validator.dart';
 import 'package:template_flutter/src/widgets/button.dart';
@@ -61,17 +63,24 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         ),
         body: SafeArea(
           child: BlocListener<UserBloc, UserState>(
-            listener: (context, state) {
+            listener: (context, state) async {
               if (state is UserCreateLoading) {
                 LoadingHud(context).show();
               } else if (state is UserCreateSuccess) {
-                LoadingHud(context).dismiss();
-                Navigator.pushReplacement(context, MaterialPageRoute(
-                  builder: (context) => MainPage(),
-                ));
+                BlocProvider.of<UserBloc>(context).add(GetDetailsUser(widget.userObj.id));
               } else if (state is UserCreateError) {
                 LoadingHud(context).dismiss();
                 DialogCus(context).show(message: 'Error create account');
+              } else if (state is GetDetailsError) {
+                LoadingHud(context).dismiss();
+                print('Get user details: error');
+              } else if (state is GetDetailsSuccessfully) {
+                LoadingHud(context).dismiss();
+                final user = jsonEncode(state.userObj);
+                await SharePreferences().saveString(SharePreferenceKey.user, user);
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => MainPage(userObj: state.userObj,),
+                ));
               }
             },
             child: Padding(

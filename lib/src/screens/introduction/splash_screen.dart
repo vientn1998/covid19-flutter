@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,10 +42,8 @@ class _SplashPageState extends State<SplashPage> {
         final isLogged = await SharePreferences().getBool(SharePreferenceKey.isLogged);
         print('was login:  $isLogged');
         if (isLogged ?? false) {
-
-          Navigator.pushReplacement(context, MaterialPageRoute(
-            builder: (context) => MainPage(),
-          ));
+          final uuid = await SharePreferences().getString(SharePreferenceKey.uuid) ?? '';
+          BlocProvider.of<UserBloc>(context).add(GetDetailsUser(uuid));
         } else {
           BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
           Navigator.pushReplacement(context, MaterialPageRoute(
@@ -67,7 +66,19 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: BlocListener<UserBloc, UserState>(
+        listener: (context, state) async {
+          if (state is GetDetailsError) {
+            print('Get user details: error');
+          } else if (state is GetDetailsSuccessfully) {
+            final user = jsonEncode(state.userObj);
+            await SharePreferences().saveString(SharePreferenceKey.user, user);
+            Navigator.pushReplacement(context, MaterialPageRoute(
+              builder: (context) => MainPage(userObj: state.userObj,),
+            ));
+          }
+        },
+        child: Container(
           color: HexColor("#2979FF"),
           child: Stack(
             fit: StackFit.expand,
@@ -92,6 +103,7 @@ class _SplashPageState extends State<SplashPage> {
             ],
           ),
         ),
+      )
     );
   }
 }

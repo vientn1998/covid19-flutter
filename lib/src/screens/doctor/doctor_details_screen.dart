@@ -62,20 +62,22 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                       Row(
                         mainAxisSize: MainAxisSize.max,
                         children: <Widget>[
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(widget.userObj.name, style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),),
-                              Text(widget.userObj.getNameMajor(), style: TextStyle(
-                                fontWeight: FontWeight.normal,
-                                fontSize: 15,
-                              ),)
-                            ],
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(widget.userObj.name, style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),),
+                                Text(widget.userObj.getNameMajor(), style: TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 15,
+                                ), maxLines: 2, overflow: TextOverflow.ellipsis,)
+                              ],
+                            ),
                           ),
-                          Spacer(),
                           SizedBox(width: 10,),
                           _buildBtnAction(Icons.email, colorTotalCase),
                           SizedBox(width: paddingDefault,),

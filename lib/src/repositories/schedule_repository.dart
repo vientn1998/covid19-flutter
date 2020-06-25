@@ -23,6 +23,20 @@ class ScheduleRepository {
     return isSuccess;
   }
 
+  Future<List<ScheduleModel>> getScheduleByDoctorAndDay(String idDoctor, int day) async{
+    List<ScheduleModel> list = [];
+    try{
+      await scheduleCollection.document(idDoctor).collection('$day}').getDocuments().then((querySnapshot){
+        print('querySnapshot : ${querySnapshot.documents.length}');
+        querySnapshot.documents.forEach((documentSnapshot) {
+          list.add(ScheduleModel.fromSnapshot(documentSnapshot));
+        });
+      });
+    } catch (error) {
+      print('error getScheduleByDoctorAndDay : $error');
+    }
+    return list;
+  }
 
 
 }

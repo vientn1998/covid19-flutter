@@ -7,7 +7,6 @@ class ScheduleRepository {
 
   Future<bool> createSchedule(ScheduleModel scheduleModel) async {
     bool isSuccess = false;
-    scheduleModel.id = '${scheduleModel.timeBook}';
     final data = scheduleModel.toJson();
     print('createSchedule $data');
     await scheduleCollection

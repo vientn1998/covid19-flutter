@@ -1,5 +1,6 @@
 extension IntExtension on int {
-  getTypeTimeSchedule() {
+
+  String getTypeTimeSchedule() {
     switch (this) {
       case 1:
         return "07:00 - 08:00";
@@ -26,7 +27,7 @@ extension IntExtension on int {
         return "15:00 - 16:00";
         break;
       case 9:
-        return "6:00 - 17:00";
+        return "16:00 - 17:00";
         break;
       default:
         return '';

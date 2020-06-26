@@ -31,9 +31,12 @@ class ScheduleDoctorPage extends StatefulWidget {
 class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
 
   DateTime _currentDate = DateTime.now();
+  DateTime dateTimeSelected = DateTime.now();
   UserObj userObjSender;
   KeyValueObj timeSelected;
   bool isShowDialog = false;
+  static const double sizeIconWork = 4.0;
+
   static Widget _eventIcon = new Container(
     decoration: new BoxDecoration(
         color: Colors.white,
@@ -54,20 +57,10 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
           icon: _eventIcon,
           dot: Container(
             margin: EdgeInsets.symmetric(horizontal: 1.0),
-            color: Colors.red,
-            height: 5.0,
-            width: 5.0,
+            color: Colors.orange,
+            height: sizeIconWork,
+            width: sizeIconWork,
           ),
-        ),
-        new Event(
-          date: new DateTime(2020, 6, 26),
-          title: 'Event 2',
-          icon: _eventIcon,
-        ),
-        new Event(
-          date: new DateTime(2020, 6, 26),
-          title: 'Event 3',
-          icon: _eventIcon,
         ),
       ],
     },
@@ -89,6 +82,8 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
 
   List<ScheduleModel> listData = [];
 
+  List<KeyValueObj> listDataValid = [];
+
   getUser() async {
     final data = UserObj.fromJson((await SharePreferences().getObject(SharePreferenceKey.user)));
     setState(() {
@@ -96,9 +91,9 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
     });
   }
 
-  getScheduleByDay(DateTime date, {bool isShowDialogCreate = false}) {
+  getScheduleByDay(DateTime date) {
     BlocProvider.of<ScheduleBloc>(context)
-        .add(GetScheduleByDay(idDoctor: widget.userObjReceiver.id, date: date, isShow: isShowDialogCreate));
+        .add(GetScheduleByDay(idDoctor: widget.userObjReceiver.id, date: date));
   }
 
   @override
@@ -106,21 +101,27 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
     isShowDialog = false;
     super.initState();
     getUser();
-    final date = DateTime.now();
-    final d = DateTime(date.year, date.month, date.day);
-    getScheduleByDay(d, isShowDialogCreate: false);
+    final dateCurrent = DateTime.now();
+    final dateInit = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+    dateTimeSelected = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+    listDataValid.addAll(listDataDefault);
+    getScheduleByDay(dateInit);
   }
 
   @override
   Widget build(BuildContext context) {
     _calendarCarouselNoHeader = CalendarCarousel<Event>(
-      todayBorderColor: Colors.black54,
+      todayBorderColor: Colors.lightBlueAccent.withOpacity(0.5),
       todayTextStyle: TextStyle(
         color: Colors.white,
       ),
-      todayButtonColor: Colors.blueAccent,
+      selectedDateTime: dateTimeSelected,
+      selectedDayBorderColor: Colors.lightBlue,
+      selectedDayButtonColor: Colors.lightBlueAccent.withOpacity(0.5),
+      todayButtonColor: Colors.black26,
       headerText: DateTimeUtils().formatMonthYearString(_currentDate),
       showHeader: true,
+      isScrollable: false,
       daysHaveCircularBorder: true,
       showOnlyCurrentMonthDate: false,
       weekendTextStyle: TextStyle(
@@ -130,18 +131,17 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
       ),
       weekFormat: false,
 //      markedDatesMap: _markedDateMap,
-      height: 380.0,
+      height: 400.0,
 //      weekDayBackgroundColor: Colors.red,
       customGridViewPhysics: NeverScrollableScrollPhysics(),
       minSelectedDate: _currentDate.subtract(Duration(days: 1)),
       maxSelectedDate: _currentDate.add(Duration(days: 30)),
       onDayPressed: (dateTime,listEvent ) async {
-        final currentDate = DateTime.now();
-        if (currentDate.hour > 16 && currentDate.day == dateTime.day && currentDate.month == dateTime.month) {
-          toast('Time invalid, please choose next the day', gravity: ToastGravity.BOTTOM);
-          return;
-        } else {
-          getScheduleByDay(dateTime, isShowDialogCreate: true);
+        if (dateTime.difference(dateTimeSelected).inDays != 0 ) {
+          setState(() {
+            dateTimeSelected = dateTime;
+          });
+          getScheduleByDay(dateTime);
         }
       },
       daysTextStyle: TextStyle(
@@ -166,6 +166,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
       },
     );
     return new Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: new AppBar(
           title: new Text(widget.userObjReceiver.name),
         ),
@@ -179,8 +180,8 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
               DialogCus(context).show(message: 'Error when create schedule');
             } else if (state is CreateScheduleSuccess) {
               LoadingHud(context).dismiss();
-              toast('Create schedule successfully');
-              getScheduleByDay(state.dateTimeCreated, isShowDialogCreate: false);
+              toast('Create schedule successfully', gravity: ToastGravity.BOTTOM);
+              getScheduleByDay(state.dateTimeCreated);
             } else if (state is LoadingFetchSchedule) {
               LoadingHud(context).show();
               print('LoadingFetchSchedule');
@@ -191,14 +192,27 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
               final data = state.list;
               print('FetchScheduleSuccess ${data.length}');
               listData.clear();
+              data.sort((a, b) => a.id.compareTo(b.id));
               setState(() {
                 listData.addAll(data);
               });
-              LoadingHud(context).dismiss();
-              print('isShowDialogCreate ${state.isShowDialogCreate}');
-              if (state.isShowDialogCreate) {
-                showDialogCreate(state.dateTime);
+              listDataValid.clear();
+              if (listData.length > 0) {
+                listDataDefault.forEach((item) {
+                  final schedule = data.firstWhere((element) => element.id == item.id.toString(), orElse: () => null);
+                  print('schedule ${schedule.toString()}');
+                  if (schedule == null || schedule.id.isEmpty) {
+                    //final value = KeyValueObj(id: int.parse(schedule.id),value: int.parse(schedule.id).getTypeTimeSchedule(), timeBook: schedule.timeBook);
+                    listDataValid.add(item);
+                  }
+                });
+              } else {
+                listDataValid.addAll(listDataDefault);
               }
+              listDataValid.forEach((element) {
+                print(element.toString());
+              });
+              LoadingHud(context).dismiss();
             }
           },
           child: Column(
@@ -207,8 +221,35 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.0),
+                margin: EdgeInsets.symmetric(horizontal: 5.0),
                 child: _calendarCarouselNoHeader,
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  SizedBox(width: 25,),
+                  Text('List schedule', style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600
+                  ),),
+                  Spacer(),
+                  FlatButton(
+                    child: Text('Create', style: TextStyle(
+                        fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.blue),),
+                    onPressed: () {
+                      final currentDate = DateTime.now();
+                      if (currentDate.hour > 16 && currentDate.day == dateTimeSelected.day
+                          && currentDate.month == dateTimeSelected.month) {
+                        toast('Time invalid, please choose next the day', gravity: ToastGravity.BOTTOM);
+                        return;
+                      }
+                      showDialogCreate(dateTimeSelected);
+                    },
+                  ),
+                  SizedBox(width: 8,),
+                ],
               ),
               Expanded(
                 child: _buildItemSchedule(listData),
@@ -225,7 +266,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
         barrierDismissible: false,
         context: context,
         builder: (context) {
-          return MyDialogCreateSchedule(dateTimeCreate,timeSelected,listDataDefault,'', userObjSender, widget.userObjReceiver);
+          return MyDialogCreateSchedule(dateTimeCreate,timeSelected,listDataValid,'', userObjSender, widget.userObjReceiver);
         }) as ScheduleModel;
     if (schedule != null && schedule.status.isNotEmpty) {
       BlocProvider.of<ScheduleBloc>(context).add(CreateSchedule(scheduleModel: schedule, dateTimeCreate: dateTimeCreate));
@@ -243,9 +284,10 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
           final item = list[index];
           final date = item.dateTime.convertDatetime();
           return ListTile(
-            title: Text('${DateTimeUtils().formatDateString(date)} - ${item.id}'),
+            title: Text('${DateTimeUtils().formatDateString(date)} - ${int.parse(item.id).getTypeTimeSchedule()}'),
           );
         },
+      padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
         separatorBuilder: (context, index) => Container(height: 10,),
         itemCount: list.length,
       shrinkWrap: true,
@@ -371,7 +413,8 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
                           toast('Time invalid, please choose next the day', gravity: ToastGravity.BOTTOM);
                           return;
                         } else {
-                          if (currentDate.day == widget.dateTime.day && currentDate.month == widget.dateTime.month) {
+                          if (currentDate.day == widget.dateTime.day
+                              && currentDate.month == widget.dateTime.month) {
                             widget.listData.forEach((element) {
                               if (element.timeBook > currentDate.hour) {
                                 list.add(element);
@@ -451,10 +494,11 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
                   onPressed: () async {
                     if (widget.timeSelected != null && widget.timeSelected.id != null) {
                       ScheduleModel obj = ScheduleModel();
+                      obj.id = widget.timeSelected.id.toString();
                       obj.note = note;
                       obj.status = 'New';
                       obj.dateTime = widget.dateTime.millisecondsSinceEpoch;
-                      obj.timeBook = widget.timeSelected.id;
+                      obj.timeBook = widget.timeSelected.timeBook;
                       obj.sender = widget.userObjSender;
                       obj.receiver = widget.userObjReceiver;
                       print(widget.dateTime);

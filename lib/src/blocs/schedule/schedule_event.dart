@@ -13,11 +13,13 @@ class InitSchedule extends ScheduleEvent {
 
 class CreateSchedule extends ScheduleEvent {
   final ScheduleModel scheduleModel;
-  CreateSchedule({@required this.scheduleModel});
+  final DateTime dateTimeCreate;
+  CreateSchedule({@required this.scheduleModel, this.dateTimeCreate});
 }
 
 class GetScheduleByDay extends ScheduleEvent {
   final String idDoctor;
-  final int date;
-  GetScheduleByDay({@required this.idDoctor, this.date});
+  final DateTime date;
+  final bool isShow;
+  GetScheduleByDay({@required this.idDoctor, this.date, this.isShow});
 }

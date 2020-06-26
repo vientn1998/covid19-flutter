@@ -29,7 +29,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     yield ScheduleLoading();
     final isSuccess = await scheduleRepository.createSchedule(event.scheduleModel);
     if (isSuccess != null && isSuccess == true) {
-      yield CreateScheduleSuccess();
+      yield CreateScheduleSuccess(dateTimeCreated: event.dateTimeCreate);
     } else {
       yield ScheduleError();
     }
@@ -38,9 +38,9 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   Stream<ScheduleState> _mapFetchDataByDayToState(GetScheduleByDay event) async* {
     yield LoadingFetchSchedule();
     try {
-      final data = await scheduleRepository.getScheduleByDoctorAndDay(event.idDoctor, event.date);
+      final data = await scheduleRepository.getScheduleByDoctorAndDay(event.idDoctor, event.date.millisecondsSinceEpoch);
       if (data != null) {
-        yield FetchScheduleSuccess(list: data);
+        yield FetchScheduleSuccess(list: data, isShowDialogCreate: event.isShow, dateTime: event.date);
         print('_mapFetchDataByDayToState : ${data.length}');
       } else {
         yield ErrorFetchSchedule();

@@ -11,8 +11,8 @@ class ScheduleModel extends Equatable {
   UserObj receiver;
   String status;
   String note;
-
-  ScheduleModel({this.id, this.timeBook, this.dateTime, this.sender, this.receiver, this.status, this.note});
+  DateTime dateTimeCreate;
+  ScheduleModel({this.id, this.timeBook, this.dateTime, this.sender, this.receiver, this.status, this.note, this.dateTimeCreate});
 
   static ScheduleModel fromSnapshot(DocumentSnapshot documentSnapshot) {
     return ScheduleModel(

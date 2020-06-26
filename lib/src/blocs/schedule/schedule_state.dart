@@ -22,7 +22,11 @@ class ScheduleError extends ScheduleState {
 }
 
 class CreateScheduleSuccess extends ScheduleState {
-
+  final DateTime dateTimeCreated;
+  CreateScheduleSuccess({@required this.dateTimeCreated});
+  @override
+  // TODO: implement props
+  List<Object> get props => [this.dateTimeCreated];
 }
 
 class LoadingFetchSchedule extends ScheduleState {
@@ -41,7 +45,9 @@ class ErrorFetchSchedule extends ScheduleState {
 
 class FetchScheduleSuccess extends ScheduleState {
   final List<ScheduleModel> list;
-  FetchScheduleSuccess({@required this.list});
+  final bool isShowDialogCreate;
+  final DateTime dateTime;
+  FetchScheduleSuccess({@required this.list, this.isShowDialogCreate, this.dateTime});
   @override
   List<Object> get props => [this.list];
   @override

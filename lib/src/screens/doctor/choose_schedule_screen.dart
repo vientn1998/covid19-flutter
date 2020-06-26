@@ -33,7 +33,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
   DateTime _currentDate = DateTime.now();
   UserObj userObjSender;
   KeyValueObj timeSelected;
-
+  bool isShowDialog = false;
   static Widget _eventIcon = new Container(
     decoration: new BoxDecoration(
         color: Colors.white,
@@ -96,20 +96,19 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
     });
   }
 
-  getScheduleByDay(DateTime date) {
+  getScheduleByDay(DateTime date, {bool isShowDialogCreate = false}) {
     BlocProvider.of<ScheduleBloc>(context)
-        .add(GetScheduleByDay(idDoctor: widget.userObjReceiver.id, date: date.millisecondsSinceEpoch));
+        .add(GetScheduleByDay(idDoctor: widget.userObjReceiver.id, date: date, isShow: isShowDialogCreate));
   }
 
   @override
   void initState() {
-//    BlocProvider.of<ScheduleBloc>(context)
-//        .add(InitSchedule());
+    isShowDialog = false;
     super.initState();
     getUser();
     final date = DateTime.now();
     final d = DateTime(date.year, date.month, date.day);
-    getScheduleByDay(d);
+    getScheduleByDay(d, isShowDialogCreate: false);
   }
 
   @override
@@ -142,18 +141,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
           toast('Time invalid, please choose next the day', gravity: ToastGravity.BOTTOM);
           return;
         } else {
-//          final date = DateTime.now();
-//          final d = DateTime(date.year, date.month, date.day);
-          getScheduleByDay(dateTime);
-          final schedule = await showDialog(
-              barrierDismissible: false,
-              context: context,
-              builder: (context) {
-                return MyDialogCreateSchedule(dateTime,timeSelected,listDataDefault,'', userObjSender, widget.userObjReceiver);
-              }) as ScheduleModel;
-          if (schedule != null && schedule.status.isNotEmpty) {
-            BlocProvider.of<ScheduleBloc>(context).add(CreateSchedule(scheduleModel: schedule));
-          }
+          getScheduleByDay(dateTime, isShowDialogCreate: true);
         }
       },
       daysTextStyle: TextStyle(
@@ -192,6 +180,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
             } else if (state is CreateScheduleSuccess) {
               LoadingHud(context).dismiss();
               toast('Create schedule successfully');
+              getScheduleByDay(state.dateTimeCreated, isShowDialogCreate: false);
             } else if (state is LoadingFetchSchedule) {
               LoadingHud(context).show();
               print('LoadingFetchSchedule');
@@ -201,10 +190,15 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
             } else if (state is FetchScheduleSuccess) {
               final data = state.list;
               print('FetchScheduleSuccess ${data.length}');
+              listData.clear();
               setState(() {
                 listData.addAll(data);
               });
               LoadingHud(context).dismiss();
+              print('isShowDialogCreate ${state.isShowDialogCreate}');
+              if (state.isShowDialogCreate) {
+                showDialogCreate(state.dateTime);
+              }
             }
           },
           child: Column(
@@ -224,6 +218,18 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
           ),
         )
     );
+  }
+
+  showDialogCreate(DateTime dateTimeCreate) async{
+    final schedule = await showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return MyDialogCreateSchedule(dateTimeCreate,timeSelected,listDataDefault,'', userObjSender, widget.userObjReceiver);
+        }) as ScheduleModel;
+    if (schedule != null && schedule.status.isNotEmpty) {
+      BlocProvider.of<ScheduleBloc>(context).add(CreateSchedule(scheduleModel: schedule, dateTimeCreate: dateTimeCreate));
+    }
   }
 
   _buildItemSchedule(List<ScheduleModel> list) {
@@ -366,18 +372,15 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
                           return;
                         } else {
                           if (currentDate.day == widget.dateTime.day && currentDate.month == widget.dateTime.month) {
-                            print('same day');
                             widget.listData.forEach((element) {
                               if (element.timeBook > currentDate.hour) {
                                 list.add(element);
                               }
                             });
                           } else {
-                            print('difference day');
                             list.addAll(widget.listData);
                           }
                         }
-                        print('size list : ${list.length}');
                         final time = await showDialog(
                           barrierDismissible: false,
                             context: context,

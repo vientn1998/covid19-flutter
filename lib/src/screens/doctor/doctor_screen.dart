@@ -9,6 +9,7 @@ import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:template_flutter/src/blocs/doctor/doctor_bloc.dart';
 import 'package:template_flutter/src/blocs/doctor/doctor_event.dart';
 import 'package:template_flutter/src/blocs/doctor/doctor_state.dart';
+import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/doctor/doctor_details_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
@@ -295,17 +296,15 @@ class _DoctorPageState extends State<DoctorPage> {
                       separatorBuilder: (context, position) {
                         return SizedBox(height: paddingDefault - 5,);
                       },
-                      itemBuilder: (BuildContext context, int index) {
-                        return _buildTopDoctor(listUser[index], () {
-                          Navigator.push(context, MaterialPageRoute(
-                            builder: (context) => DoctorDetailsPage(userObj: listUser[index],),
-                          ));
-                        }, () {
-                          Navigator.push(context, MaterialPageRoute(
-                            builder: (context) => ScheduleDoctorPage(userObjReceiver: listUser[index],),
-                          ));
-                        });
-                      }
+                      itemBuilder: (BuildContext context, int index) => _buildTopDoctor(listUser[index], () {
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => DoctorDetailsPage(userObj: listUser[index],),
+                        ));
+                      }, () {
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => ScheduleDoctorPage(userObjReceiver: listUser[index],),
+                        ));
+                      })
                   ),
                   SizedBox(height: 15,),
                   Container(

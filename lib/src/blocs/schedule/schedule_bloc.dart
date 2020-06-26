@@ -18,6 +18,10 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   ) async* {
     if (event is CreateSchedule) {
       yield* _mapCreateToState(event);
+    } else if (event is GetScheduleByDay) {
+      yield* _mapFetchDataByDayToState(event);
+    } else {
+      yield InitialScheduleState();
     }
   }
 
@@ -29,6 +33,23 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     } else {
       yield ScheduleError();
     }
-
   }
+
+  Stream<ScheduleState> _mapFetchDataByDayToState(GetScheduleByDay event) async* {
+    yield LoadingFetchSchedule();
+    try {
+      final data = await scheduleRepository.getScheduleByDoctorAndDay(event.idDoctor, event.date);
+      if (data != null) {
+        yield FetchScheduleSuccess(list: data);
+        print('_mapFetchDataByDayToState : ${data.length}');
+      } else {
+        yield ErrorFetchSchedule();
+        print('error _mapFetchDataByDayToState');
+      }
+    } catch(error) {
+      yield ErrorFetchSchedule();
+      print('error _mapFetchDataByDayToState: $error');
+    }
+  }
+
 }

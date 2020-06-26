@@ -8,7 +8,16 @@ abstract class ScheduleEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class InitSchedule extends ScheduleEvent {
+}
+
 class CreateSchedule extends ScheduleEvent {
   final ScheduleModel scheduleModel;
   CreateSchedule({@required this.scheduleModel});
+}
+
+class GetScheduleByDay extends ScheduleEvent {
+  final String idDoctor;
+  final int date;
+  GetScheduleByDay({@required this.idDoctor, this.date});
 }

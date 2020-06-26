@@ -19,8 +19,8 @@ class ScheduleModel extends Equatable {
       id: documentSnapshot.data['id'] ?? '',
       timeBook: documentSnapshot.data['timeBook'] ?? 0,
       dateTime: documentSnapshot.data['dateTime'] ?? 0,
-      sender: UserObj.fromSnapshot(documentSnapshot.data['sender']),
-      receiver: UserObj.fromSnapshot(documentSnapshot.data['receiver']),
+      sender: UserObj.fromJson(documentSnapshot.data['sender']),
+      receiver: UserObj.fromJson(documentSnapshot.data['receiver']),
       status: documentSnapshot.data['status'] ?? '',
       note: documentSnapshot.data['note'] ?? '',
     );

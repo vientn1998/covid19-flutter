@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
@@ -14,7 +16,8 @@ import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/widgets/button.dart';
-
+import '../../utils/extension/int_extention.dart';
+import '../../utils/extension/datetime_extention.dart';
 class ScheduleDoctorPage extends StatefulWidget {
 
   final UserObj userObjReceiver;
@@ -84,7 +87,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
     KeyValueObj(id: 9, value: '16:00 - 17:00', timeBook: 16),
   ];
 
-  List<KeyValueObj> listData = [];
+  List<ScheduleModel> listData = [];
 
   getUser() async {
     final data = UserObj.fromJson((await SharePreferences().getObject(SharePreferenceKey.user)));
@@ -93,44 +96,20 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
     });
   }
 
+  getScheduleByDay(DateTime date) {
+    BlocProvider.of<ScheduleBloc>(context)
+        .add(GetScheduleByDay(idDoctor: widget.userObjReceiver.id, date: date.millisecondsSinceEpoch));
+  }
+
   @override
   void initState() {
-
-    getUser();
-    _markedDateMap.add(
-        new DateTime(2020, 6, 27),
-        new Event(
-          date: new DateTime(2020, 6, 27),
-          title: 'Event 5',
-          icon: _eventIcon,
-        ));
-
-    _markedDateMap.add(
-        new DateTime(2020, 6, 28),
-        new Event(
-          date: new DateTime(2020, 6, 28),
-          title: 'Event 4',
-          icon: _eventIcon,
-        ));
-
-    _markedDateMap.addAll(new DateTime(2020, 6, 29), [
-      new Event(
-        date: new DateTime(2020, 6, 29),
-        title: 'Event 1',
-        icon: _eventIcon,
-      ),
-      new Event(
-        date: new DateTime(2020, 6, 29),
-        title: 'Event 2',
-        icon: _eventIcon,
-      ),
-      new Event(
-        date: new DateTime(2020, 6, 29),
-        title: 'Event 3',
-        icon: _eventIcon,
-      ),
-    ]);
+//    BlocProvider.of<ScheduleBloc>(context)
+//        .add(InitSchedule());
     super.initState();
+    getUser();
+    final date = DateTime.now();
+    final d = DateTime(date.year, date.month, date.day);
+    getScheduleByDay(d);
   }
 
   @override
@@ -163,6 +142,9 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
           toast('Time invalid, please choose next the day', gravity: ToastGravity.BOTTOM);
           return;
         } else {
+//          final date = DateTime.now();
+//          final d = DateTime(date.year, date.month, date.day);
+          getScheduleByDay(dateTime);
           final schedule = await showDialog(
               barrierDismissible: false,
               context: context,
@@ -203,11 +185,26 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
           listener: (context, state) {
             if (state is ScheduleLoading) {
               LoadingHud(context).show();
+              print('ScheduleLoading');
             } else if (state is ScheduleError) {
               LoadingHud(context).dismiss();
+              DialogCus(context).show(message: 'Error when create schedule');
             } else if (state is CreateScheduleSuccess) {
               LoadingHud(context).dismiss();
               toast('Create schedule successfully');
+            } else if (state is LoadingFetchSchedule) {
+              LoadingHud(context).show();
+              print('LoadingFetchSchedule');
+            } else if (state is ErrorFetchSchedule) {
+              LoadingHud(context).dismiss();
+              DialogCus(context).show(message: 'Error when fetch data schedule');
+            } else if (state is FetchScheduleSuccess) {
+              final data = state.list;
+              print('FetchScheduleSuccess ${data.length}');
+              setState(() {
+                listData.addAll(data);
+              });
+              LoadingHud(context).dismiss();
             }
           },
           child: Column(
@@ -220,19 +217,33 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
                 child: _calendarCarouselNoHeader,
               ),
               Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      Container(height: 500, color: Colors.red,),
-                      Container(height: 500, color: Colors.yellow,),
-                    ],
-                  ),
-                ),
+                child: _buildItemSchedule(listData),
               )
               //
             ],
           ),
         )
+    );
+  }
+
+  _buildItemSchedule(List<ScheduleModel> list) {
+    if (list.length == 0) {
+      return Center(
+       child: Text('Empty'),
+      );
+    }
+    return ListView.separated(
+        itemBuilder: (context, index) {
+          final item = list[index];
+          final date = item.dateTime.convertDatetime();
+          return ListTile(
+            title: Text('${DateTimeUtils().formatDateString(date)} - ${item.id}'),
+          );
+        },
+        separatorBuilder: (context, index) => Container(height: 10,),
+        itemCount: list.length,
+      shrinkWrap: true,
+      scrollDirection: Axis.vertical,
     );
   }
 }

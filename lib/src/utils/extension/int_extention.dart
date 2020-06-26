@@ -32,4 +32,8 @@ extension IntExtension on int {
         return '';
     }
   }
+
+  DateTime convertDatetime() {
+    return DateTime.fromMillisecondsSinceEpoch(this) ?? DateTime.now();
+  }
 }

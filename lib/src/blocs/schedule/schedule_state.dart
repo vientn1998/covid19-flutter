@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:template_flutter/src/models/schedule_day_model.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
 
 abstract class ScheduleState extends Equatable {
@@ -53,5 +54,19 @@ class FetchScheduleSuccess extends ScheduleState {
   @override
   String toString() {
     return 'FetchScheduleSuccess';
+  }
+}
+
+class FetchAllScheduleByDoctorSuccess extends ScheduleState {
+  final List<ScheduleDayModel> list;
+  FetchAllScheduleByDoctorSuccess({@required this.list});
+  @override
+  List<Object> get props => [this.list];
+}
+
+class ErrorFetchAllSchedule extends ScheduleState {
+  @override
+  String toString() {
+    return 'ErrorFetchSchedule';
   }
 }

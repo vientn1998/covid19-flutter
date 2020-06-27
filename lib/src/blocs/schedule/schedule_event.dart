@@ -23,3 +23,9 @@ class GetScheduleByDay extends ScheduleEvent {
   final bool isShow;
   GetScheduleByDay({@required this.idDoctor, this.date, this.isShow});
 }
+
+class GetScheduleByDoctor extends ScheduleEvent {
+  final String idDoctor;
+  DateTime fromDate;
+  GetScheduleByDoctor({@required this.idDoctor, this.fromDate});
+}

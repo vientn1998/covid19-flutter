@@ -49,6 +49,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
               )
             ],
           ),
+
           SliverList(
             delegate: SliverChildListDelegate(
                 <Widget>[

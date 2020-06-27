@@ -7,6 +7,7 @@ import 'package:template_flutter/src/blocs/auth/auth_bloc.dart';
 import 'package:template_flutter/src/blocs/auth/bloc.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/introduction/login_screen.dart';
+import 'package:template_flutter/src/screens/profile/medical_examination.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
@@ -155,7 +156,9 @@ class _ProfilePageState extends State<ProfilePage> {
     return Column(
       children: <Widget>[
         _buildRowItem(FaIcon(FontAwesomeIcons.briefcaseMedical, color: Colors.red, size: sizeIcon,),"Medical examination","2", function: () {
-          print('Medical examination');
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) => MedicalExamination(),
+          ));
         }),
         _buildLine(),
         _buildRowItem(FaIcon(FontAwesomeIcons.bell, color: Colors.blueAccent, size: sizeIcon,),"Notification","4", function: () {

@@ -29,6 +29,8 @@ class ScheduleModel extends Equatable {
   Map<String, Object> toJson() {
     return {
       'id' : this.id,
+      'receiverId' : this.receiver.id,
+      'senderId' : this.sender.id,
       'timeBook' : this.timeBook,
       'dateTime' : this.dateTime,
       'sender' : this.sender.toJsonDoctor(),

@@ -70,3 +70,10 @@ class ErrorFetchAllSchedule extends ScheduleState {
     return 'ErrorFetchSchedule';
   }
 }
+
+class FetchScheduleByUserSuccess extends ScheduleState {
+  final List<ScheduleModel> list;
+  FetchScheduleByUserSuccess({@required this.list});
+  @override
+  List<Object> get props => [this.list];
+}

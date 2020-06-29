@@ -29,3 +29,9 @@ enum StatusTabHome {
   total,
   yesterday,
 }
+
+enum StatusSchedule {
+  New,
+  Approved,
+  Canceled
+}

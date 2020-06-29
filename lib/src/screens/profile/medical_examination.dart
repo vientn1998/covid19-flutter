@@ -149,7 +149,7 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
                     SizedBox(height: 2,),
                     Text('Bs Nguyen Anh', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),),
                     SizedBox(height: 2,),
-                    Text('Note',
+                    Text('Address',
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: textColor),),
                   ],
                 ),

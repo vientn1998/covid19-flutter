@@ -35,3 +35,9 @@ enum StatusSchedule {
   Approved,
   Canceled
 }
+
+extension ParseToString on StatusSchedule {
+  String toShortString() {
+    return this.toString().split('.').last;
+  }
+}

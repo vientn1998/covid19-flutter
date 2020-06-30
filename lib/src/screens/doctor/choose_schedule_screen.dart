@@ -37,14 +37,6 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
   bool isShowDialog = false;
   static const double sizeIconWork = 9.0;
 
-  static Widget _eventIcon = new Container(
-    decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(sizeIconWork / 2)),
-        border: Border.all(color: Colors.blue, width: 1.0)),
-    height: sizeIconWork,
-    width: sizeIconWork,
-  );
-
   CalendarCarousel _calendarCarouselNoHeader;
 
   EventList<Event> listMakeDate = EventList<Event>();
@@ -86,14 +78,12 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
     dateTimeSelected = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
     listDataValid.addAll(listDataDefault);
     getScheduleByDay(dateInit);
-    buildLoadAllSchedule();
+    buildLoadAllSchedule(dateInit);
   }
 
-  buildLoadAllSchedule() {
-    final dateCurrent = DateTime.now();
-    final dateInit = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+  buildLoadAllSchedule(DateTime dateTime) {
     BlocProvider.of<ScheduleBloc>(context)
-        .add(GetScheduleByDoctor(idDoctor: widget.userObjReceiver.id, fromDate: dateInit));
+        .add(GetScheduleByDoctor(idDoctor: widget.userObjReceiver.id, fromDate: dateTime));
   }
 
   @override
@@ -173,7 +163,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
               LoadingHud(context).dismiss();
               toast('Create schedule successfully', gravity: ToastGravity.BOTTOM);
               getScheduleByDay(state.dateTimeCreated);
-              //buildLoadAllSchedule();
+              buildLoadAllSchedule(state.dateTimeCreated);
             } else if (state is LoadingFetchSchedule) {
               LoadingHud(context).show();
               print('LoadingFetchSchedule');
@@ -191,7 +181,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
               listDataValid.clear();
               if (listData.length > 0) {
                 listDataDefault.forEach((item) {
-                  final schedule = data.firstWhere((element) => element.id == item.id.toString(), orElse: () => null);
+                  final schedule = data.firstWhere((element) => element.timeBook == item.timeBook, orElse: () => null);
                   print('schedule ${schedule.toString()}');
                   if (schedule == null || schedule.id.isEmpty) {
                     listDataValid.add(item);
@@ -205,6 +195,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
               });
               LoadingHud(context).dismiss();
             } else if (state is FetchAllScheduleByDoctorSuccess) {
+              listMakeDate.clear();
               final list = state.list;
               print('size FetchAllScheduleByDoctorSuccess ${list.length}');
               list.forEach((element) {
@@ -239,7 +230,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   SizedBox(width: 25,),
-                  Text('List schedule', style: TextStyle(
+                  Text('List schedule: ${listData.length}', style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600
                   ),),
@@ -299,6 +290,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
   }
 
   _buildItemSchedule(List<ScheduleModel> list) {
+    list.sort((a, b) => a.timeBook.compareTo(b.timeBook));
     if (list.length == 0) {
       return Center(
        child: Text('Empty'),
@@ -342,7 +334,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
               children: <Widget>[
                 Text(item.sender.name, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: textColor),),
                 Spacer(),
-                Text(int.parse(item.id).getTypeTimeSchedule(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: textColor),),
+                Text(item.timeBook.getTypeTimeSchedule(), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: textColor),),
               ],
             ),
             SizedBox(height: 5,),
@@ -565,7 +557,7 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
                       Navigator.pop(context, obj);
                       FocusScope.of(context).unfocus();
                     } else {
-                      toast('Please choose time');
+                      toast('Please choose time', gravity: ToastGravity.BOTTOM);
                     }
                   },
                 ),

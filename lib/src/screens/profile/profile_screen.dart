@@ -5,6 +5,7 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:template_flutter/src/blocs/auth/auth_bloc.dart';
 import 'package:template_flutter/src/blocs/auth/bloc.dart';
+import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/introduction/login_screen.dart';
 import 'package:template_flutter/src/screens/profile/medical_examination.dart';
@@ -40,6 +41,10 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       }
     }
+    final dateCurrent = DateTime.now();
+    final date = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+    BlocProvider.of<ScheduleBloc>(context)
+        .add(GetScheduleByUesr(idUser: userObj.id));
   }
 
   @override
@@ -153,15 +158,16 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   _buildDataFirstSection() {
+    final data = (BlocProvider.of<ScheduleBloc>(context).numberExamination);
     return Column(
       children: <Widget>[
-        _buildRowItem(FaIcon(FontAwesomeIcons.briefcaseMedical, color: Colors.red, size: sizeIcon,),"Medical examination","2", function: () {
+        _buildRowItem(FaIcon(FontAwesomeIcons.briefcaseMedical, color: Colors.red, size: sizeIcon,),"Medical examination","${data}", function: () {
           Navigator.push(context, MaterialPageRoute(
-            builder: (context) => MedicalExamination(),
+            builder: (context) => MedicalExamination(userObj: userObj,),
           ));
         }),
         _buildLine(),
-        _buildRowItem(FaIcon(FontAwesomeIcons.bell, color: Colors.blueAccent, size: sizeIcon,),"Notification","4", function: () {
+        _buildRowItem(FaIcon(FontAwesomeIcons.bell, color: Colors.blueAccent, size: sizeIcon,),"Notification","", function: () {
           print('Notification');
         }),
       ],

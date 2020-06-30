@@ -94,6 +94,8 @@ dependencies:
   smooth_star_rating: ^1.1.1
   #calendar schedule doctor
   flutter_calendar_carousel: ^1.4.12
+  #pull to refresh
+  pull_to_refresh: ^1.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,24 +1,54 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_hud/loading_hud.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:template_flutter/src/blocs/schedule/bloc.dart';
+import 'package:template_flutter/src/models/schedule_model.dart';
+import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/utils/color.dart';
+import 'package:template_flutter/src/utils/date_time.dart';
 import 'package:template_flutter/src/utils/define.dart';
-
+import '../../utils/extension/int_extention.dart';
 class MedicalExamination extends StatefulWidget {
+  UserObj userObj;
+  MedicalExamination({@required this.userObj});
   @override
   _MedicalExaminationState createState() => _MedicalExaminationState();
 }
 
 class _MedicalExaminationState extends State<MedicalExamination> with SingleTickerProviderStateMixin {
+
   TabController _tabController;
   static const heightFilter = 35.0;
+  List<ScheduleModel> list = [];
+  RefreshController _refreshController = RefreshController(initialRefresh: false);
+  DateTime dateTimeSelected;
+  StatusSchedule _statusSchedule;
+  void _onRefresh() async{
+    BlocProvider.of<ScheduleBloc>(context)
+        .add(GetScheduleByUesr(idUser: widget.userObj.id, fromDate: dateTimeSelected, statusSchedule: _statusSchedule));
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async{
+    _refreshController.loadComplete();
+  }
+
+
   @override
   void initState() {
     super.initState();
+    final dateCurrent = DateTime.now();
+    dateTimeSelected = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+    BlocProvider.of<ScheduleBloc>(context)
+        .add(GetScheduleByUesr(idUser: widget.userObj.id, fromDate: dateTimeSelected, statusSchedule: _statusSchedule));
     _tabController = new TabController(length: 2, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       appBar: new AppBar(
         title: new Text("My Examination Schedule"),
         centerTitle: true,
@@ -47,13 +77,42 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
         ),
         bottomOpacity: 1,
       ),
-      body: TabBarView(
-        physics: NeverScrollableScrollPhysics(),
-        children: [
-          buildWidgetCalendar(),
-          buildWidgetHistory(),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<ScheduleBloc, ScheduleState>(
+            listener: (context, state) {
+              if (state is LoadingFetchSchedule) {
+                LoadingHud(context).show();
+              } else if (state is ErrorFetchSchedule) {
+                LoadingHud(context).dismiss();
+                _onLoading();
+              } else if (state is FetchScheduleByUserSuccess) {
+                final data = state.list;
+                list.clear();
+                data.sort((a, b) {
+                  int cmp = a.dateTime.compareTo(b.dateTime);
+                  if (cmp != 0) {
+                    return cmp;
+                  }
+                  return a.timeBook.compareTo(b.timeBook);
+                });
+                setState(() {
+                  list.addAll(data);
+                });
+                LoadingHud(context).dismiss();
+                _onLoading();
+              }
+            },
+          )
         ],
-        controller: _tabController,),
+        child: TabBarView(
+          physics: NeverScrollableScrollPhysics(),
+          children: [
+            buildWidgetCalendar(),
+            buildWidgetHistory(),
+          ],
+          controller: _tabController,),
+      ),
     );
   }
 
@@ -71,37 +130,81 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
                 fontWeight: FontWeight.w700
               ),),
               Spacer(),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.lightBlueAccent,
-                  borderRadius: BorderRadius.circular(8),
+              InkWell(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.lightBlueAccent,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  height: heightFilter,
+                  width: heightFilter,
+                  child: Icon(Icons.sort),
                 ),
-                height: heightFilter,
-                width: heightFilter,
-                child: Icon(Icons.sort),
+                onTap: () async {
+                  final status = await showCupertinoModalPopup(
+                    context: context,
+                    builder: (context) => CupertinoActionSheet(
+                        cancelButton: CupertinoActionSheetAction(
+                          isDefaultAction: true,
+                          child: const Text('Cancel', style: TextStyle(color: Colors.red),),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                        actions: <Widget>[
+                          CupertinoActionSheetAction(
+                              child: const Text('New'), onPressed: () async {
+                            Navigator.pop(context, StatusSchedule.New);
+                          }),
+                          CupertinoActionSheetAction(
+                              child: const Text('Approved'), onPressed: () async {
+                            Navigator.pop(context, StatusSchedule.Approved);
+                          }),
+                        ]),
+                  ) as StatusSchedule;
+                  if (status != null) {
+                    print(status);
+                    setState(() {
+                      _statusSchedule = status;
+                    });
+                    BlocProvider.of<ScheduleBloc>(context)
+                        .add(GetScheduleByUesr(idUser: widget.userObj.id, fromDate: dateTimeSelected, statusSchedule: status));
+                  }
+
+                },
               ),
             ],
           ),
         ),
         Expanded(
-          child: buildListViewUpcoming(),
+          child: SmartRefresher(
+            controller: _refreshController,
+            enablePullDown: true,
+//            header: ClassicHeader(),
+            onRefresh: _onRefresh,
+            onLoading: _onLoading,
+            child: buildListViewUpcoming(),
+          ),
         )
       ],
     );
   }
 
   buildListViewUpcoming() {
+    if (list.isEmpty) {
+      return Center(child: Text('Empty'),);
+    }
     return ListView.separated(
         itemBuilder: (context, index) {
-          return buildUpcomingItem();
+          return buildUpcomingItem(item: list[index]);
         },
-        padding: EdgeInsets.only(top: 5, bottom: 10),
+        padding: EdgeInsets.only(top: 7, bottom: 10),
         separatorBuilder: (context, index) => Container(height: paddingDefault,),
-        itemCount: 20
+        itemCount: list.length
     );
   }
 
-  buildUpcomingItem() {
+  buildUpcomingItem({@required ScheduleModel item}) {
     return InkWell(
       child: Container(
         margin: EdgeInsets.only(right: paddingDefault, left: paddingDefault),
@@ -127,10 +230,14 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
                 height: 70,
                 width: 70,
                 margin: EdgeInsets.only(top: 12, bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: ClipOval(
-                    child: Icon(Icons.calendar_today),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text('${DateTimeUtils().formatDayString(DateTime.fromMillisecondsSinceEpoch(item.dateTime))}', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800, color: Colors.blue),),
+                      Text('${DateTimeUtils().formatMonthString(DateTime.fromMillisecondsSinceEpoch(item.dateTime))}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.blue),),
+                    ],
                   ),
                 ),
                 decoration: BoxDecoration(
@@ -145,12 +252,12 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text('07:00 - 08:00', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textColor),),
-                    SizedBox(height: 2,),
-                    Text('Bs Nguyen Anh', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),),
-                    SizedBox(height: 2,),
-                    Text('Address',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: textColor),),
+                    Text('Hours: ${item.timeBook.getTypeTimeSchedule()}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textColor),),
+                    SizedBox(height: 4,),
+                    Text('Doctor: ${item.receiver.name}', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),),
+                    SizedBox(height: 8,),
+                    Text('Address: ${item.receiver.location != null ? item.receiver.location.street : 'N/a' }',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: textColor), overflow: TextOverflow.ellipsis, maxLines: 2,)
                   ],
                 ),
               ),
@@ -159,7 +266,9 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
                 width: 6,
                 height: 94,
                 decoration: BoxDecoration(
-                  color: Colors.yellow,
+                  color: item.status == StatusSchedule.New.toShortString()
+                      ? Colors.yellow
+                      : item.status == StatusSchedule.Approved.toShortString() ? Colors.green : Colors.grey,
                   borderRadius: BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8))
                 ),
               ),

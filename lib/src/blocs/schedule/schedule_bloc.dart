@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:template_flutter/src/repositories/schedule_repository.dart';
+import 'package:template_flutter/src/utils/define.dart';
 import 'bloc.dart';
 
 class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
 
   final ScheduleRepository scheduleRepository;
-
+  int numberExamination = 0;
   ScheduleBloc(this.scheduleRepository);
 
   @override
@@ -33,6 +34,7 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     yield ScheduleLoading();
     final isSuccess = await scheduleRepository.createSchedule(event.scheduleModel);
     if (isSuccess != null && isSuccess == true) {
+      numberExamination += 1;
       yield CreateScheduleSuccess(dateTimeCreated: event.dateTimeCreate);
     } else {
       yield ScheduleError();
@@ -78,6 +80,9 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     try {
       final data = await scheduleRepository.getScheduleByUser(event.idUser, status: event.statusSchedule);
       if (data != null) {
+        if (event.statusSchedule == StatusSchedule.New) {
+          numberExamination = data.length;
+        }
         yield FetchScheduleByUserSuccess(list: data);
         print('_mapFetchScheduleByUserToState : ${data.length}');
       } else {

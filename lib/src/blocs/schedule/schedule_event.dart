@@ -36,5 +36,5 @@ class GetScheduleByUesr extends ScheduleEvent {
   final String idUser;
   final StatusSchedule statusSchedule;
   DateTime fromDate;
-  GetScheduleByUesr({@required this.idUser, this.fromDate, this.statusSchedule});
+  GetScheduleByUesr({@required this.idUser, this.fromDate, this.statusSchedule = StatusSchedule.New});
 }

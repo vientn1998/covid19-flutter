@@ -81,6 +81,7 @@ class UserObj extends Equatable {
       yearExperience: json["yearExperience"] as int,
       isDoctor: json["isDoctor"] as bool,
       isVerifyPhone: json["isVerifyPhone"] as bool,
+      location: json['location'] == null ? null : LocationObj.fromJson(json['location']),
       isAuthFb: json["isAuthFb"] as bool,
       majors: list,
       imagesCertificate: listCertificate,
@@ -172,6 +173,7 @@ class UserObj extends Equatable {
       'id': this.id,
       'name': this.name,
       'phone': this.phone,
+      'location': location != null ? location.toJson() : null,
       'email': this.email,
     };
   }

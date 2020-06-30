@@ -15,4 +15,12 @@ class DateTimeUtils {
   String formatDateTimeString(DateTime dateTime) {
     return DateFormat('MM/dd/yyyy HH:mm').format(dateTime);
   }
+
+  String formatDayString(DateTime dateTime) {
+    return DateFormat('dd').format(dateTime);
+  }
+
+  String formatMonthString(DateTime dateTime) {
+    return DateFormat('MMM').format(dateTime);
+  }
 }

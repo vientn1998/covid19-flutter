@@ -45,3 +45,14 @@ class GetScheduleByDoctor extends ScheduleEvent {
   DateTime fromDate;
   GetScheduleByDoctor({@required this.idDoctor, this.fromDate, this.statusSchedule});
 }
+
+class GetScheduleAllByDoctor extends ScheduleEvent {
+  final String idDoctor;
+  GetScheduleAllByDoctor({@required this.idDoctor});
+}
+
+class UpdateSchedule extends ScheduleEvent {
+  final String idSchedule;
+  final StatusSchedule statusSchedule;
+  UpdateSchedule({@required this.idSchedule, this.statusSchedule});
+}

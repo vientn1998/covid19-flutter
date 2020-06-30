@@ -89,9 +89,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 children: <Widget>[
                   Expanded(
                     child: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
+                        mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           SizedBox(height: heightSpaceNormal,),
                           Material(

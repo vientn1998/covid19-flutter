@@ -27,6 +27,10 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       yield* _mapFetchScheduleByUserToState(event);
     } else if (event is GetScheduleByDoctor) {
       yield* _mapFetchScheduleByDoctorToState(event);
+    } else if (event is UpdateSchedule) {
+      yield* _mapUpdateScheduleToState(event);
+    } else if (event is GetScheduleAllByDoctor) {
+      yield* _mapFetchScheduleAllByDoctorToState(event);
     } else {
       yield InitialScheduleState();
     }
@@ -95,10 +99,28 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     }
   }
 
+  Stream<ScheduleState> _mapFetchScheduleAllByDoctorToState(GetScheduleAllByDoctor event) async* {
+    yield LoadingFetchSchedule();
+    try {
+      final data = await scheduleRepository
+          .getScheduleAllByDoctor(event.idDoctor);
+      if (data != null) {
+        yield FetchAllTotalScheduleByDoctorSuccess(list: data);
+        print('_mapFetchScheduleAllByDoctorToState : ${data.length}');
+      } else {
+        yield ErrorFetchSchedule();
+        print('error _mapFetchScheduleAllByDoctorToState');
+      }
+    } catch(error) {
+      yield ErrorFetchSchedule();
+      print('error _mapFetchScheduleAllByDoctorToState: $error');
+    }
+  }
+
   Stream<ScheduleState> _mapFetchScheduleByUserToState(GetScheduleByUesr event) async* {
     yield LoadingFetchSchedule();
     try {
-      final data = await scheduleRepository.getScheduleByUser(event.idUser, status: event.statusSchedule);
+      final data = await scheduleRepository.getScheduleByUser(event.idUser,day: event.fromDate.millisecondsSinceEpoch, status: event.statusSchedule);
       if (data != null) {
         if (event.statusSchedule == StatusSchedule.New) {
           numberExamination = data.length;
@@ -112,6 +134,16 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     } catch(error) {
       yield ErrorFetchSchedule();
       print('error _mapFetchScheduleByUserToState: $error');
+    }
+  }
+
+  Stream<ScheduleState> _mapUpdateScheduleToState(UpdateSchedule event) async* {
+    yield ScheduleLoading();
+    final isSuccess = await scheduleRepository.updateStatusSchedule(event.idSchedule, event.statusSchedule);
+    if (isSuccess != null && isSuccess == true) {
+      yield UpdateScheduleSuccess();
+    } else {
+      yield ScheduleError();
     }
   }
 

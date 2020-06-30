@@ -25,6 +25,7 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
   RefreshController _refreshController = RefreshController(initialRefresh: false);
   DateTime dateTimeSelected;
   StatusSchedule _statusSchedule;
+
   void _onRefresh() async{
     BlocProvider.of<ScheduleBloc>(context)
         .add(GetScheduleByUesr(idUser: widget.userObj.id, fromDate: dateTimeSelected, statusSchedule: _statusSchedule));
@@ -33,6 +34,7 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
 
   void _onLoading() async{
     _refreshController.loadComplete();
+    LoadingHud(context).dismiss();
   }
 
 
@@ -87,6 +89,7 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
                 LoadingHud(context).dismiss();
                 _onLoading();
               } else if (state is FetchScheduleByUserSuccess) {
+                print('FetchScheduleByUserSuccess');
                 final data = state.list;
                 list.clear();
                 data.sort((a, b) {
@@ -99,7 +102,6 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
                 setState(() {
                   list.addAll(data);
                 });
-                LoadingHud(context).dismiss();
                 _onLoading();
               }
             },
@@ -125,7 +127,7 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              Text('List Upcoming', style: TextStyle(
+              Text('List Upcoming ${list.length}', style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700
               ),),
@@ -180,7 +182,6 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
           child: SmartRefresher(
             controller: _refreshController,
             enablePullDown: true,
-//            header: ClassicHeader(),
             onRefresh: _onRefresh,
             onLoading: _onLoading,
             child: buildListViewUpcoming(),

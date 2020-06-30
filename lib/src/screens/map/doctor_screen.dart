@@ -1,17 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loading_hud/loading_hud.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/covid19/country.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
-import 'package:template_flutter/src/screens/doctor/schedule_details_screen.dart';
+import 'package:template_flutter/src/screens/map/schedule_details_screen.dart';
 import 'package:template_flutter/src/screens/home/search_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
 import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/utils/styles.dart';
 import 'package:template_flutter/src/widgets/icon.dart';
@@ -30,7 +32,7 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
   DateTime dateTimeSelected;
   StatusSchedule _statusSchedule = StatusSchedule.Today;
   UserObj userObj = UserObj();
-
+  var numberToday = 0, numberCanceled = 0, numberNew = 0, numberApproved = 0;
   void _onRefresh() async {
     _refreshController.refreshCompleted();
   }
@@ -50,9 +52,9 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
       }
     }
     final dateCurrent = DateTime.now();
-    final date = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+    dateTimeSelected = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
     BlocProvider.of<ScheduleBloc>(context)
-        .add(GetScheduleByDoctor(idDoctor: userObj.id, fromDate: date, statusSchedule: null));
+        .add(GetScheduleAllByDoctor(idDoctor: userObj.id, ));
   }
 
   @override
@@ -74,10 +76,33 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                   LoadingHud(context).dismiss();
                 } else if (state is FetchAllScheduleByDoctorSuccess) {
                   final data = state.list;
+                  data.sort((a, b) {
+                    int cmp = a.dateTime.compareTo(b.dateTime);
+                    if (cmp != 0) {
+                      return cmp;
+                    }
+                    return a.timeBook.compareTo(b.timeBook);
+                  });
                   list.clear();
                   setState(() {
                     list.addAll(data);
                   });
+                  LoadingHud(context).dismiss();
+                } else if (state is FetchAllTotalScheduleByDoctorSuccess) {
+                  final data = state.list;
+                  print('datetimedatetime ${dateTimeSelected.millisecondsSinceEpoch}');
+                  final today = data.where((element) => element.dateTime == dateTimeSelected.millisecondsSinceEpoch).toList().length;
+                  final newCase = data.where((element) => element.status == StatusSchedule.New.toShortString()).toList().length;
+                  final approved = data.where((element) => element.status == StatusSchedule.Approved.toShortString()).toList().length;
+                  final canceled = data.where((element) => element.status == StatusSchedule.Canceled.toShortString()).toList().length;
+                  setState(() {
+                    numberToday = today;
+                    numberCanceled = canceled;
+                    numberNew = newCase;
+                    numberApproved = approved;
+                  });
+                  BlocProvider.of<ScheduleBloc>(context)
+                      .add(GetScheduleByDoctor(idDoctor: userObj.id, fromDate: dateTimeSelected, statusSchedule: null));
                   LoadingHud(context).dismiss();
                 }
               },
@@ -99,14 +124,16 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                     children: <Widget>[
                       IconBox(
                         iconData: Icons.notifications_none,
-                        onPressed: () {},
+                        onPressed: () {
+                          toast("Coming soon", gravity: ToastGravity.BOTTOM);
+                        },
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.max,
                         children: <Widget>[
                           Text(
-                            'Address',
+                            DateTimeUtils().formatDateString(DateTime.now()),
                             style: kTitleBold,
                           ),
                         ],
@@ -114,12 +141,7 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                       IconBox(
                         iconData: Icons.search,
                         onPressed: () async {
-                          final item = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SearchPage(),
-                              )) as CountryObj;
-                          if (item != null) {}
+                          toast("Coming soon", gravity: ToastGravity.BOTTOM);
                         },
                       ),
                     ],
@@ -178,6 +200,8 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                   child: Icon(Icons.sort),
                 ),
                 onTap: () async {
+                  toast("Coming soon", gravity: ToastGravity.BOTTOM);
+                  return;
                   final status = await showCupertinoModalPopup(
                     context: context,
                     builder: (context) => CupertinoActionSheet(
@@ -236,7 +260,35 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
     }
     return ListView.separated(
         itemBuilder: (context, index) {
-          return buildItem(item: list[index]);
+          return buildItem(item: list[index], function: () async {
+            final data = await Navigator.push(context, MaterialPageRoute(
+              builder: (context) => ScheduleDetails(scheduleModel: list[index],),
+            )) as ScheduleModel;
+            if (data != null) {
+              if (data.status == StatusSchedule.Approved.toShortString()) {
+                setState(() {
+                  list.removeAt(index);
+                  numberApproved += 1;
+                  numberNew -= 1;
+                });
+              } else if (data.status == StatusSchedule.Canceled.toShortString()) {
+                setState(() {
+                  list.removeAt(index);
+                  numberCanceled += 1;
+                  numberNew -= 1;
+                });
+              } else if (data.status == StatusSchedule.Done.toShortString()) {
+                setState(() {
+                  list.removeAt(index);
+                  numberApproved -= 1;
+                });
+              } else {
+                setState(() {
+                  list[index].status = data.status;
+                });
+              }
+            }
+          });
         },
         padding: EdgeInsets.only(top: 7, bottom: 10),
         separatorBuilder: (context, index) => Container(
@@ -245,7 +297,7 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
         itemCount: list.length);
   }
 
-  buildItem({@required ScheduleModel item}) {
+  buildItem({@required ScheduleModel item, Function function}) {
     return Container(
       margin: EdgeInsets.only(right: paddingDefault, left: paddingDefault),
       decoration: BoxDecoration(
@@ -351,7 +403,7 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                           StatusSchedule.Approved.toShortString()
                           ? colorApproved
                           : item.status ==
-                          StatusSchedule.Done.toShortString() ? colorDeath : colorSerious,
+                          StatusSchedule.Done.toShortString() ? colorDeath : colorCancel,
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(8),
                           bottomRight: Radius.circular(8))),
@@ -359,11 +411,7 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
               ],
             ),
           ),
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (context) => ScheduleDetails(),
-            ));
-          },
+          onTap: function,
         ),
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(8),
@@ -454,7 +502,10 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Flexible(
-                  child: widgetBoxStatus(colorSerious, 'Today', '123', () {
+                  child: widgetBoxStatus(colorSerious, 'Today', numberToday.toString(), () {
+                    if (_statusSchedule == StatusSchedule.Today) {
+                      return;
+                    }
                     setState(() {
                       _statusSchedule = StatusSchedule.Today;
                     });
@@ -468,13 +519,18 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                   width: paddingDefault,
                 ),
                 Flexible(
-                  child: widgetBoxStatus(colorDeath, 'History', '123', () {
+                  child: widgetBoxStatus(colorCancel, 'Cancel', numberCanceled.toString(), () {
+                    if (_statusSchedule == StatusSchedule.Canceled) {
+                      return;
+                    }
                     setState(() {
-                      _statusSchedule = StatusSchedule.History;
+                      _statusSchedule = StatusSchedule.Canceled;
                     });
+                    final dateCurrent = DateTime.now();
+                    final date = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
                     BlocProvider.of<ScheduleBloc>(context)
-                        .add(GetScheduleByDoctor(idDoctor: userObj.id, fromDate: null, statusSchedule: StatusSchedule.Done));
-                  }, isCheck: _statusSchedule == StatusSchedule.History),
+                        .add(GetScheduleByDoctor(idDoctor: userObj.id, fromDate: null, statusSchedule: StatusSchedule.Canceled));
+                  }, isCheck: _statusSchedule == StatusSchedule.Canceled),
                 ),
               ],
             ),
@@ -493,7 +549,10 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Flexible(
-                  child: widgetBoxStatus(colorNew, 'New', '123', () {
+                  child: widgetBoxStatus(colorNew, 'New', numberNew.toString(), () {
+                    if (_statusSchedule == StatusSchedule.New) {
+                      return;
+                    }
                     setState(() {
                       _statusSchedule = StatusSchedule.New;
                     });
@@ -506,7 +565,10 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                 ),
                 Flexible(
                   child:
-                      widgetBoxStatus(colorApproved, 'Approved', '123', () {
+                      widgetBoxStatus(colorApproved, 'Approved', numberApproved.toString(), () {
+                        if (_statusSchedule == StatusSchedule.Approved) {
+                          return;
+                        }
                         setState(() {
                           _statusSchedule = StatusSchedule.Approved;
                         });

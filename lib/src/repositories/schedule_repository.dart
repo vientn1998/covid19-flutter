@@ -107,20 +107,32 @@ class ScheduleRepository {
 
       } else {
         if (status != null) {
-          await scheduleCollection
-              .where("receiverId", isEqualTo: idDoctor)
-              .where("status", isEqualTo: status.toShortString())
-              .where("dateTime", isGreaterThanOrEqualTo: day)
-              .getDocuments().then((querySnapshot) {
-            final item = querySnapshot.documents.map((document) {
-              return ScheduleModel.fromSnapshot(document);
-            }).toList();
-            listSchedule.addAll(item);
-          });
+          if (status == StatusSchedule.History) {
+            await scheduleCollection
+                .where("receiverId", isEqualTo: idDoctor)
+                .where("dateTime", isLessThan: day)
+                .getDocuments().then((querySnapshot) {
+              final item = querySnapshot.documents.map((document) {
+                return ScheduleModel.fromSnapshot(document);
+              }).toList();
+              listSchedule.addAll(item);
+            });
+          } else {
+            await scheduleCollection
+                .where("receiverId", isEqualTo: idDoctor)
+                .where("status", isEqualTo: status.toShortString())
+                .where("dateTime", isGreaterThanOrEqualTo: day)
+                .getDocuments().then((querySnapshot) {
+              final item = querySnapshot.documents.map((document) {
+                return ScheduleModel.fromSnapshot(document);
+              }).toList();
+              listSchedule.addAll(item);
+            });
+          }
         } else {
           await scheduleCollection
               .where("receiverId", isEqualTo: idDoctor)
-              .where("dateTime", isGreaterThanOrEqualTo: day)
+              .where("dateTime", isEqualTo: day)
               .getDocuments().then((querySnapshot) {
             final item = querySnapshot.documents.map((document) {
               return ScheduleModel.fromSnapshot(document);
@@ -137,13 +149,32 @@ class ScheduleRepository {
     return listSchedule;
   }
 
-  Future<List<ScheduleModel>> getScheduleByUser(String idUser, {StatusSchedule status = StatusSchedule.New}) async {
+  Future<List<ScheduleModel>> getScheduleAllByDoctor(String idDoctor) async {
+    List<ScheduleModel> listSchedule = [];
+    print('getScheduleAllByDoctor $idDoctor');
+    try{
+      await scheduleCollection
+          .where("receiverId", isEqualTo: idDoctor)
+          .getDocuments().then((querySnapshot) {
+        final item = querySnapshot.documents.map((document) {
+          return ScheduleModel.fromSnapshot(document);
+        }).toList();
+        listSchedule.addAll(item);
+      });
+    } catch (error) {
+      print('error getScheduleByDoctor : $error');
+    }
+    return listSchedule;
+  }
+
+  Future<List<ScheduleModel>> getScheduleByUser(String idUser, {int day = 0,StatusSchedule status = StatusSchedule.New}) async {
     List<ScheduleModel> list = [];
     print('getScheduleByUser $idUser ${status.toShortString()}');
     try{
       if (status != null) {
         await scheduleCollection
             .where("senderId", isEqualTo: idUser)
+            .where("dateTime", isGreaterThanOrEqualTo: day)
             .where("status", isEqualTo: status.toShortString())
             .getDocuments().then((querySnapshot) {
           final item = querySnapshot.documents.map((document) {
@@ -154,6 +185,7 @@ class ScheduleRepository {
       } else {
         await scheduleCollection
             .where("senderId", isEqualTo: idUser)
+            .where("dateTime", isGreaterThanOrEqualTo: day)
             .getDocuments().then((querySnapshot) {
           final item = querySnapshot.documents.map((document) {
             return ScheduleModel.fromSnapshot(document);
@@ -166,6 +198,19 @@ class ScheduleRepository {
       print('error getScheduleByUser : $error');
     }
     return list;
+  }
+
+  Future<bool> updateStatusSchedule(String id, StatusSchedule statusSchedule) async {
+    bool isSuccess = false;
+    print('updateStatusSchedule $statusSchedule');
+    await scheduleCollection.document(id).updateData({"status" : statusSchedule.toShortString()}).then(
+            (value) {
+          isSuccess = true;
+        }, onError: (error) {
+      print(error.toString());
+      return false;
+    });
+    return isSuccess;
   }
 }
 

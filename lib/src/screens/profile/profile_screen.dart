@@ -41,10 +41,6 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       }
     }
-//    final dateCurrent = DateTime.now();
-//    final date = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
-//    BlocProvider.of<ScheduleBloc>(context)
-//        .add(GetScheduleByUesr(idUser: userObj.id));
   }
 
   @override

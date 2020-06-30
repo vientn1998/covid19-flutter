@@ -190,6 +190,14 @@ class UserObj extends Equatable {
     }
   }
 
+  String getAddress() {
+    if (location != null && location.address != null) {
+      return location.address;
+    } else {
+      return 'N/a';
+    }
+  }
+
   @override
   String toString() {
     // TODO: implement toString

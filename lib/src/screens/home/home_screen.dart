@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pk_skeleton/pk_skeleton.dart';
@@ -20,6 +21,7 @@ import 'package:template_flutter/src/screens/home/search_screen.dart';
 import 'package:template_flutter/src/services/permission_service.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/hex_color.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/utils/styles.dart';
@@ -114,7 +116,7 @@ class _HomePageState extends State<HomePage> {
                       IconBox(
                         iconData: Icons.notifications_none,
                         onPressed: () {
-
+                          toast("Coming soon", gravity: ToastGravity.BOTTOM);
                         },
                       ),
                       Row(
@@ -162,25 +164,33 @@ class _HomePageState extends State<HomePage> {
                         iconData: Icons.report,
                         background: colorTotalCase,
                         title: 'Report',
-                        onPressed: () {},
+                        onPressed: () {
+                          toast("Coming soon", gravity: ToastGravity.BOTTOM);
+                        },
                       ),
                       IconMenuBox(
                         iconData: Icons.next_week,
                         background: colorDeath,
                         title: 'Prevention',
-                        onPressed: () {},
+                        onPressed: () {
+                          toast("Coming soon", gravity: ToastGravity.BOTTOM);
+                        },
                       ),
                       IconMenuBox(
                         iconData: Icons.camera_enhance,
                         background: colorActive,
                         title: 'Symptoms',
-                        onPressed: () {},
+                        onPressed: () {
+                          toast("Coming soon", gravity: ToastGravity.BOTTOM);
+                        },
                       ),
                       IconMenuBox(
                         iconData: Icons.tap_and_play,
                         background: colorSerious,
                         title: 'News',
-                        onPressed: () {},
+                        onPressed: () {
+                          toast("Coming soon", gravity: ToastGravity.BOTTOM);
+                        },
                       ),
                     ],
                   ),

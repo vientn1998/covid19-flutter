@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/doctor/doctor_screen.dart';
-import 'package:template_flutter/src/screens/map/map_screen.dart';
+import 'package:template_flutter/src/screens/map/doctor_screen.dart';
 import 'package:template_flutter/src/screens/profile/profile_screen.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
@@ -63,7 +63,7 @@ class _MainPageState extends State<MainPage> {
             index: _selectedIndex,
             children: <Widget>[
               HomePage(),
-              MapPage(),
+              DoctorManagerPage(),
               ProfilePage(),
             ],
           ) : IndexedStack(

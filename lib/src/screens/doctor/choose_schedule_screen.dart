@@ -83,7 +83,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
 
   buildLoadAllSchedule(DateTime dateTime) {
     BlocProvider.of<ScheduleBloc>(context)
-        .add(GetScheduleByDoctor(idDoctor: widget.userObjReceiver.id, fromDate: dateTime));
+        .add(GetScheduleDayByDoctor(idDoctor: widget.userObjReceiver.id, fromDate: dateTime));
   }
 
   @override
@@ -194,7 +194,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
                 print(element.toString());
               });
               LoadingHud(context).dismiss();
-            } else if (state is FetchAllScheduleByDoctorSuccess) {
+            } else if (state is FetchAllScheduleDayByDoctorSuccess) {
               listMakeDate.clear();
               final list = state.list;
               print('size FetchAllScheduleByDoctorSuccess ${list.length}');

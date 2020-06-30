@@ -57,8 +57,15 @@ class FetchScheduleSuccess extends ScheduleState {
   }
 }
 
-class FetchAllScheduleByDoctorSuccess extends ScheduleState {
+class FetchAllScheduleDayByDoctorSuccess extends ScheduleState {
   final List<ScheduleDayModel> list;
+  FetchAllScheduleDayByDoctorSuccess({@required this.list});
+  @override
+  List<Object> get props => [this.list];
+}
+
+class FetchAllScheduleByDoctorSuccess extends ScheduleState {
+  final List<ScheduleModel> list;
   FetchAllScheduleByDoctorSuccess({@required this.list});
   @override
   List<Object> get props => [this.list];

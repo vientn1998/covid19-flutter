@@ -45,9 +45,7 @@ class ScheduleRepository {
     return list;
   }
 
-
-
-  Future<List<ScheduleDayModel>> getScheduleByDoctor(String idDoctor, {int day = 0, StatusSchedule status = StatusSchedule.New}) async {
+  Future<List<ScheduleDayModel>> getScheduleDayByDoctor(String idDoctor, {int day = 0, StatusSchedule status = StatusSchedule.New}) async {
     List<ScheduleDayModel> list = [];
     List<ScheduleModel> listSchedule = [];
     List<int> listDay = [];
@@ -81,6 +79,64 @@ class ScheduleRepository {
     return list;
   }
 
+  Future<List<ScheduleModel>> getScheduleByDoctor(String idDoctor, {int day = 0, StatusSchedule status = StatusSchedule.New}) async {
+    List<ScheduleModel> listSchedule = [];
+    print('getScheduleByDoctor $idDoctor - $day - $status');
+    try{
+      if (day == 0) {
+        if (status != null) {
+          await scheduleCollection
+              .where("receiverId", isEqualTo: idDoctor)
+              .where("status", isEqualTo: status.toShortString())
+              .getDocuments().then((querySnapshot) {
+            final item = querySnapshot.documents.map((document) {
+              return ScheduleModel.fromSnapshot(document);
+            }).toList();
+            listSchedule.addAll(item);
+          });
+        } else {
+          await scheduleCollection
+              .where("receiverId", isEqualTo: idDoctor)
+              .getDocuments().then((querySnapshot) {
+            final item = querySnapshot.documents.map((document) {
+              return ScheduleModel.fromSnapshot(document);
+            }).toList();
+            listSchedule.addAll(item);
+          });
+        }
+
+      } else {
+        if (status != null) {
+          await scheduleCollection
+              .where("receiverId", isEqualTo: idDoctor)
+              .where("status", isEqualTo: status.toShortString())
+              .where("dateTime", isGreaterThanOrEqualTo: day)
+              .getDocuments().then((querySnapshot) {
+            final item = querySnapshot.documents.map((document) {
+              return ScheduleModel.fromSnapshot(document);
+            }).toList();
+            listSchedule.addAll(item);
+          });
+        } else {
+          await scheduleCollection
+              .where("receiverId", isEqualTo: idDoctor)
+              .where("dateTime", isGreaterThanOrEqualTo: day)
+              .getDocuments().then((querySnapshot) {
+            final item = querySnapshot.documents.map((document) {
+              return ScheduleModel.fromSnapshot(document);
+            }).toList();
+            listSchedule.addAll(item);
+          });
+        }
+
+      }
+
+    } catch (error) {
+      print('error getScheduleByDoctor : $error');
+    }
+    return listSchedule;
+  }
+
   Future<List<ScheduleModel>> getScheduleByUser(String idUser, {StatusSchedule status = StatusSchedule.New}) async {
     List<ScheduleModel> list = [];
     print('getScheduleByUser $idUser ${status.toShortString()}');
@@ -111,7 +167,6 @@ class ScheduleRepository {
     }
     return list;
   }
-
 }
 
 //Future<List<ScheduleDayModel>> getScheduleByDoctor1(String idDoctor, int day) async {

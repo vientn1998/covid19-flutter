@@ -25,11 +25,11 @@ class GetScheduleByDay extends ScheduleEvent {
   GetScheduleByDay({@required this.idDoctor, this.date, this.isShow});
 }
 
-class GetScheduleByDoctor extends ScheduleEvent {
+class GetScheduleDayByDoctor extends ScheduleEvent {
   final String idDoctor;
   final StatusSchedule statusSchedule;
   DateTime fromDate;
-  GetScheduleByDoctor({@required this.idDoctor, this.fromDate, this.statusSchedule});
+  GetScheduleDayByDoctor({@required this.idDoctor, this.fromDate, this.statusSchedule});
 }
 
 class GetScheduleByUesr extends ScheduleEvent {
@@ -37,4 +37,11 @@ class GetScheduleByUesr extends ScheduleEvent {
   final StatusSchedule statusSchedule;
   DateTime fromDate;
   GetScheduleByUesr({@required this.idUser, this.fromDate, this.statusSchedule = StatusSchedule.New});
+}
+
+class GetScheduleByDoctor extends ScheduleEvent {
+  final String idDoctor;
+  final StatusSchedule statusSchedule;
+  DateTime fromDate;
+  GetScheduleByDoctor({@required this.idDoctor, this.fromDate, this.statusSchedule});
 }

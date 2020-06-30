@@ -33,6 +33,9 @@ enum StatusTabHome {
 enum StatusSchedule {
   New,
   Approved,
+  Today,
+  History,
+  Done,
   Canceled
 }
 

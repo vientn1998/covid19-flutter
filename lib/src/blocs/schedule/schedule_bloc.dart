@@ -21,10 +21,12 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       yield* _mapCreateToState(event);
     } else if (event is GetScheduleByDay) {
       yield* _mapFetchDataByDayToState(event);
-    } else if (event is GetScheduleByDoctor) {
-      yield* _mapFetchDataByDoctorToState(event);
+    } else if (event is GetScheduleDayByDoctor) {
+      yield* _mapFetchDataDayByDoctorToState(event);
     } else if (event is GetScheduleByUesr) {
       yield* _mapFetchScheduleByUserToState(event);
+    } else if (event is GetScheduleByDoctor) {
+      yield* _mapFetchScheduleByDoctorToState(event);
     } else {
       yield InitialScheduleState();
     }
@@ -58,10 +60,28 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     }
   }
 
-  Stream<ScheduleState> _mapFetchDataByDoctorToState(GetScheduleByDoctor event) async* {
+  Stream<ScheduleState> _mapFetchDataDayByDoctorToState(GetScheduleDayByDoctor event) async* {
     yield LoadingFetchSchedule();
     try {
-      final data = await scheduleRepository.getScheduleByDoctor(event.idDoctor);
+      final data = await scheduleRepository.getScheduleDayByDoctor(event.idDoctor);
+      if (data != null) {
+        yield FetchAllScheduleDayByDoctorSuccess(list: data);
+        print('_mapFetchDataByDoctorToState : ${data.length}');
+      } else {
+        yield ErrorFetchSchedule();
+        print('error _mapFetchDataByDoctorToState');
+      }
+    } catch(error) {
+      yield ErrorFetchSchedule();
+      print('error _mapFetchDataByDoctorToState: $error');
+    }
+  }
+
+  Stream<ScheduleState> _mapFetchScheduleByDoctorToState(GetScheduleByDoctor event) async* {
+    yield LoadingFetchSchedule();
+    try {
+      final data = await scheduleRepository
+          .getScheduleByDoctor(event.idDoctor, day: event.fromDate == null ? 0 : event.fromDate.millisecondsSinceEpoch, status: event.statusSchedule);
       if (data != null) {
         yield FetchAllScheduleByDoctorSuccess(list: data);
         print('_mapFetchDataByDoctorToState : ${data.length}');

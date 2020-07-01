@@ -6,9 +6,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:template_flutter/src/blocs/auth/auth_bloc.dart';
 import 'package:template_flutter/src/blocs/auth/bloc.dart';
 import 'package:template_flutter/src/blocs/schedule/bloc.dart';
+import 'package:template_flutter/src/models/schedule_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/introduction/login_screen.dart';
 import 'package:template_flutter/src/screens/profile/medical_examination.dart';
+import 'package:template_flutter/src/screens/profile/notification_screen.dart';
+import 'package:template_flutter/src/services/notification_service.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
@@ -25,6 +28,8 @@ class _ProfilePageState extends State<ProfilePage> {
   String name;
   static const double heightPadding = 15.0;
   static const double sizeIcon = 18.0;
+  List<ScheduleModel> listLocalPush = [];
+
   @override
   void initState() {
     super.initState();
@@ -39,35 +44,67 @@ class _ProfilePageState extends State<ProfilePage> {
         setState(() {
           userObj = data;
         });
+        final dateCurrent = DateTime.now();
+        final date = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+        BlocProvider.of<ScheduleBloc>(context)
+            .add(GetScheduleLocalPushByUser(idUser: userObj.id, fromDate: date));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    print('build: ProfilePage  ');
     return Scaffold(
-//      appBar: AppBar(
-//        backgroundColor: Colors.white,
-//        elevation: 0,
-//      ),
-      body: Container(
-        color: Colors.white,
-        child: Center(
-          child: ListView(
-            children: <Widget>[
-              SizedBox(height: heightSpaceLarge,),
-              SizedBox(height: heightSpaceNormal,),
-              _buildHeader(),
-              SizedBox(height: heightSpaceLarge,),
-              SizedBox(height: heightSpaceSmall,),
-              _buildSection(_buildDataFirstSection()),
-              SizedBox(height: heightSpaceNormal,),
-              _buildSection(_buildDataSecondSection()),
-              SizedBox(height: heightSpaceNormal,),
-              _buildSection(_buildDataLogoutSection()),
+      body: BlocListener<ScheduleBloc, ScheduleState>(
+        listener: (context, state) {
+          if (state is LoadingLocalPushFetchSchedule) {
+            print('loading local push');
 
-            ],
+          } else if (state is ErrorFetchSchedule) {
+            print('error fetch local push');
+          } else if (state is FetchScheduleLocalPushByUser) {
+            final data = state.list;
+            print('fetch local push ${data.length}');
+            listLocalPush.addAll(data);
+            var notificationPushLocal = NotificationPushLocal();
+            listLocalPush.forEach((item) {
+              try {
+                notificationPushLocal.scheduleNotificationUser(item);
+              } catch (error) {
+                print(error);
+              }
+            });
+          }
+        },
+        child: Container(
+          color: Colors.white,
+          child: Center(
+            child: ListView(
+              children: <Widget>[
+                SizedBox(
+                  height: heightSpaceLarge,
+                ),
+                SizedBox(
+                  height: heightSpaceNormal,
+                ),
+                _buildHeader(),
+                SizedBox(
+                  height: heightSpaceLarge,
+                ),
+                SizedBox(
+                  height: heightSpaceSmall,
+                ),
+                _buildSection(_buildDataFirstSection()),
+                SizedBox(
+                  height: heightSpaceNormal,
+                ),
+                _buildSection(_buildDataSecondSection()),
+                SizedBox(
+                  height: heightSpaceNormal,
+                ),
+                _buildSection(_buildDataLogoutSection()),
+              ],
+            ),
           ),
         ),
       ),
@@ -87,9 +124,20 @@ class _ProfilePageState extends State<ProfilePage> {
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(userObj.name != null ? userObj.name : 'N/a', style: kTitleWelcome,),
-              SizedBox(height: 10,),
-              Text('Edit profile', style: TextStyle(fontSize: 14, color: textColor, decoration: TextDecoration.underline),),
+              Text(
+                userObj.name != null ? userObj.name : 'N/a',
+                style: kTitleWelcome,
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Text(
+                'Edit profile',
+                style: TextStyle(
+                    fontSize: 14,
+                    color: textColor,
+                    decoration: TextDecoration.underline),
+              ),
             ],
           ),
           InkWell(
@@ -97,7 +145,7 @@ class _ProfilePageState extends State<ProfilePage> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(width: 2, color: Colors.blue),
-                borderRadius: BorderRadius.circular(heightAvatar/2),
+                borderRadius: BorderRadius.circular(heightAvatar / 2),
               ),
               height: heightAvatar,
               width: heightAvatar,
@@ -106,11 +154,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: _buildImageAvatar(),
                 ),
                 elevation: 2,
-                borderRadius: BorderRadius.circular(heightAvatar/2),
+                borderRadius: BorderRadius.circular(heightAvatar / 2),
               ),
             ),
-            onTap: () async {
-            },
+            onTap: () async {},
           )
         ],
       ),
@@ -157,14 +204,36 @@ class _ProfilePageState extends State<ProfilePage> {
     final data = (BlocProvider.of<ScheduleBloc>(context).numberExamination);
     return Column(
       children: <Widget>[
-        _buildRowItem(FaIcon(FontAwesomeIcons.briefcaseMedical, color: Colors.red, size: sizeIcon,),"Medical examination","${data}", function: () {
-          Navigator.push(context, MaterialPageRoute(
-            builder: (context) => MedicalExamination(userObj: userObj,),
-          ));
+        _buildRowItem(
+            FaIcon(
+              FontAwesomeIcons.briefcaseMedical,
+              color: Colors.red,
+              size: sizeIcon,
+            ),
+            "Medical examination",
+            "${data}", function: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MedicalExamination(
+                  userObj: userObj,
+                ),
+              ));
         }),
         _buildLine(),
-        _buildRowItem(FaIcon(FontAwesomeIcons.bell, color: Colors.blueAccent, size: sizeIcon,),"Notification","", function: () {
-          print('Notification');
+        _buildRowItem(
+            FaIcon(
+              FontAwesomeIcons.bell,
+              color: Colors.blueAccent,
+              size: sizeIcon,
+            ),
+            "Notification",
+            "", function: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => NotificationPage(),
+              ));
         }),
       ],
     );
@@ -173,27 +242,60 @@ class _ProfilePageState extends State<ProfilePage> {
   _buildDataSecondSection() {
     return Column(
       children: <Widget>[
-        _buildRowItem(FaIcon(FontAwesomeIcons.clipboardList, color: Colors.green, size: sizeIcon,),"Visited address","", function: () {
+        _buildRowItem(
+            FaIcon(
+              FontAwesomeIcons.clipboardList,
+              color: Colors.green,
+              size: sizeIcon,
+            ),
+            "Visited address",
+            "", function: () {
           print('Visited address');
         }),
         _buildLine(),
-        _buildRowItem(FaIcon(FontAwesomeIcons.globeEurope, color: Colors.grey, size: sizeIcon,),"Change language","0", function: () {
+        _buildRowItem(
+            FaIcon(
+              FontAwesomeIcons.globeEurope,
+              color: Colors.grey,
+              size: sizeIcon,
+            ),
+            "Change language",
+            "0", function: () {
           print('Change language');
         }),
         _buildLine(),
-        _buildRowItem(FaIcon(FontAwesomeIcons.questionCircle, color: Colors.blueGrey, size: sizeIcon,),"Support","0", function: () {
+        _buildRowItem(
+            FaIcon(
+              FontAwesomeIcons.questionCircle,
+              color: Colors.blueGrey,
+              size: sizeIcon,
+            ),
+            "Support",
+            "0", function: () {
           print('Support');
         }),
       ],
     );
   }
+
   _buildDataLogoutSection() {
     return Column(
       children: <Widget>[
-        _buildRowItem(FaIcon(FontAwesomeIcons.signOutAlt, color: Colors.blue, size: sizeIcon,),"Logout","0", function: () {
+        _buildRowItem(
+            FaIcon(
+              FontAwesomeIcons.signOutAlt,
+              color: Colors.blue,
+              size: sizeIcon,
+            ),
+            "Logout",
+            "0", function: () {
           print('Logout');
-          DialogCus(context).showDialogs(message: 'Are you sure want to logout?', isDismiss: true,
-              titleLef: 'Cancel', titleRight: 'Ok', funRight: () {
+          DialogCus(context).showDialogs(
+              message: 'Are you sure want to logout?',
+              isDismiss: true,
+              titleLef: 'Cancel',
+              titleRight: 'Ok',
+              funRight: () {
                 logout();
               });
         }),
@@ -202,8 +304,12 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   _buildLine() {
-    return Container(height: 1, width: double.infinity, color: Colors.grey.withOpacity(0.2),
-      margin: EdgeInsets.only(left: heightPadding, right: heightPadding),);
+    return Container(
+      height: 1,
+      width: double.infinity,
+      color: Colors.grey.withOpacity(0.2),
+      margin: EdgeInsets.only(left: heightPadding, right: heightPadding),
+    );
   }
 
   _buildRowItem(FaIcon icon, String title, String value, {Function function}) {
@@ -225,12 +331,27 @@ class _ProfilePageState extends State<ProfilePage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              SizedBox(width: heightPadding,),
-              Text(title, style: TextStyle(fontSize: 16, color: Colors.black87),),
+              SizedBox(
+                width: heightPadding,
+              ),
+              Text(
+                title,
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
               Spacer(),
-              Text(value == '0' ? '' : value,
-                style: TextStyle(fontSize: 16, color: Colors.black, fontWeight: FontWeight.w700),),
-              value == '0' ? SizedBox() : Icon(Icons.navigate_next, color: colorIcon,),
+              Text(
+                value == '0' ? '' : value,
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w700),
+              ),
+              value == '0'
+                  ? SizedBox()
+                  : Icon(
+                      Icons.navigate_next,
+                      color: colorIcon,
+                    ),
             ],
           ),
         ),
@@ -245,8 +366,10 @@ class _ProfilePageState extends State<ProfilePage> {
     BlocProvider.of<AuthBloc>(context).add(AuthLogoutGoogle());
     await SharePreferences().saveBool(SharePreferenceKey.isLogged, false);
     await FacebookLogin().logOut();
-    Navigator.pushReplacement(context, MaterialPageRoute(
-      builder: (context) => LoginScreen(),
-    ));
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => LoginScreen(),
+        ));
   }
 }

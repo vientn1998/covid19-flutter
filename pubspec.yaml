@@ -96,6 +96,12 @@ dependencies:
   flutter_calendar_carousel: ^1.4.12
   #pull to refresh
   pull_to_refresh: ^1.6.0
+  #local push notification
+  flutter_local_notifications: ^1.4.4+1
+  #check network
+  connectivity: ^0.4.9
+  #
+  rxdart: ^0.23.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

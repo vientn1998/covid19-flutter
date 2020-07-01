@@ -2,6 +2,9 @@
 app_settings=/Users/admin/.pub-cache/hosted/pub.dartlang.org/app_settings-4.0.0/
 cloud_firestore=/Users/admin/.pub-cache/hosted/pub.dartlang.org/cloud_firestore-0.13.6/
 cloud_firestore_web=/Users/admin/.pub-cache/hosted/pub.dartlang.org/cloud_firestore_web-0.1.1+2/
+connectivity=/Users/admin/.pub-cache/hosted/pub.dartlang.org/connectivity-0.4.9/
+connectivity_for_web=/Users/admin/.pub-cache/hosted/pub.dartlang.org/connectivity_for_web-0.3.0/
+connectivity_macos=/Users/admin/.pub-cache/hosted/pub.dartlang.org/connectivity_macos-0.1.0+3/
 firebase_auth=/Users/admin/.pub-cache/hosted/pub.dartlang.org/firebase_auth-0.16.1/
 firebase_auth_web=/Users/admin/.pub-cache/hosted/pub.dartlang.org/firebase_auth_web-0.1.3+1/
 firebase_core=/Users/admin/.pub-cache/hosted/pub.dartlang.org/firebase_core-0.4.5/
@@ -9,6 +12,7 @@ firebase_core_web=/Users/admin/.pub-cache/hosted/pub.dartlang.org/firebase_core_
 firebase_storage=/Users/admin/.pub-cache/hosted/pub.dartlang.org/firebase_storage-3.1.6/
 flutter_facebook_login=/Users/admin/.pub-cache/hosted/pub.dartlang.org/flutter_facebook_login-3.0.0/
 flutter_keyboard_visibility=/Users/admin/.pub-cache/hosted/pub.dartlang.org/flutter_keyboard_visibility-3.2.0/
+flutter_local_notifications=/Users/admin/.pub-cache/hosted/pub.dartlang.org/flutter_local_notifications-1.4.4+1/
 flutter_plugin_android_lifecycle=/Users/admin/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-1.0.8/
 fluttertoast=/Users/admin/.pub-cache/hosted/pub.dartlang.org/fluttertoast-4.0.1/
 geolocator=/Users/admin/.pub-cache/hosted/pub.dartlang.org/geolocator-5.3.2+2/

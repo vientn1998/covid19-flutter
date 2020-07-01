@@ -18,6 +18,7 @@ import 'package:template_flutter/src/models/covid19/deaths.dart';
 import 'package:template_flutter/src/models/covid19/overview.dart';
 import 'package:template_flutter/src/screens/home/newcase_screen.dart';
 import 'package:template_flutter/src/screens/home/search_screen.dart';
+import 'package:template_flutter/src/services/notification_service.dart';
 import 'package:template_flutter/src/services/permission_service.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';

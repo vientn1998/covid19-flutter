@@ -31,6 +31,10 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       yield* _mapUpdateScheduleToState(event);
     } else if (event is GetScheduleAllByDoctor) {
       yield* _mapFetchScheduleAllByDoctorToState(event);
+    } else if (event is GetScheduleLocalPushByUser) {
+      yield* _mapFetchScheduleLocalPushByUserToState(event);
+    } else if (event is GetScheduleLocalPushByUserEventSuccess) {
+      yield* _mapFetchScheduleLocalPushSuccessByUserToState(event);
     } else {
       yield InitialScheduleState();
     }
@@ -134,6 +138,33 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     } catch(error) {
       yield ErrorFetchSchedule();
       print('error _mapFetchScheduleByUserToState: $error');
+    }
+  }
+
+  Stream<ScheduleState> _mapFetchScheduleLocalPushByUserToState(GetScheduleLocalPushByUser event) async* {
+    yield LoadingLocalPushFetchSchedule();
+    try {
+      scheduleRepository
+          .getScheduleLocalPushByUser(event.idUser,event.fromDate.millisecondsSinceEpoch).listen((event) {
+            print('_mapFetchScheduleLocalPushByUserToState $event');
+            final list = event;
+            print('_mapFetchScheduleLocalPushByUserToState ${list.length}');
+            return add(GetScheduleLocalPushByUserEventSuccess(list: list));
+
+      });
+    } catch(error) {
+      yield ErrorFetchSchedule();
+      print('error _mapFetchScheduleLocalPushByUserToState: $error');
+    }
+  }
+
+  Stream<ScheduleState> _mapFetchScheduleLocalPushSuccessByUserToState(GetScheduleLocalPushByUserEventSuccess event) async* {
+//    yield LoadingFetchSchedule();
+    try {
+      yield FetchScheduleLocalPushByUser(list: event.list);
+    } catch(error) {
+      yield ErrorFetchSchedule();
+      print('error _mapFetchScheduleLocalPushByUserToState: $error');
     }
   }
 

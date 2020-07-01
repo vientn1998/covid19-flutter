@@ -200,6 +200,18 @@ class ScheduleRepository {
     return list;
   }
 
+  Stream<List<ScheduleModel>> getScheduleLocalPushByUser(String idUser, int day) {
+    print('getScheduleLocalPushByUser : $idUser $day');
+    return scheduleCollection
+        .where("senderId", isEqualTo: idUser)
+        .where("dateTime", isGreaterThanOrEqualTo: day)
+        .where("status", isEqualTo: StatusSchedule.Approved.toShortString())
+        .snapshots()
+        .map((snapShot) => snapShot.documents
+        .map((document) => ScheduleModel.fromSnapshot(document))
+        .toList());
+  }
+
   Future<bool> updateStatusSchedule(String id, StatusSchedule statusSchedule) async {
     bool isSuccess = false;
     print('updateStatusSchedule $statusSchedule');

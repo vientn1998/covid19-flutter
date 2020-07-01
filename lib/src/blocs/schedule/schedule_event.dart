@@ -51,6 +51,17 @@ class GetScheduleAllByDoctor extends ScheduleEvent {
   GetScheduleAllByDoctor({@required this.idDoctor});
 }
 
+class GetScheduleLocalPushByUser extends ScheduleEvent {
+  final String idUser;
+  DateTime fromDate;
+  GetScheduleLocalPushByUser({@required this.idUser, @required this.fromDate});
+}
+
+class GetScheduleLocalPushByUserEventSuccess extends ScheduleEvent {
+  final List<ScheduleModel> list;
+  GetScheduleLocalPushByUserEventSuccess({@required this.list});
+}
+
 class UpdateSchedule extends ScheduleEvent {
   final String idSchedule;
   final StatusSchedule statusSchedule;

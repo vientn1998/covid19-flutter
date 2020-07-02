@@ -72,6 +72,14 @@ main() async {
         }
         selectNotificationSubject.add(payload);
       });
+  notificationPushLocal.flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+      IOSFlutterLocalNotificationsPlugin>()
+      ?.requestPermissions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
   BlocSupervisor.delegate = SimpleBlocDelegate();
   final Covid19Repository covid19repository =
       Covid19Repository(covid19apiClient: Covid19ApiClient());
@@ -113,6 +121,7 @@ main() async {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Roboto',
+        backgroundColor: Colors.red,
       ),
       home: SplashPage(
         userRepository: userRepository,

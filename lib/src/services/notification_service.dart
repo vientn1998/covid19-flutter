@@ -1,5 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
+import 'package:template_flutter/src/utils/date_time.dart';
 import '../utils/extension/int_extention.dart';
 class NotificationPushLocal {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -23,9 +24,11 @@ class NotificationPushLocal {
   }
 
   Future<void> scheduleNotificationUser(ScheduleModel scheduleModel) async {
-    var scheduledNotificationDateTime = DateTime.now().add(Duration(seconds: 5));
+    var scheduledNotificationDateTime = DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime)
+        .add(Duration(minutes: scheduleModel.timeBook * 60 - 17));
+//    var scheduledNotificationDateTime = DateTime.now().add(Duration(seconds: 5));
     var message = BigTextStyleInformation(
-        'Bạn có cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc <b>${scheduleModel.timeBook.getTypeTimeSchedule()}</b>',
+        'Bạn có cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc <b>${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))}</b>',
       htmlFormatSummaryText: true,
       htmlFormatBigText: true
     );
@@ -35,17 +38,15 @@ class NotificationPushLocal {
         'description',
       enableVibration: true,
       icon: '@mipmap/ic_launcher',
-      styleInformation: message
+//      styleInformation: message
     );
-    var iOSPlatformChannelSpecifics =
-    IOSNotificationDetails();
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.schedule(
-        scheduleModel.dateTime ~/ 1000,
+        scheduleModel.dateTime ~/ 1000 + scheduleModel.timeBook,
         'Nhắc nhở lịch khám bệnh',
-null,
-//        'Bạn có cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()})',
+        'Bạn có cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))}.',
         scheduledNotificationDateTime,
         platformChannelSpecifics,
         payload: 'abc'

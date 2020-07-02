@@ -44,10 +44,12 @@ class _ProfilePageState extends State<ProfilePage> {
         setState(() {
           userObj = data;
         });
-        final dateCurrent = DateTime.now();
-        final date = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
-        BlocProvider.of<ScheduleBloc>(context)
-            .add(GetScheduleLocalPushByUser(idUser: userObj.id, fromDate: date));
+        if (!userObj.isDoctor) {
+          final dateCurrent = DateTime.now();
+          final date = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+          BlocProvider.of<ScheduleBloc>(context)
+              .add(GetScheduleLocalPushByUser(idUser: userObj.id, fromDate: date));
+        }
       }
     }
   }
@@ -65,15 +67,18 @@ class _ProfilePageState extends State<ProfilePage> {
           } else if (state is FetchScheduleLocalPushByUser) {
             final data = state.list;
             print('fetch local push ${data.length}');
-            listLocalPush.addAll(data);
-            var notificationPushLocal = NotificationPushLocal();
-            listLocalPush.forEach((item) {
-              try {
-                notificationPushLocal.scheduleNotificationUser(item);
-              } catch (error) {
-                print(error);
-              }
-            });
+            if (!userObj.isDoctor) {
+              listLocalPush.addAll(data);
+              var notificationPushLocal = NotificationPushLocal();
+              listLocalPush.forEach((item) {
+                try {
+                  notificationPushLocal.scheduleNotificationUser(item);
+                } catch (error) {
+                  print(error);
+                }
+              });
+            }
+
           }
         },
         child: Container(

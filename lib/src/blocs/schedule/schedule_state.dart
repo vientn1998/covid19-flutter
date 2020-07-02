@@ -105,10 +105,31 @@ class UpdateScheduleSuccess extends ScheduleState {
   List<Object> get props => [];
 }
 
-class FetchScheduleLocalPushByUser extends ScheduleState {
+class FetchScheduleListenReminderPush extends ScheduleState {
   final List<ScheduleModel> list;
-  FetchScheduleLocalPushByUser({@required this.list});
+  FetchScheduleListenReminderPush({@required this.list});
   @override
   List<Object> get props => [this.list];
 }
 
+class FetchScheduleListenNewPush extends ScheduleState {
+  final ScheduleModel item;
+  FetchScheduleListenNewPush({@required this.item});
+  @override
+  List<Object> get props => [this.item];
+}
+
+
+class FetchScheduleListenNewPushTotal extends ScheduleState {
+  final int total;
+  FetchScheduleListenNewPushTotal({@required this.total});
+  @override
+  List<Object> get props => [this.total];
+}
+
+class FetchScheduleListenChangeStatusPushOfUser extends ScheduleState {
+  final ScheduleModel item;
+  FetchScheduleListenChangeStatusPushOfUser({@required this.item});
+  @override
+  List<Object> get props => [this.item];
+}

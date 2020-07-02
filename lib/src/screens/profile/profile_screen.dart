@@ -28,10 +28,13 @@ class _ProfilePageState extends State<ProfilePage> {
   String name;
   static const double heightPadding = 15.0;
   static const double sizeIcon = 18.0;
-  List<ScheduleModel> listLocalPush = [];
-
+  List<ScheduleModel> listLocalPushReminder = [];
+  List<ScheduleModel> listLocalPushNew = [];
+  var totalScheduleNew = 0;
+  var isFirstLoadStatusNew = false;
   @override
   void initState() {
+    isFirstLoadStatusNew = false;
     super.initState();
     getUser();
   }
@@ -44,11 +47,18 @@ class _ProfilePageState extends State<ProfilePage> {
         setState(() {
           userObj = data;
         });
-        if (!userObj.isDoctor) {
-          final dateCurrent = DateTime.now();
-          final date = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+        final dateCurrent = DateTime.now();
+        final date = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+        BlocProvider.of<ScheduleBloc>(context)
+            .add(GetScheduleLocalPushReminder(idUser: userObj.id, fromDate: date, isDoctor: userObj.isDoctor));
+        if (userObj.isDoctor) {
           BlocProvider.of<ScheduleBloc>(context)
-              .add(GetScheduleLocalPushByUser(idUser: userObj.id, fromDate: date));
+              .add(GetScheduleLocalPushNewEventSuccessTotal(idDoctor: userObj.id, fromDate: date));
+          BlocProvider.of<ScheduleBloc>(context)
+              .add(GetScheduleLocalPushNewByDoctor(idDoctor: userObj.id, fromDate: date));
+        } else {
+          BlocProvider.of<ScheduleBloc>(context)
+              .add(GetScheduleLocalPushChangeStatusOfUser(idUser: userObj.id, fromDate: date));
         }
       }
     }
@@ -61,16 +71,39 @@ class _ProfilePageState extends State<ProfilePage> {
         listener: (context, state) {
           if (state is LoadingLocalPushFetchSchedule) {
             print('loading local push');
-
           } else if (state is ErrorFetchSchedule) {
             print('error fetch local push');
-          } else if (state is FetchScheduleLocalPushByUser) {
-            final data = state.list;
-            print('fetch local push ${data.length}');
-            if (!userObj.isDoctor) {
-              listLocalPush.addAll(data);
-              var notificationPushLocal = NotificationPushLocal();
-              listLocalPush.forEach((item) {
+          } else if (state is FetchScheduleListenReminderPush) {
+            print('total push reminder list ${state.list.length}');
+            final dateNow = DateTime.now();
+            final dateCurrent = DateTime(dateNow.year, dateNow.month, dateNow.day);
+            final data = state.list.where((element) {
+              var dateItem = DateTime.fromMillisecondsSinceEpoch(element.dateTime);
+              print('${dateItem} - ${dateCurrent} ${element.timeBook} - ${dateCurrent.hour}');
+              return (dateItem.difference(dateCurrent).inDays != 0)
+                  || (dateItem.difference(dateCurrent).inDays == 0 && element.timeBook > dateCurrent.hour);
+            }).toList();
+            print('total push reminder data ${data.length}');
+            var notificationPushLocal = NotificationPushLocal();
+            notificationPushLocal.cancelAllNotifications();
+            listLocalPushReminder.addAll(data);
+            listLocalPushReminder.sort((a, b) {
+              int cmp = a.dateTime.compareTo(b.dateTime);
+              if (cmp != 0) {
+                return cmp;
+              }
+              return a.timeBook.compareTo(b.timeBook);
+            });
+            if (userObj.isDoctor) {
+              listLocalPushReminder.forEach((item) {
+                try {
+                  notificationPushLocal.scheduleNotificationDoctor(item);
+                } catch (error) {
+                  print(error);
+                }
+              });
+            } else {
+              listLocalPushReminder.forEach((item) {
                 try {
                   notificationPushLocal.scheduleNotificationUser(item);
                 } catch (error) {
@@ -78,7 +111,27 @@ class _ProfilePageState extends State<ProfilePage> {
                 }
               });
             }
-
+          } else if (state is FetchScheduleListenNewPush) {
+            final data = state.item;
+            setState(() {
+              listLocalPushNew.add(data);
+            });
+            print('FetchScheduleListenNewPush $totalScheduleNew - ${listLocalPushNew.length}');
+            if (totalScheduleNew < listLocalPushNew.length) {
+              var notificationPushLocal = NotificationPushLocal();
+              notificationPushLocal.showNotificationAddSchedule(data);
+            }
+          } else if (state is FetchScheduleListenChangeStatusPushOfUser) {
+            //change status schedule of user
+            final data = state.item;
+            print('FetchScheduleListenChangeStatusPushOfUser ${data.id}');
+            var notificationPushLocal = NotificationPushLocal();
+            notificationPushLocal.showNotificationChangeStatusOfUserSchedule(data);
+          } else if (state is FetchScheduleListenNewPushTotal) {
+            print('FetchScheduleListenNewPushTotal ${state.total}');
+            setState(() {
+              totalScheduleNew = state.total;
+            });
           }
         },
         child: Container(

@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
+import 'package:template_flutter/src/utils/define.dart';
 import '../utils/extension/int_extention.dart';
 class NotificationPushLocal {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -23,34 +25,162 @@ class NotificationPushLocal {
         payload: 'item x');
   }
 
+  Future<void> showNotificationAddSchedule(ScheduleModel scheduleModel) async {
+    print('showNotificationAddSchedule');
+    print('${scheduleModel.timeBook} - ${DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime)}');
+    var bigTextStyleInformation = BigTextStyleInformation(
+        '${scheduleModel.sender.name} đã yêu cầu khám bệnh vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))}.',
+        htmlFormatBigText: true,
+        htmlFormatContentTitle: true,
+        htmlFormatSummaryText: true);
+
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'id', 'name', 'description',
+        styleInformation: bigTextStyleInformation,
+        importance: Importance.Max, priority: Priority.High);
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    if (TargetPlatform.iOS != null) {
+      await flutterLocalNotificationsPlugin.show(
+          scheduleModel.dateTime ~/ 1000,
+          'Bạn có 1 cuộc hẹn mới',
+          '${scheduleModel.sender.name} đã yêu cầu khám bệnh vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))}.', platformChannelSpecifics,
+          payload: 'item x');
+    } else {
+      await flutterLocalNotificationsPlugin.show(
+          scheduleModel.dateTime ~/ 1000,
+          'Bạn có 1 cuộc hẹn mới',
+          null, platformChannelSpecifics,
+          payload: 'item x');
+    }
+
+  }
+
+  Future<void> showNotificationChangeStatusOfUserSchedule(ScheduleModel scheduleModel) async {
+    print('showNotificationChangeStatusOfUserSchedule');
+    var message = "";
+    if (scheduleModel.status == StatusSchedule.Approved.toShortString()) {
+      message = "Cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))} đã được chấp nhận.";
+    } else if (scheduleModel.status == StatusSchedule.Canceled.toShortString()) {
+      message = "Cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))} đã bị huỷ.";
+    }
+    var bigTextStyleInformation = BigTextStyleInformation(
+        message,
+        htmlFormatBigText: true,
+        htmlFormatContentTitle: true,
+        htmlFormatSummaryText: true);
+
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'id', 'name', 'description',
+        styleInformation: bigTextStyleInformation,
+        importance: Importance.Max, priority: Priority.High);
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    if (TargetPlatform.iOS != null) {
+      await flutterLocalNotificationsPlugin.show(
+          scheduleModel.dateTime ~/ 1000,
+          'Bạn có 1 thông báo mới',
+          message, platformChannelSpecifics,
+          payload: 'item x');
+    } else {
+      await flutterLocalNotificationsPlugin.show(
+          scheduleModel.dateTime ~/ 1000,
+          'Bạn có 1 cuộc hẹn mới',
+          null, platformChannelSpecifics,
+          payload: 'item x');
+    }
+
+  }
+
   Future<void> scheduleNotificationUser(ScheduleModel scheduleModel) async {
     var scheduledNotificationDateTime = DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime)
-        .add(Duration(minutes: scheduleModel.timeBook * 60 - 17));
-//    var scheduledNotificationDateTime = DateTime.now().add(Duration(seconds: 5));
-    var message = BigTextStyleInformation(
-        'Bạn có cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc <b>${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))}</b>',
-      htmlFormatSummaryText: true,
-      htmlFormatBigText: true
-    );
+        .add(Duration(minutes: scheduleModel.timeBook * 60 - 15));
+    print('${scheduleModel.timeBook * 60} - ${scheduledNotificationDateTime}');
+    var bigTextStyleInformation = BigTextStyleInformation(
+        'Bạn có cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))}.',
+        htmlFormatBigText: true,
+        htmlFormatContentTitle: true,
+        htmlFormatSummaryText: true);
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'id',
         'name',
         'description',
       enableVibration: true,
+      styleInformation: bigTextStyleInformation,
       icon: '@mipmap/ic_launcher',
-//      styleInformation: message
     );
+    final mess = 'Bạn có cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))}.';
+    print(mess);
     var iOSPlatformChannelSpecifics = IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.schedule(
-        scheduleModel.dateTime ~/ 1000 + scheduleModel.timeBook,
-        'Nhắc nhở lịch khám bệnh',
-        'Bạn có cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))}.',
-        scheduledNotificationDateTime,
-        platformChannelSpecifics,
-        payload: 'abc'
+    if (TargetPlatform.iOS != null) {
+      await flutterLocalNotificationsPlugin.schedule(
+          scheduleModel.dateTime ~/ 1000 + scheduleModel.timeBook,
+          'Nhắc nhở lịch khám bệnh',
+          mess,
+          scheduledNotificationDateTime,
+          platformChannelSpecifics,
+          payload: 'abc'
+      );
+    } else {
+      await flutterLocalNotificationsPlugin.schedule(
+          scheduleModel.dateTime ~/ 1000 + scheduleModel.timeBook,
+          'Nhắc nhở lịch khám bệnh',
+          null,
+          scheduledNotificationDateTime,
+          platformChannelSpecifics,
+          payload: 'abc'
+      );
+    }
+
+  }
+
+  Future<void> scheduleNotificationDoctor(ScheduleModel scheduleModel) async {
+    var scheduledNotificationDateTime = DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime)
+        .add(Duration(minutes: scheduleModel.timeBook * 60 - 15));
+    print('${scheduleModel.timeBook * 60} - ${scheduledNotificationDateTime}');
+    final mess = 'Bạn có cuộc hẹn với bệnh nhân ${scheduleModel.sender.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))}.';
+    var bigTextStyleInformation = BigTextStyleInformation(
+        mess,
+        htmlFormatBigText: true,
+        htmlFormatContentTitle: true,
+        htmlFormatSummaryText: true);
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+      'id',
+      'name',
+      'description',
+      enableVibration: true,
+      styleInformation: bigTextStyleInformation,
+      icon: '@mipmap/ic_launcher',
     );
+
+    print(mess);
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    print('id notification: ${scheduleModel.dateTime ~/ 1000 + scheduleModel.timeBook}');
+    if (TargetPlatform.iOS != null) {
+      await flutterLocalNotificationsPlugin.schedule(
+          scheduleModel.dateTime ~/ 1000 + scheduleModel.timeBook,
+          'Nhắc nhở khám bệnh',
+          mess,
+          scheduledNotificationDateTime,
+          platformChannelSpecifics,
+          payload: 'abc'
+      );
+    } else {
+      await flutterLocalNotificationsPlugin.schedule(
+          scheduleModel.dateTime ~/ 1000 + scheduleModel.timeBook,
+          'Nhắc nhở khám bệnh',
+          null,
+          scheduledNotificationDateTime,
+          platformChannelSpecifics,
+          payload: 'abc'
+      );
+    }
   }
 
   String _toTwoDigitString(int value) {

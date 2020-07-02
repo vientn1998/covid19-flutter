@@ -51,19 +51,46 @@ class GetScheduleAllByDoctor extends ScheduleEvent {
   GetScheduleAllByDoctor({@required this.idDoctor});
 }
 
-class GetScheduleLocalPushByUser extends ScheduleEvent {
-  final String idUser;
-  DateTime fromDate;
-  GetScheduleLocalPushByUser({@required this.idUser, @required this.fromDate});
-}
-
-class GetScheduleLocalPushByUserEventSuccess extends ScheduleEvent {
-  final List<ScheduleModel> list;
-  GetScheduleLocalPushByUserEventSuccess({@required this.list});
-}
 
 class UpdateSchedule extends ScheduleEvent {
   final String idSchedule;
   final StatusSchedule statusSchedule;
   UpdateSchedule({@required this.idSchedule, this.statusSchedule});
 }
+
+class GetScheduleLocalPushReminder extends ScheduleEvent {
+  final String idUser;
+  DateTime fromDate;
+  final isDoctor;
+  GetScheduleLocalPushReminder({@required this.idUser, @required this.fromDate, @required this.isDoctor});
+}
+
+class GetScheduleLocalPushNewByDoctor extends ScheduleEvent {
+  final String idDoctor;
+  DateTime fromDate;
+  GetScheduleLocalPushNewByDoctor({@required this.idDoctor, @required this.fromDate});
+}
+
+class GetScheduleLocalPushNewEventSuccess extends ScheduleEvent {
+  final ScheduleModel item;
+  GetScheduleLocalPushNewEventSuccess({@required this.item});
+}
+
+class GetScheduleLocalPushNewEventSuccessTotal extends ScheduleEvent {
+  final String idDoctor;
+  DateTime fromDate;
+  GetScheduleLocalPushNewEventSuccessTotal({@required this.idDoctor, this.fromDate});
+}
+
+class GetScheduleLocalPushChangeStatusOfUser extends ScheduleEvent {
+  final String idUser;
+  DateTime fromDate;
+  GetScheduleLocalPushChangeStatusOfUser({@required this.idUser, @required this.fromDate});
+}
+
+class GetScheduleLocalPushChangeStatusOfUserEventSuccess extends ScheduleEvent {
+  final ScheduleModel item;
+  GetScheduleLocalPushChangeStatusOfUserEventSuccess({@required this.item});
+}
+
+

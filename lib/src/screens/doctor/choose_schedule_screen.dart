@@ -53,6 +53,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
   ];
 
   List<ScheduleModel> listData = [];
+  List<ScheduleModel> listScheduleBooked = [];
 
   List<KeyValueObj> listDataValid = [];
 
@@ -61,6 +62,8 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
     setState(() {
       userObjSender = data;
     });
+    BlocProvider.of<ScheduleBloc>(context)
+        .add(GetScheduleByUesr(idUser: userObjSender.id, fromDate: dateTimeSelected, statusSchedule: null));
   }
 
   getScheduleByDay(DateTime date) {
@@ -215,6 +218,21 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
                 });
               });
               LoadingHud(context).dismiss();
+            } else if (state is FetchScheduleByUserSuccess) {
+              print('FetchScheduleByUserSuccess');
+              LoadingHud(context).dismiss();
+              final data = state.list;
+              listScheduleBooked.clear();
+              data.sort((a, b) {
+                int cmp = a.dateTime.compareTo(b.dateTime);
+                if (cmp != 0) {
+                  return cmp;
+                }
+                return a.timeBook.compareTo(b.timeBook);
+              });
+              setState(() {
+                listScheduleBooked.addAll(data);
+              });
             }
           },
           child: Column(
@@ -282,7 +300,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
         barrierDismissible: false,
         context: context,
         builder: (context) {
-          return MyDialogCreateSchedule(dateTimeCreate,timeSelected,listDataValid,'', userObjSender, widget.userObjReceiver);
+          return MyDialogCreateSchedule(dateTimeCreate,timeSelected,listDataValid,'', userObjSender, widget.userObjReceiver, listScheduleBooked);
         }) as ScheduleModel;
     if (schedule != null && schedule.status.isNotEmpty) {
       BlocProvider.of<ScheduleBloc>(context).add(CreateSchedule(scheduleModel: schedule, dateTimeCreate: dateTimeCreate));
@@ -353,7 +371,8 @@ class MyDialogCreateSchedule extends StatefulWidget {
   List<KeyValueObj> listData;
   String note;
   final UserObj userObjSender, userObjReceiver;
-  MyDialogCreateSchedule(this.dateTime, this.timeSelected, this.listData, this.note, this.userObjSender, this.userObjReceiver);
+  final List<ScheduleModel> listScheduleBooked;
+  MyDialogCreateSchedule(this.dateTime, this.timeSelected, this.listData, this.note, this.userObjSender, this.userObjReceiver, this.listScheduleBooked);
 
   @override
   _MyDialogCreateScheduleState createState() => _MyDialogCreateScheduleState();
@@ -478,7 +497,7 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
                           barrierDismissible: false,
                             context: context,
                             builder: (context) {
-                              return MyDialogChooseTimeSchedule(list, widget.timeSelected);
+                              return MyDialogChooseTimeSchedule(list, widget.timeSelected, widget.listScheduleBooked, widget.dateTime);
                             }) as KeyValueObj;
                         print('time: $time');
                         setState(() {
@@ -575,7 +594,9 @@ class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
 class MyDialogChooseTimeSchedule extends StatefulWidget {
   List<KeyValueObj> listData;
   KeyValueObj itemSelected;
-  MyDialogChooseTimeSchedule(this.listData, this.itemSelected);
+  DateTime dateTimeSelected;
+  final List<ScheduleModel> listScheduleBooked;
+  MyDialogChooseTimeSchedule(this.listData, this.itemSelected, this.listScheduleBooked, this.dateTimeSelected);
 
   @override
   _MyDialogSchedule createState() => _MyDialogSchedule();
@@ -688,7 +709,16 @@ class _MyDialogSchedule extends State<MyDialogChooseTimeSchedule> {
                           ),),
                           onPressed: () {
                             if (_currentTimeValue.length != 0) {
-                              Navigator.pop(context, itemSelected);
+//                              print(element.dateTime == widget.dateTimeSelected.millisecondsSinceEpoch);
+                              final item = widget.listScheduleBooked
+                                  .firstWhere((element) => element.dateTime == widget.dateTimeSelected.millisecondsSinceEpoch
+                                  && element.timeBook == itemSelected.timeBook, orElse: () => null);
+                              if (widget.listScheduleBooked.any((element) => element.dateTime == widget.dateTimeSelected.millisecondsSinceEpoch
+                                  && element.timeBook == itemSelected.timeBook)) {
+                                toast('Bạn đã có cuộc hẹn vào ${item.timeBook.getTypeTimeSchedule()}\n với bác sĩ ${item.receiver.name}', gravity: ToastGravity.BOTTOM);
+                              } else {
+                                Navigator.pop(context, itemSelected);
+                              }
                             } else {
                               toast('Please choose one item');
                             }

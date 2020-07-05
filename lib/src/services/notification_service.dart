@@ -96,7 +96,7 @@ class NotificationPushLocal {
 
   Future<void> scheduleNotificationUser(ScheduleModel scheduleModel) async {
     var scheduledNotificationDateTime = DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime)
-        .add(Duration(minutes: scheduleModel.timeBook * 60 - 15));
+        .add(Duration(minutes: scheduleModel.timeBook * 60 - 47));
     print('${scheduleModel.timeBook * 60} - ${scheduledNotificationDateTime}');
     var bigTextStyleInformation = BigTextStyleInformation(
         'Bạn có cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))}.',

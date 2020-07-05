@@ -26,11 +26,9 @@ class ChatRepository {
     List<ChatModel> listChat = [];
     List<int> listDay = [];
     try {
-      await chatCollection.document(id).collection(id).orderBy("dateTime", descending: true)
-          .getDocuments()
-          .then((querySnapshot) {
-        final item = querySnapshot.documents.map((document) {
-          return ChatModel.fromSnapshot(document);
+      chatCollection.document(id).collection(id).orderBy("dateTime", descending: true).snapshots().listen((querySnapshot) {
+        final item = querySnapshot.documentChanges.map((documentChange) {
+          return ChatModel.fromSnapshot(documentChange.document);
         }).toList();
         listChat.addAll(item);
       });

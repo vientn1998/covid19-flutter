@@ -7,6 +7,7 @@ import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
+import 'package:template_flutter/src/screens/chat/chat_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
 import 'package:template_flutter/src/utils/define.dart';
@@ -37,6 +38,19 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
       appBar: AppBar(
         title: Text('Details Schedule'),
         centerTitle: true,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.chat),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          ChatPage(widget.scheduleModel.sender)
+                  ));
+            },
+          )
+        ],
       ),
       body: BlocListener<ScheduleBloc, ScheduleState>(
         listener: (context, state) {

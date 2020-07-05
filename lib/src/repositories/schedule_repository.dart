@@ -6,8 +6,6 @@ import 'package:template_flutter/src/utils/define.dart';
 
 class ScheduleRepository {
   final scheduleCollection = Firestore.instance.collection("Schedules");
-  final pathDay = "Days";
-  final pathHours = "Hours";
 
   Future<bool> createSchedule(ScheduleModel scheduleModel) async {
     bool isSuccess = false;

@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:template_flutter/src/app/simple_bloc_delegate.dart';
 import 'package:template_flutter/src/blocs/auth/auth_bloc.dart';
 import 'package:template_flutter/src/blocs/auth/auth_state.dart';
+import 'package:template_flutter/src/blocs/chat/bloc.dart';
 import 'package:template_flutter/src/blocs/common/bloc.dart';
 import 'package:template_flutter/src/blocs/covid19/bloc.dart';
 import 'package:template_flutter/src/blocs/death/bloc.dart';
@@ -20,6 +21,7 @@ import 'package:template_flutter/src/blocs/local_search/bloc.dart';
 import 'package:template_flutter/src/blocs/major/bloc.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/database/covid_dao.dart';
+import 'package:template_flutter/src/repositories/chat_repository.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_api_client.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_repository.dart';
 import 'package:template_flutter/src/repositories/major_repository.dart';
@@ -84,7 +86,7 @@ main() async {
   final Covid19Repository covid19repository =
       Covid19Repository(covid19apiClient: Covid19ApiClient());
   final majorRepository = MajorRepository();
-
+  final chatRepository = ChatRepository();
   final userRepository = UserRepository();
   final scheduleRepository = ScheduleRepository();
   runApp(MultiBlocProvider(
@@ -115,6 +117,9 @@ main() async {
       ),
       BlocProvider<MajorBloc>(
         create: (context) => MajorBloc(majorRepository),
+      ),
+      BlocProvider<ChatBloc>(
+        create: (context) => ChatBloc(chatRepository),
       ),
     ],
     child: MaterialApp(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:template_flutter/src/models/user_model.dart';
+import 'package:template_flutter/src/screens/chat/chat_screen.dart';
 import 'package:template_flutter/src/screens/doctor/choose_schedule_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
@@ -44,7 +45,14 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   actions: <Widget>[
                     IconButton(
                       icon: Icon(Icons.favorite),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ChatPage(widget.userObj)
+                            ));
+                      },
                     )
                   ],
                 ),

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loading_hud/loading_hud.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
@@ -11,6 +12,8 @@ import 'package:template_flutter/src/screens/chat/chat_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
 import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/dialog_cus.dart';
+import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/widgets/button.dart';
 import '../../utils/extension/int_extention.dart';
 import '../../utils/extension/string_extention.dart';
@@ -25,11 +28,30 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
 
   static const double sizeIcon = 20.0;
   StatusSchedule _statusSchedule;
+  UserObj userObj = UserObj();
 
 
   updateSchedule(StatusSchedule statusSchedule) {
     BlocProvider.of<ScheduleBloc>(context)
         .add(UpdateSchedule(idSchedule: widget.scheduleModel.id, statusSchedule: statusSchedule));
+  }
+
+  getUser() async {
+    final dataMap = await SharePreferences().getObject(SharePreferenceKey.user);
+    if (dataMap != null) {
+      final data = await UserObj.fromJson(dataMap);
+      if (data != null) {
+        setState(() {
+          userObj = data;
+        });
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUser();
   }
 
   @override
@@ -46,7 +68,7 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                   context,
                   MaterialPageRoute(
                       builder: (context) =>
-                          ChatPage(widget.scheduleModel.sender)
+                          ChatPage(userObj, widget.scheduleModel.sender)
                   ));
             },
           )
@@ -289,11 +311,20 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                         child: ButtonCustom(
                           title: 'Cancel',
                           background: colorActive,
-                          onPressed: () {
-                            updateSchedule(StatusSchedule.Canceled);
-                            setState(() {
-                              _statusSchedule = StatusSchedule.Canceled;
-                            });
+                          onPressed: () async {
+                            final note = await showDialog(
+                                barrierDismissible: false,
+                                context: context,
+                                builder: (context) {
+                                  return MyDialogCreateSchedule();
+                                }) as String;
+                            print('note: $note');
+                            if (note != null && note.length > 0) {
+                              updateSchedule(StatusSchedule.Canceled);
+                              setState(() {
+                                _statusSchedule = StatusSchedule.Canceled;
+                              });
+                            }
                           },
                         ),
                       ),
@@ -347,35 +378,115 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
       ),
     );
   }
+}
 
-  _buildBtnAction(IconData icon, Color background) {
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Icon(icon, size: 20, color: Colors.white,),
-      ),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: background
-      ),
-    );
+
+class MyDialogCreateSchedule extends StatefulWidget {
+
+  @override
+  _MyDialogCreateScheduleState createState() => _MyDialogCreateScheduleState();
+}
+
+class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
+
+  String note;
+  TextEditingController textEditingController;
+
+  @override
+  void initState() {
+    note = '';
+    textEditingController = TextEditingController();
+    super.initState();
+  }
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    super.dispose();
   }
 
-  _buildImageAvatar(UserObj item) {
-    if (item.avatar != null) {
-      return CachedNetworkImage(
-        imageUrl: item.avatar,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => CircularProgressIndicator(),
-        errorWidget: (context, url, error) => Center(
-          child: FaIcon(FontAwesomeIcons.user),
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12.0))),
+      contentPadding: EdgeInsets.only(top: 0.0),
+      elevation: 1,
+      content: Container(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                SizedBox(width: 35,),
+                Expanded(
+                  child: Text('Reason', style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: textColor
+                  ), textAlign: TextAlign.center,),
+                ),
+                IconButton(
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(paddingDefault, 0, paddingDefault, 0),
+              child: Container(
+                decoration: BoxDecoration(
+                    color: backgroundSearch,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(width: 1, color: backgroundTextInput)
+                ),
+                child: TextField(
+                  maxLines: 6,
+                  minLines: 6,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                  controller: textEditingController,
+                  onChanged: (value) {
+                    setState(() {
+                      note = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 7, vertical: 7),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height:5,),
+            Container(
+              margin: EdgeInsets.all(paddingDefault),
+              height: heightButton,
+              width: double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                child: ButtonCustom(
+                  title: 'Done',
+                  background: colorActive,
+                  onPressed: () async {
+                    if (note.length > 0) {
+                      Navigator.pop(context, note);
+                      FocusScope.of(context).unfocus();
+                    } else {
+                      toast('Please input note', gravity: ToastGravity.BOTTOM);
+                    }
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
-      );
-    } else {
-      return CachedNetworkImage(
-        imageUrl : "https://images.pexels.com/photos/396547/pexels-photo-396547.jpeg?auto=compress&cs=tinysrgb&h=350",
-        fit: BoxFit.cover,
-      );
-    }
+      ),
+    );
   }
 }

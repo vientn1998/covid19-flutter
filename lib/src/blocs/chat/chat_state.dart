@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:template_flutter/src/models/chat_model.dart';
 
@@ -31,10 +32,10 @@ class LoadingFetchChat extends ChatState {
 }
 
 class FetchChatSuccess extends ChatState {
-  List<ChatGroupDay> list;
-  FetchChatSuccess(this.list);
+  QuerySnapshot querySnapshot;
+  FetchChatSuccess(this.querySnapshot);
   @override
-  List<Object> get props => [this.list];
+  List<Object> get props => [this.querySnapshot];
 }
 
 class FetchChatError extends ChatState {

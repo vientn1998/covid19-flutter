@@ -66,6 +66,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    print('build Profile');
     return Scaffold(
       body: BlocListener<ScheduleBloc, ScheduleState>(
         listener: (context, state) {
@@ -76,11 +77,10 @@ class _ProfilePageState extends State<ProfilePage> {
           } else if (state is FetchScheduleListenReminderPush) {
             print('total push reminder list ${state.list.length}');
             final dateNow = DateTime.now();
-            final dateCurrent = DateTime(dateNow.year, dateNow.month, dateNow.day);
+            final dateCurrent = DateTime(dateNow.year, dateNow.month, dateNow.day, dateNow.hour);
             final data = state.list.where((element) {
               var dateItem = DateTime.fromMillisecondsSinceEpoch(element.dateTime);
-              print('${dateItem} - ${dateCurrent} ${element.timeBook} - ${dateCurrent.hour}');
-              return (dateItem.difference(dateCurrent).inDays != 0)
+              return (dateItem.isAfter(dateCurrent))
                   || (dateItem.difference(dateCurrent).inDays == 0 && element.timeBook > dateCurrent.hour);
             }).toList();
             print('total push reminder data ${data.length}');

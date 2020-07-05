@@ -42,6 +42,24 @@ class _DoctorPageState extends State<DoctorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.notifications_none, color: Colors.blue,),
+          onPressed: () {
+
+          },
+        ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.search, color: Colors.blue,),
+            onPressed: () {
+
+            },
+          )
+        ],
+      ),
       body: SafeArea(
         child: BlocListener<DoctorBloc,DoctorState>(
           listener: (context, state) {
@@ -65,44 +83,6 @@ class _DoctorPageState extends State<DoctorPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  SizedBox(
-                    height: heightSpaceSmall,
-                  ),
-                  //notify and search
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        right: paddingDefault, left: paddingDefault),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.notifications_none, color: Colors.blue,),
-                          onPressed: () {
-
-                          },
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: <Widget>[
-                            Text(
-                              '',
-                              style: kTitleBold,
-                            ),
-                          ],
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.search,),
-                          onPressed: () {
-
-                          },
-                        )
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: heightSpaceSmall,),
                   CarouselSlider(
                     options: CarouselOptions(
                       height: 170.0,

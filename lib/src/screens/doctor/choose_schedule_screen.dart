@@ -153,6 +153,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
         resizeToAvoidBottomInset: false,
         appBar: new AppBar(
           title: new Text(widget.userObjReceiver.name),
+          centerTitle: true,
         ),
         body: BlocListener<ScheduleBloc, ScheduleState>(
           listener: (context, state) {

@@ -7,6 +7,7 @@ import 'package:template_flutter/src/screens/chat/chat_screen.dart';
 import 'package:template_flutter/src/screens/doctor/choose_schedule_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/widgets/button.dart';
 
 class DoctorDetailsPage extends StatefulWidget {
@@ -19,6 +20,33 @@ class DoctorDetailsPage extends StatefulWidget {
 }
 
 class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
+  UserObj userObj = UserObj();
+
+
+  @override
+  void initState() {
+    super.initState();
+    getUser();
+  }
+
+  getUser() async {
+    final dataMap = await SharePreferences().getObject(SharePreferenceKey.user);
+    if (dataMap != null) {
+      final data = await UserObj.fromJson(dataMap);
+      if (data != null) {
+        setState(() {
+          userObj = data;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,12 +74,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                     IconButton(
                       icon: Icon(Icons.favorite),
                       onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ChatPage(widget.userObj)
-                            ));
+
                       },
                     )
                   ],
@@ -100,7 +123,14 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                                   SizedBox(
                                     width: 10,
                                   ),
-                                  _buildBtnAction(Icons.email, colorTotalCase),
+                                  _buildBtnAction(Icons.chat, colorTotalCase, function: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                ChatPage(userObj, widget.userObj)
+                                        ));
+                                  }),
                                   SizedBox(
                                     width: paddingDefault,
                                   ),
@@ -280,18 +310,21 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
     );
   }
 
-  _buildBtnAction(IconData icon, Color background) {
-    return Container(
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Icon(
-          icon,
-          size: 20,
-          color: Colors.white,
+  _buildBtnAction(IconData icon, Color background, {Function function}) {
+    return InkWell(
+      child: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Icon(
+            icon,
+            size: 20,
+            color: Colors.white,
+          ),
         ),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8), color: background),
       ),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8), color: background),
+      onTap: function,
     );
   }
 

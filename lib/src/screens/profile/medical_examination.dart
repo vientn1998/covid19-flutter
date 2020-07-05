@@ -25,7 +25,8 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
   RefreshController _refreshController = RefreshController(initialRefresh: false);
   DateTime dateTimeSelected;
   StatusSchedule _statusSchedule;
-
+  final dateNow = DateTime.now();
+  DateTime dateCurrent;
   void _onRefresh() async{
     BlocProvider.of<ScheduleBloc>(context)
         .add(GetScheduleByUesr(idUser: widget.userObj.id, fromDate: dateTimeSelected, statusSchedule: _statusSchedule));
@@ -41,8 +42,8 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
   @override
   void initState() {
     super.initState();
-    final dateCurrent = DateTime.now();
-    dateTimeSelected = DateTime(dateCurrent.year, dateCurrent.month, dateCurrent.day);
+    dateTimeSelected = DateTime(dateNow.year, dateNow.month, dateNow.day);
+    dateCurrent = DateTime(dateNow.year, dateNow.month, dateNow.day, dateNow.hour);
     BlocProvider.of<ScheduleBloc>(context)
         .add(GetScheduleByUesr(idUser: widget.userObj.id, fromDate: dateTimeSelected, statusSchedule: _statusSchedule));
     _tabController = new TabController(length: 2, vsync: this);
@@ -90,7 +91,20 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
                 _onLoading();
               } else if (state is FetchScheduleByUserSuccess) {
                 print('FetchScheduleByUserSuccess');
-                final data = state.list;
+
+                final data = state.list.where((element) {
+                  var dateItem = DateTime.fromMillisecondsSinceEpoch(element.dateTime);
+                  print('${dateItem} - ${dateCurrent} ${element.timeBook} - ${dateCurrent.hour}');
+
+                  print((dateItem.isAfter(dateCurrent)));
+
+                  print((dateItem.difference(dateCurrent).inDays == 0 && element.timeBook > dateCurrent.hour));
+
+                  return (dateItem.isAfter(dateCurrent))
+                      || (dateItem.difference(dateCurrent).inDays == 0 && element.timeBook > dateCurrent.hour);
+                }).toList();
+
+
                 list.clear();
                 data.sort((a, b) {
                   int cmp = a.dateTime.compareTo(b.dateTime);

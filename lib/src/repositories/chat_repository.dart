@@ -20,6 +20,10 @@ class ChatRepository {
     return isSuccess;
   }
 
+  Stream<QuerySnapshot> getChatsRealmTimeById(String id) {
+    return chatCollection.document(id).collection(id).limit(50).snapshots();
+  }
+
   Future<List<ChatGroupDay>> getChatsById(String id) async {
     print('getChatsById : $id');
     List<ChatGroupDay> list = [];

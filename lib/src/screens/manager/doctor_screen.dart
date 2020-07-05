@@ -8,7 +8,7 @@ import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/covid19/country.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
-import 'package:template_flutter/src/screens/map/schedule_details_screen.dart';
+import 'package:template_flutter/src/screens/manager/schedule_details_screen.dart';
 import 'package:template_flutter/src/screens/home/search_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
@@ -27,12 +27,13 @@ class DoctorManagerPage extends StatefulWidget {
 class _DoctorManagerPageState extends State<DoctorManagerPage> {
   static const heightFilter = 35.0;
   List<ScheduleModel> list = [];
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
-  DateTime dateTimeSelected;
+  RefreshController _refreshController = RefreshController(initialRefresh: false);
+  final ScrollController listScrollController = ScrollController();
+  DateTime dateTimeSelected, dateCurrent;
   StatusSchedule _statusSchedule = StatusSchedule.Today;
   UserObj userObj = UserObj();
   var numberToday = 0, numberCanceled = 0, numberNew = 0, numberApproved = 0;
+  final dateNow = DateTime.now();
   void _onRefresh() async {
     _refreshController.refreshCompleted();
   }
@@ -59,6 +60,7 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
 
   @override
   void initState() {
+    dateCurrent = DateTime(dateNow.year, dateNow.month, dateNow.day, dateNow.hour);
     super.initState();
     getUser();
   }
@@ -84,17 +86,40 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                     return a.timeBook.compareTo(b.timeBook);
                   });
                   list.clear();
-                  setState(() {
-                    list.addAll(data);
-                  });
+                  if (_statusSchedule == StatusSchedule.New) {
+                    final ls = data.where((element) {
+                      var dateItem = DateTime.fromMillisecondsSinceEpoch(element.dateTime);
+                      print('${dateItem} - ${dateCurrent} ${element.timeBook} - ${dateCurrent.hour}');
+
+                      print((dateItem.isAfter(dateCurrent)));
+
+                      print((dateItem.difference(dateCurrent).inDays == 0 && element.timeBook > dateCurrent.hour));
+
+                      return (dateItem.isAfter(dateCurrent))
+                          || (dateItem.difference(dateCurrent).inDays == 0 && element.timeBook > dateCurrent.hour);
+                    }).toList();
+                    setState(() {
+                      list.addAll(ls);
+                    });
+                  } else {
+                    setState(() {
+                      list.addAll(data);
+                    });
+                  }
+                  scrollTop();
                   LoadingHud(context).dismiss();
                 } else if (state is FetchAllTotalScheduleByDoctorSuccess) {
                   final data = state.list;
                   print('datetimedatetime ${dateTimeSelected.millisecondsSinceEpoch}');
                   final today = data.where((element) => element.dateTime == dateTimeSelected.millisecondsSinceEpoch).toList().length;
-                  final newCase = data.where((element) => element.status == StatusSchedule.New.toShortString()).toList().length;
+                  final listNew = data.where((element) => element.status == StatusSchedule.New.toShortString()).toList();
                   final approved = data.where((element) => element.status == StatusSchedule.Approved.toShortString()).toList().length;
                   final canceled = data.where((element) => element.status == StatusSchedule.Canceled.toShortString()).toList().length;
+                  final newCase = listNew.where((element) {
+                    var dateItem = DateTime.fromMillisecondsSinceEpoch(element.dateTime);
+                    return (dateItem.isAfter(dateCurrent))
+                        || (dateItem.difference(dateCurrent).inDays == 0 && element.timeBook > dateCurrent.hour);
+                  }).toList().length;
                   setState(() {
                     numberToday = today;
                     numberCanceled = canceled;
@@ -259,6 +284,7 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
       );
     }
     return ListView.separated(
+      controller: listScrollController,
         itemBuilder: (context, index) {
           return buildItem(item: list[index], function: () async {
             final data = await Navigator.push(context, MaterialPageRoute(
@@ -487,6 +513,10 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
         borderRadius: BorderRadius.circular(8),
       ),
     );
+  }
+
+  scrollTop() {
+    listScrollController.animateTo(0.0, duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
   }
 
   widgetBoxFilter() {

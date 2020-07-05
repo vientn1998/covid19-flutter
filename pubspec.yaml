@@ -100,8 +100,10 @@ dependencies:
   flutter_local_notifications: ^1.4.4+1
   #check network
   connectivity: ^0.4.9
-  #
+  #stream
   rxdart: ^0.23.1
+  #keyboard utils
+  keyboard_utils: ^1.2.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

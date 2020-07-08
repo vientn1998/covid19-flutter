@@ -29,6 +29,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.4.1"
+  audioplayers:
+    dependency: "direct main"
+    description:
+      name: audioplayers
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.15.1"
   bloc:
     dependency: transitive
     description:
@@ -244,6 +251,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_audio_recorder:
+    dependency: "direct main"
+    description:
+      name: flutter_audio_recorder
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.5"
   flutter_bloc:
     dependency: "direct main"
     description:
@@ -401,6 +415,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.12"
+  image_cropper:
+    dependency: "direct main"
+    description:
+      name: image_cropper
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.3"
   image_picker:
     dependency: "direct main"
     description:

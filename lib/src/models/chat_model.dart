@@ -37,10 +37,12 @@ class ChatGroupDay extends Equatable {
 
 class ChatModel extends Equatable {
 
-  String id, idReceiver, idSender, content, url, type, idGroup;
+  String id, idReceiver, idSender, content, url, type, idGroup, durationAudio;
   int day, dateTime;
 
-  ChatModel({this.id, this.idReceiver, this.idSender, this.content, this.idGroup,this.url, this.dateTime, this.day, this.type});
+  ChatModel({this.id, this.idReceiver, this.idSender, this.content, this.idGroup,this.url, this.dateTime, this.day, this.durationAudio, this.type});
+
+  String get timerDuration => durationAudio != null && durationAudio.length > 0 ? durationAudio : '00:00';
 
   static ChatModel fromSnapshot(DocumentSnapshot documentSnapshot) {
     return ChatModel(
@@ -50,6 +52,7 @@ class ChatModel extends Equatable {
       content: documentSnapshot.data['content'] ?? '',
       url: documentSnapshot.data['url'] ?? '',
       type: documentSnapshot.data['type'] ?? '',
+      durationAudio: documentSnapshot.data['timeAudio'] ?? '',
       dateTime: documentSnapshot.data['dateTime'] ?? 0,
       day: documentSnapshot.data['day'] ?? 0,
     );
@@ -63,6 +66,7 @@ class ChatModel extends Equatable {
       'content' : this.content,
       'url' : this.url,
       'type' : this.type,
+      'timeAudio' : this.durationAudio,
       'day' : this.day,
       'dateTime' : this.dateTime,
     };

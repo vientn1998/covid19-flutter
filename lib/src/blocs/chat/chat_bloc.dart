@@ -26,6 +26,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       yield* _mapFetchAllChatByIdToState(event);
     } else if (event is InitChatEvent) {
       yield InitialChatState();
+    } else if (event is UploadImage) {
+      yield* _mapUploadImageToState(event);
     }
   }
 
@@ -59,6 +61,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     } catch(error) {
       yield FetchChatError();
       print('error _mapFetchAllChatByIdToState: $error');
+    }
+  }
+
+  Stream<ChatState> _mapUploadImageToState(UploadImage event) async* {
+    yield UploadFileChatLoading();
+    print('_mapUploadImageToState');
+    try {
+      final urlImage = await chatRepository.uploadImageToServer(event.folder, event.file);
+      if (urlImage != null && urlImage.length > 0) {
+        yield UploadFileChatSuccess(urlImage, event.isImage);
+      } else {
+        yield UploadFileChatError();
+      }
+    } catch(error) {
+      yield UploadFileChatError();
     }
   }
 }

@@ -104,6 +104,12 @@ dependencies:
   rxdart: ^0.23.1
   #keyboard utils
   keyboard_utils: ^1.2.4
+  #crop image
+  image_cropper: ^1.2.3
+  #recorder audio
+  flutter_audio_recorder: ^0.5.5
+  #player manager
+  audioplayers: ^0.15.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

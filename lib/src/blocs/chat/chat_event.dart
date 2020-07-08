@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -34,4 +36,11 @@ class FetchListRealTimeChat extends ChatEvent {
   FetchListRealTimeChat({@required this.querySnapshot});
   @override
   List<Object> get props => [this.querySnapshot];
+}
+
+class UploadImage extends ChatEvent {
+  final String folder;
+  final File file;
+  final bool isImage;
+  UploadImage({@required this.folder,@required this.file, @required this.isImage}) : assert(folder != null);
 }

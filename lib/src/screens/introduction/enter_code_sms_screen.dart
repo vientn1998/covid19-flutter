@@ -43,7 +43,7 @@ class _EnterOTPPageState extends State<EnterOTPPage> {
   int currentSeconds = 0;
 
   String get timerText =>
-      '${((timerMaxSeconds - currentSeconds) ~/ 60).toString().padLeft(2, '0')}: ${((timerMaxSeconds - currentSeconds) % 60).toString().padLeft(2, '0')}';
+      '${((timerMaxSeconds - currentSeconds) ~/ 60).toString().padLeft(2, '0')}:${((timerMaxSeconds - currentSeconds) % 60).toString().padLeft(2, '0')}';
 
   startTimeout([int milliseconds]) {
     var duration = interval;

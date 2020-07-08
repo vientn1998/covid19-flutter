@@ -42,3 +42,21 @@ class FetchChatError extends ChatState {
   @override
   List<Object> get props => [];
 }
+
+class UploadFileChatLoading extends ChatState {
+  @override
+  List<Object> get props => [];
+}
+
+class UploadFileChatError extends ChatState {
+  @override
+  List<Object> get props => [];
+}
+
+class UploadFileChatSuccess extends ChatState {
+  String url;
+  bool isTypeImage;
+  UploadFileChatSuccess(this.url, this.isTypeImage);
+  @override
+  List<Object> get props => [this.url];
+}

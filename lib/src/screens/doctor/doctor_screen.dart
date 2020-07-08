@@ -272,7 +272,7 @@ class _DoctorPageState extends State<DoctorPage> {
                       shrinkWrap: true,
                       scrollDirection: Axis.vertical,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: listUser.length > 3 ? 3 : listUser.length,
+                      itemCount: listUser.length > 3 ? 4 : listUser.length,
                       separatorBuilder: (context, position) {
                         return SizedBox(height: paddingDefault - 5,);
                       },

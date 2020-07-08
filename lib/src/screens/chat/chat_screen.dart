@@ -43,7 +43,7 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController textEditingController = TextEditingController();
   final ScrollController listScrollController = ScrollController(initialScrollOffset: 0);
   final FocusNode focusNode = FocusNode();
-  bool isFocus = false, isFirstFetchData, isChooseImage;
+  bool isFocus = false, isFirstFetchData, isChooseImage, isSenValid;
   double deviceWidth, deviceHeight;
   String idChat = '';
   String idSender = '';
@@ -52,7 +52,6 @@ class _ChatPageState extends State<ChatPage> {
   double heightKeyboard = 0.0;
   KeyboardBloc _bloc = KeyboardBloc();
   FlutterAudioRecorder _recorder;
-  Recording _current;
   RecordingStatus _currentStatus = RecordingStatus.Unset;
   int currentSeconds = 0;
   String pathRecorder = '', durationAudio = '';
@@ -62,6 +61,7 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     isFirstFetchData = false;
     isChooseImage = false;
+    isSenValid = false;
     super.initState();
     audioPlayer = AudioPlayer();
     focusNode.addListener(onFocusChange);
@@ -177,7 +177,6 @@ class _ChatPageState extends State<ChatPage> {
     File file = File(result.path);
     _timer.cancel();
     setState(() {
-      currentSeconds = 0;
       _currentStatus = result.status;
     });
     return file;
@@ -262,7 +261,6 @@ class _ChatPageState extends State<ChatPage> {
                     if (state is FetchChatSuccess) {
                       if (listScrollController != null) {
                         Timer(Duration(milliseconds: 100), () {
-                          print('isFirstFetchData : $isFirstFetchData');
                           listScrollController.animateTo(listScrollController.position.maxScrollExtent, duration: isFirstFetchData ? Duration(milliseconds: 100) : Duration(microseconds: 1), curve: Curves.easeInOut);
                           isFirstFetchData = true;
                         });
@@ -273,6 +271,7 @@ class _ChatPageState extends State<ChatPage> {
                       LoadingHud(context).show();
                     } else if (state is UploadFileChatSuccess) {
                       LoadingHud(context).dismiss();
+                      focusNode.requestFocus();
                       if (state.isTypeImage) {
                         sendMessage("",urlImage: state.url, isTypeImage: true);
                       } else {
@@ -298,7 +297,6 @@ class _ChatPageState extends State<ChatPage> {
                       return Text('Loading...');
                     }
                     if (state is FetchChatSuccess) {
-                      print('FetchChatSuccess abc');
                       List<ChatGroupDay> list = [];
                       List<ChatModel> listChat = [];
                       List<int> listDay = [];
@@ -306,9 +304,6 @@ class _ChatPageState extends State<ChatPage> {
                       final item = querySnapshot.documents.map((documentChange) {
                         return ChatModel.fromSnapshot(documentChange);
                       }).toList();
-
-                      print('item: ${item.length}');
-                      print('listChat: ${listChat.length}');
                       listChat.addAll(item);
 
                       listChat.forEach((schedule) {
@@ -383,7 +378,7 @@ class _ChatPageState extends State<ChatPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Expanded(
-            child: Center(child: Text(currentSeconds == 0 ? '00: 00' : timerText, style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: borderColor),)),
+            child: Center(child: Text(currentSeconds == 0 ? '00:00' : timerText, style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: currentSeconds == 0 ? borderColor : textColor),)),
           ),
           if (_currentStatus != null && _currentStatus == RecordingStatus.Initialized || _currentStatus == RecordingStatus.Stopped)
             Container(
@@ -398,6 +393,11 @@ class _ChatPageState extends State<ChatPage> {
                   borderRadius: 16,
                   onPressed: () {
                     _start();
+                    Timer(Duration(seconds: 1), () {
+                      setState(() {
+                        isSenValid = true;
+                      });
+                    });
                   },
                 ),),
           ) else Row(
@@ -427,15 +427,16 @@ class _ChatPageState extends State<ChatPage> {
                     title: 'Send',
                     background: Colors.blue,
                     borderRadius: 16,
-                    onPressed: () async {
+                    onPressed: isSenValid ? () async {
+                      isSenValid = false;
                       durationAudio = timerText;
                       final file = await _send();
+                      print('total time file recorder: $currentSeconds');
                       print('duration file recorder: $durationAudio');
                       print('path file recorder: ${file.path}');
                       print('size file recorder: ${ await file.length()}');
-                      focusNode.requestFocus();
                       BlocProvider.of<ChatBloc>(context).add(UploadImage(folder: idChat, file: file, isImage: false));
-                    },
+                    } : null,
                   ),),
               ),),
             ],
@@ -783,8 +784,9 @@ class _ChatPageState extends State<ChatPage> {
             IconButton(
               icon: Icon(Icons.send, color: Colors.red,),
               onPressed: () {
-                sendMessage(textEditingController.text);
-                print('object');
+                if (textEditingController.text.length > 0) {
+                  sendMessage(textEditingController.text);
+                }
               },
             ),
           ],
@@ -814,7 +816,9 @@ class _ChatPageState extends State<ChatPage> {
       chatModel.type = 'image';
     } else {
       chatModel.type = 'audio';
+      chatModel.totalTimerAudio = currentSeconds;
       chatModel.durationAudio = durationAudio;
+      currentSeconds = 0;
     }
 //    chatModel.type = chatModel.getType();
     var documentReference = Firestore.instance
@@ -862,26 +866,76 @@ class KeyboardBloc {
 
 class BuildBubbleAudio extends StatefulWidget {
   ChatModel chatModel;
-  BuildBubbleAudio({chatModel}) : assert(chatModel != null);
+  BuildBubbleAudio({Key key, this.chatModel}) : assert(chatModel != null);
   @override
   _BuildBubbleAudioState createState() => _BuildBubbleAudioState();
 }
 
+enum AudioState {
+  init,
+  playing,
+  pause,
+  complete,
+  stop,
+}
+
 class _BuildBubbleAudioState extends State<BuildBubbleAudio> {
   AudioPlayer audioPlayer = AudioPlayer();
-  ChatModel chatModel;
+  AudioState status = AudioState.init;
+  int currentTimer = 0;
+  int totalTimer;
+  Timer _timer;
+  bool isPrepare = false;
   @override
   void initState() {
     super.initState();
-    chatModel = widget.chatModel;
-    audioPlayer.onDurationChanged.listen((duration) {
-      print('max duration $duration');
+    totalTimer = widget.chatModel.totalTimerAudio;
+    audioPlayer.onAudioPositionChanged.listen((duration) {
+      print('duration : ${duration.inSeconds} ${isPrepare}');
+      if (duration.inSeconds > 0) {
+        if (isPrepare) {
+          print('isPrepare before : ${isPrepare}');
+          setState(() {
+            isPrepare = false;
+          });
+          print('isPrepare after: ${isPrepare}');
+        }
+      }
     });
+    audioPlayer.onPlayerStateChanged.listen((audioState) {
+      if (audioState == AudioPlayerState.PLAYING) {
+        print('AudioPlayerState.PLAYING');
+      } else if (audioState == AudioPlayerState.PAUSED) {
+        setState(() {
+          totalTimer = currentTimer;
+        });
+      } else if (audioState == AudioPlayerState.COMPLETED) {
+        setState(() {
+          status = AudioState.complete;
+          currentTimer = 0;
+        });
+        _timer.cancel();
+      } else if (audioState == AudioPlayerState.STOPPED) {
+        _timer.cancel();
+      }
+    });
+  }
+
+  String get timerText {
+    return '${((totalTimer - currentTimer) ~/ 60).toString().padLeft(2, '0')}:${((totalTimer - currentTimer) % 60).toString().padLeft(2, '0')}';
+  }
+
+  @override
+  void dispose() {
+    if (_timer != null) {
+      _timer.cancel();
+    }
+    audioPlayer.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    print('chat model : ${chatModel.toString()}');
     return Padding(
         padding: const EdgeInsets.all(10.0),
         child: Row(
@@ -889,19 +943,59 @@ class _BuildBubbleAudioState extends State<BuildBubbleAudio> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             InkWell(
-              child: Icon(
-                Icons.play_arrow,
-                color: Colors.white,
-                size: 20,
-              ),
+              child: status == AudioState.init
+                  ? Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 20,
+                        )
+                  : status == AudioState.playing
+                      ? isPrepare
+                          ? Theme(data: ThemeData(cupertinoOverrideTheme: CupertinoThemeData(brightness: Brightness.dark)),
+                  child: CupertinoActivityIndicator())
+                          : Icon(
+                              Icons.pause,
+                              color: Colors.white,
+                              size: 20,
+                            )
+                      : Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 20,
+                        ),
               onTap: () async {
-                await audioPlayer.play(widget.chatModel.url);
+                if (status == AudioState.init || status == AudioState.complete) {
+                  await audioPlayer.play(widget.chatModel.url);
+                  Timer(Duration(milliseconds: 1500), () {
+                    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+                      if (!mounted) return;
+                      setState(() {
+                        if (currentTimer == totalTimer) {
+                          timer.cancel();
+                        } else {
+                          currentTimer = timer.tick;
+                        }
+                      });
+                    });
+                  });
+                  setState(() {
+                    status = AudioState.playing;
+                    isPrepare = true;
+                  });
+                } else if (status == AudioState.playing){
+                  _timer.cancel();
+                  await audioPlayer.stop();
+                  setState(() {
+                    status = AudioState.stop;
+                    currentTimer = 0;
+                  });
+                }
               },
             ),
             SizedBox(
               width: 50,
             ),
-            Text('',
+            Text(timerText,
                 style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
@@ -910,3 +1004,4 @@ class _BuildBubbleAudioState extends State<BuildBubbleAudio> {
         ));
   }
 }
+

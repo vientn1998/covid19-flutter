@@ -106,8 +106,9 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                       list.addAll(data);
                     });
                   }
-                  scrollTop();
                   LoadingHud(context).dismiss();
+//                  scrollTop();
+
                 } else if (state is FetchAllTotalScheduleByDoctorSuccess) {
                   final data = state.list;
                   print('datetimedatetime ${dateTimeSelected.millisecondsSinceEpoch}');

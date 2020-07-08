@@ -202,18 +202,9 @@ class _ChatPageState extends State<ChatPage> {
   String get timerText => currentSeconds == 0 ? '00:00`' :
       '${((currentSeconds) ~/ 60).toString().padLeft(2, '0')}:${((currentSeconds) % 60).toString().padLeft(2, '0')}';
 
-  playAudio(String url) async {
-    int result = await audioPlayer.play(url);
-    if (result == 1) {
-      print('play success');
-    } else {
-      print('play failure');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    print('build');
     deviceWidth = MediaQuery.of(context).size.width;
     deviceHeight = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -518,9 +509,7 @@ class _ChatPageState extends State<ChatPage> {
                           color: backgroundTextInput,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: chatModel.url.length > 0 ? Container(
-//                                height: 100,
-//                                width: 70,
+                        child: chatModel.type == "image" ? Container(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: CachedNetworkImage(
@@ -532,7 +521,7 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                             ),
                           ),
-                        ) : Padding(
+                        ) : chatModel.type == "audio" ? BuildBubbleAudio(chatModel: chatModel,) : Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: Text(chatModel.content, style: TextStyle(
                               fontSize: 16,
@@ -926,10 +915,20 @@ class _BuildBubbleAudioState extends State<BuildBubbleAudio> {
   }
 
   @override
+  void deactivate() {
+//    if (_timer != null) {
+//      _timer.cancel();
+//    }
+//    audioPlayer.dispose();
+//    super.deactivate();
+  }
+
+  @override
   void dispose() {
     if (_timer != null) {
       _timer.cancel();
     }
+    audioPlayer.stop();
     audioPlayer.dispose();
     super.dispose();
   }

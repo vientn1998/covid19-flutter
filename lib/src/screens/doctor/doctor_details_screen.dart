@@ -2,13 +2,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:template_flutter/main.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/chat/chat_screen.dart';
 import 'package:template_flutter/src/screens/doctor/choose_schedule_screen.dart';
+import 'package:template_flutter/src/services/CallsAndMessagesService.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/widgets/button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DoctorDetailsPage extends StatefulWidget {
   final UserObj userObj;
@@ -21,7 +25,7 @@ class DoctorDetailsPage extends StatefulWidget {
 
 class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
   UserObj userObj = UserObj();
-
+  CallsAndMessagesService callsAndMessagesService = getIt<CallsAndMessagesService>();
 
   @override
   void initState() {
@@ -134,7 +138,13 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                                   SizedBox(
                                     width: paddingDefault,
                                   ),
-                                  _buildBtnAction(Icons.phone, background)
+                                  _buildBtnAction(Icons.phone, background, function: () {
+                                    if (widget.userObj.phone.length > 0) {
+                                      callsAndMessagesService.call(widget.userObj.phone);
+                                    } else {
+                                      DialogCus(context).show(message: 'The doctor not have phone number');
+                                    }
+                                  })
                                 ],
                               ),
                               SizedBox(
@@ -308,6 +318,15 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _makePhoneCall(String url) async {
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   _buildBtnAction(IconData icon, Color background, {Function function}) {

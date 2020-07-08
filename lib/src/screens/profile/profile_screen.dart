@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -36,6 +37,10 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     isFirstLoadStatusNew = false;
     super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      //This is a callback for the end of the frame, it only get called once and we know for sure
+      //that the Widget build is complete.
+    });
     getUser();
   }
 

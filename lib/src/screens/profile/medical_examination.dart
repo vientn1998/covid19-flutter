@@ -28,8 +28,8 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
   final dateNow = DateTime.now();
   DateTime dateCurrent;
   void _onRefresh() async{
-    BlocProvider.of<ScheduleBloc>(context)
-        .add(GetScheduleByUesr(idUser: widget.userObj.id, fromDate: dateTimeSelected, statusSchedule: _statusSchedule));
+//    BlocProvider.of<ScheduleBloc>(context)
+//        .add(GetScheduleByUesr(idUser: widget.userObj.id, fromDate: dateTimeSelected, statusSchedule: _statusSchedule));
     _refreshController.refreshCompleted();
   }
 

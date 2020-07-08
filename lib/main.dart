@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:get_it/get_it.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,6 +38,7 @@ import 'src/blocs/schedule/bloc.dart';
 import 'src/models/notification_model.dart';
 import 'src/screens/introduction/login_screen.dart';
 import 'src/screens/introduction/introduction_screen.dart';
+import 'src/services/CallsAndMessagesService.dart';
 
 // Streams are created so that app can respond to notification-related events since the
 // plugin is initialised in the `main` function
@@ -48,10 +50,19 @@ BehaviorSubject<String>();
 
 NotificationAppLaunchDetails notificationAppLaunchDetails;
 
+GetIt getIt = GetIt.instance;
+
+void setupLocator() {
+  getIt.registerSingleton(CallsAndMessagesService(),
+      signalsReady: true);
+}
+
 
 main() async {
   //needed if you intend to initialize in the `main` function
   WidgetsFlutterBinding.ensureInitialized();
+  setupLocator();
+
   var notificationPushLocal = NotificationPushLocal();
   notificationAppLaunchDetails = await notificationPushLocal
       .flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
@@ -134,3 +145,23 @@ main() async {
     ),
   ));
 }
+/*
+* 1. createState
+* 2. initState
+* 3. addPostFrameCallBack: this one need to be called inside your initState()
+* 4. didChangeDependencies(). this method is called immediately after initState().
+* 5. build(). We can say for sure this method is the most "important" one and called right after
+* didChangeDependencies().
+* 6. didUpdateWidget().
+* 7. deActive()
+* 8. dispose().
+* */
+
+
+
+
+
+
+
+
+

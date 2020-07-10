@@ -97,5 +97,7 @@
     </dict>
     <key>NSMicrophoneUsageDescription</key>
         <string>Can We Use Your Microphone Please</string>
+    <key>io.flutter.embedded_views_preview</key>
+        <true/>
 </dict>
 </plist>

@@ -12,6 +12,7 @@ import 'package:template_flutter/src/blocs/doctor/doctor_state.dart';
 import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/doctor/doctor_details_screen.dart';
+import 'package:template_flutter/src/screens/map/map_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
@@ -272,7 +273,7 @@ class _DoctorPageState extends State<DoctorPage> {
                       shrinkWrap: true,
                       scrollDirection: Axis.vertical,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: listUser.length > 3 ? 4 : listUser.length,
+                      itemCount: listUser.length > 3 ? 2 : listUser.length,
                       separatorBuilder: (context, position) {
                         return SizedBox(height: paddingDefault - 5,);
                       },
@@ -295,7 +296,22 @@ class _DoctorPageState extends State<DoctorPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Text('Near by', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
-                        Text('See all', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),),
+                        InkWell(
+                          child: Text(
+                            'See all',
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: textColor),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MapPage(),
+                                ));
+                          },
+                        ),
                       ],
                     ),
                   ),

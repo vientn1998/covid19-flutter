@@ -25,6 +25,9 @@
         <!-- Facebook Login configuration -->
         <meta-data android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"/>
+        <meta-data
+                android:name="com.google.android.geo.API_KEY"
+                android:value="AIzaSyBv16BLpdW-CSa9MWpeZ8m4KPPktXycl5s"/>
 
         <activity android:name="com.facebook.FacebookActivity"
             android:configChanges=

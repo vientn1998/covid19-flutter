@@ -1,6 +1,7 @@
 import UIKit
 import Flutter
 import Firebase
+import GoogleMaps
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -16,7 +17,8 @@ import Firebase
         UIApplication.shared.cancelAllLocalNotifications()
         UserDefaults.standard.set(true, forKey: "Notification")
     }
-    GeneratedPluginRegistrant.register(with: self)    
+    GeneratedPluginRegistrant.register(with: self)
+    GMSServices.provideAPIKey("AIzaSyBv16BLpdW-CSa9MWpeZ8m4KPPktXycl5s")
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 

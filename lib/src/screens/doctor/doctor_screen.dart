@@ -11,6 +11,7 @@ import 'package:template_flutter/src/blocs/doctor/doctor_event.dart';
 import 'package:template_flutter/src/blocs/doctor/doctor_state.dart';
 import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/user_model.dart';
+import 'package:template_flutter/src/screens/chat/test_screen.dart';
 import 'package:template_flutter/src/screens/doctor/doctor_details_screen.dart';
 import 'package:template_flutter/src/screens/map/map_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
@@ -308,7 +309,7 @@ class _DoctorPageState extends State<DoctorPage> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => MapPage(),
+                                  builder: (context) => MapPage(listDoctor: listUser,),
                                 ));
                           },
                         ),

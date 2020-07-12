@@ -254,12 +254,15 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
                     fontWeight: FontWeight.w600
                   ),),
                   Spacer(),
-                  FlatButton(
-                    child: Text('Book', style: TextStyle(
-                        fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.blue),),
-                    onPressed: () {
+                  InkWell(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, paddingDefault, 0),
+                      child: Text('Book', style: TextStyle(
+                          fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue),),
+                    ),
+                    onTap: () {
                       final currentDate = DateTime.now();
                       if (currentDate.hour > 16 && currentDate.day == dateTimeSelected.day
                           && currentDate.month == dateTimeSelected.month) {
@@ -286,6 +289,7 @@ class _ScheduleDoctorPageState extends State<ScheduleDoctorPage> {
                   SizedBox(width: 8,),
                 ],
               ),
+              SizedBox(height: 5,),
               Expanded(
                 child: _buildItemSchedule(listData),
               )

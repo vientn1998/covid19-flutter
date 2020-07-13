@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:template_flutter/main.dart';
+import 'package:template_flutter/src/models/location_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/chat/chat_screen.dart';
 import 'package:template_flutter/src/screens/doctor/choose_schedule_screen.dart';
+import 'package:template_flutter/src/screens/map/map_screen.dart';
 import 'package:template_flutter/src/services/CallsAndMessagesService.dart';
+import 'package:template_flutter/src/utils/calculate.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
@@ -26,11 +29,26 @@ class DoctorDetailsPage extends StatefulWidget {
 class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
   UserObj userObj = UserObj();
   CallsAndMessagesService callsAndMessagesService = getIt<CallsAndMessagesService>();
-
+  String distance = "";
   @override
   void initState() {
     super.initState();
     getUser();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      final dataMap = await SharePreferences().getObject(SharePreferenceKey.location);
+      if (dataMap != null) {
+        final data = LocationObj.fromJson(dataMap);
+        if (data != null) {
+          distance = calculateDistance(data.latitude, data.longitude, widget.userObj.location.latitude, widget.userObj.location.longitude).toStringAsFixed(1);
+        }
+      }
+    }catch (error) {
+      toast("Error get location current");
+    }
+
   }
 
   getUser() async {
@@ -43,6 +61,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         });
       }
     }
+    _getCurrentLocation();
   }
 
   @override
@@ -276,12 +295,51 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                               SizedBox(
                                 height: heightSpaceSmall,
                               ),
-                              Text(
-                                widget.userObj.location.address,
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w400,
-                                    color: backgroundSurvey),
+                              Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Column(
+                                      children: <Widget>[
+                                        Text(
+                                          widget.userObj.location.address,
+                                          overflow: TextOverflow.visible,
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w400,
+                                              color: backgroundSurvey),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: paddingDefault,
+                                  ),
+                                  InkWell(
+                                    child: Container(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          '$distance Km',
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.lightBlue),
+                                        ),
+                                      ),
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(8),
+                                          color: borderColor.withOpacity(0.8)),
+                                    ),
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                MapPage(listDoctor: [widget.userObj], isFromMain: false,)
+                                          ));
+                                    },
+                                  )
+                                ],
                               ),
                             ],
                           ),

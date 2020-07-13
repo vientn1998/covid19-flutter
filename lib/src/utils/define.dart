@@ -21,6 +21,7 @@ enum SharePreferenceKey {
   uuid,
   isBackChooseRole,
   user,
+  location,
   phone,
 }
 

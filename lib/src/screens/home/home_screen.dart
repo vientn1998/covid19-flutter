@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:app_settings/app_settings.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -16,6 +17,7 @@ import 'package:template_flutter/src/blocs/local_search/bloc.dart';
 import 'package:template_flutter/src/models/covid19/country.dart';
 import 'package:template_flutter/src/models/covid19/deaths.dart';
 import 'package:template_flutter/src/models/covid19/overview.dart';
+import 'package:template_flutter/src/models/location_model.dart';
 import 'package:template_flutter/src/screens/home/newcase_screen.dart';
 import 'package:template_flutter/src/screens/home/search_screen.dart';
 import 'package:template_flutter/src/services/notification_service.dart';
@@ -61,7 +63,13 @@ class _HomePageState extends State<HomePage> {
             isChooseCountry = true;
             countrySearch = country == null ? placemark[0].country : country.countrySearch;
           });
-          print('search : $countrySearch');
+          final location = LocationObj(latitude: position.latitude, longitude: position.longitude,
+              street: placemark[0].subThoroughfare + ' ' + placemark[0].thoroughfare,
+              cityOrProvince: placemark[0].administrativeArea, country: placemark[0].country);
+          final address = location.getFullAddress(placemark[0]);
+          location.address = address;
+          final data = jsonEncode(location);
+          SharePreferences().saveString(SharePreferenceKey.location, data);
           BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview(countryName: countrySearch));
         } else {
           BlocProvider.of<Covid19Bloc>(context).add(FetchDataOverview());
@@ -326,8 +334,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-
 
   LineChartData mainData(List<DeathsObj> data) {
     final dataSortByDeath = data.map((e) => DeathsObj.clone(e)).toList();

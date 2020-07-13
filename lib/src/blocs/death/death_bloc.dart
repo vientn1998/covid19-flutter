@@ -26,11 +26,15 @@ class DeathBloc extends Bloc<DeathEvent, DeathState> {
 
   Stream<DeathState> _mapFetchDataDeathToState() async* {
     yield Covid19DeathsLoading();
-    if (listDataDeaths.length == 0) {
-      final list = await covid19repository.getTotalDeaths();
-      listDataDeaths.addAll(list);
-      yield Covid19LoadedDeaths(list: listDataDeaths);
-    } else {
+    try{
+      if (listDataDeaths.length == 0) {
+        final list = await covid19repository.getTotalDeaths();
+        listDataDeaths.addAll(list);
+        yield Covid19LoadedDeaths(list: listDataDeaths);
+      } else {
+        yield Covid19LoadedDeaths(list: listDataDeaths);
+      }
+    } catch (error) {
       yield Covid19LoadedDeaths(list: listDataDeaths);
     }
   }

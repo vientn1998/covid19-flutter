@@ -8,21 +8,28 @@ import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
+import 'package:template_flutter/src/models/location_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/doctor/choose_schedule_screen.dart';
 import 'package:template_flutter/src/screens/doctor/doctor_details_screen.dart';
+import 'package:template_flutter/src/utils/calculate.dart';
 import 'package:template_flutter/src/utils/color.dart';
+import 'package:template_flutter/src/utils/constants.dart';
 import 'package:template_flutter/src/utils/define.dart';
+import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/hex_color.dart';
+import 'package:template_flutter/src/utils/share_preferences.dart';
 
 class MapPage extends StatefulWidget {
 
   List<UserObj> listDoctor = [];
-  MapPage({@required this.listDoctor});
+  bool isFromMain = true;
+  MapPage({@required this.listDoctor,this.isFromMain = true});
 
   @override
   _MapPageState createState() => _MapPageState();
@@ -33,16 +40,14 @@ class _MapPageState extends State<MapPage> {
   Completer<GoogleMapController> _controller = Completer();
   CarouselController carouselController;
   final Geolocator _geolocator = Geolocator();
-  Position _currentPosition;
+  static Position _currentPosition;
   bool isShowPager = false;
   int indexSelected = 0;
   static List<UserObj> listData = [];
   static var contextBuilder;
-
   static final CameraPosition initLocation = CameraPosition(
     target: LatLng(0.0, 0.0)
   );
-
   final Set<Marker> _markers = {};
 
   @override
@@ -105,7 +110,7 @@ class _MapPageState extends State<MapPage> {
                       }
                       final GoogleMapController controller = await _controller.future;
                       controller.animateCamera(
-                          CameraUpdate.newLatLngBounds(getBounds(_markers.toList()), 80)
+                          CameraUpdate.newLatLngBounds(getBounds(_markers.toList()), widget.isFromMain ? 80 : 100)
                       );
                     },
                   ),
@@ -158,7 +163,7 @@ class _MapPageState extends State<MapPage> {
                 child: CarouselSlider(
                   carouselController: carouselController,
                   options: CarouselOptions(
-                    height: 175.0,
+                    height: 180.0,
                     viewportFraction: 0.9,
                     enableInfiniteScroll: true,
                     autoPlayInterval: Duration(seconds: 3),
@@ -180,7 +185,164 @@ class _MapPageState extends State<MapPage> {
                       );
                     }
                   ),
-                  items: itemSlider,
+                  items: listData.map((doctor) {
+                    final distance = calculateDistance(_currentPosition.latitude, _currentPosition.longitude, doctor.location.latitude, doctor.location.longitude).toStringAsFixed(1);
+                    return Container(
+                      margin: EdgeInsets.fromLTRB(4,8,4,8),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.4),
+                              spreadRadius: 1,
+                              blurRadius: 6,
+                              offset: Offset(1, 1),
+                            )
+                          ]
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Column(
+                          children: <Widget>[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Container(
+                                  height: 60,
+                                  width: 60,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: ClipOval(
+                                      child: buildImageAvatar(doctor),
+                                    ),
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.lightBlueAccent.withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                SizedBox(width: 10,),
+                                Flexible(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: <Widget>[
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              Text(doctor.name, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textColor),),
+                                              SizedBox(height: 6,),
+                                              Row(
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                mainAxisSize: MainAxisSize.max,
+                                                children: <Widget>[
+                                                  Row(
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: <Widget>[
+                                                      Icon(Icons.assignment, color: textColor, size: 16,),
+                                                      Text('100',style: TextStyle(
+                                                          fontSize: 14, color: textColor, fontWeight: FontWeight.w500
+                                                      ),),
+                                                    ],
+                                                  ),
+                                                  SizedBox(width: 20,),
+                                                  Row(
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: <Widget>[
+                                                      Icon(Icons.star, color: Colors.yellow, size: 18,),
+                                                      Text('4.5',style: TextStyle(
+                                                          fontSize: 14, color: textColor, fontWeight: FontWeight.w500
+                                                      ),),
+                                                    ],
+                                                  ),
+                                                  SizedBox(width: 20,),
+                                                  Row(
+                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                    children: <Widget>[
+                                                      Icon(Icons.location_on, color: colorIcon, size: 18,),
+                                                      Text('$distance Km',style: TextStyle(
+                                                          fontSize: 14, color: textColor, fontWeight: FontWeight.w500
+                                                      ),),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          Spacer(),
+                                          IconButton(
+                                            icon: Icon(Icons.directions, color: Colors.blue,size: 28,),
+                                            onPressed: () {
+                                            },
+                                          )
+                                        ],
+                                      ),
+
+                                      SizedBox(height: 6,),
+                                      Text(doctor.getNameMajor(),maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 15,),
+                            Expanded(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.max,
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Container(
+                                      height: 36,
+                                      child: FlatButton(
+                                        color: Colors.blue,
+                                        child: Text('Book', style: TextStyle(
+                                            fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold
+                                        ),),
+                                        onPressed: () {
+                                          Navigator.push(contextBuilder, MaterialPageRoute(
+                                            builder: (context) => ScheduleDoctorPage(userObjReceiver: doctor,),
+                                          ));
+                                        },
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(4),
+                                            side: BorderSide(color: Colors.blue)
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: paddingDefault,),
+                                  Expanded(
+                                    child: Container(
+                                      height: 36,
+                                      child: OutlineButton(
+                                        child: Text('Details', style: TextStyle(
+                                            fontSize: 14, color: Colors.blue, fontWeight: FontWeight.bold
+                                        ),),
+                                        onPressed: () {
+                                          Navigator.push(contextBuilder, MaterialPageRoute(
+                                            builder: (context) => DoctorDetailsPage(userObj: doctor,),
+                                          ));
+                                        },
+                                        borderSide: BorderSide(color: Colors.blue),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ) : SizedBox(height: 0, width: 0,),
@@ -189,158 +351,6 @@ class _MapPageState extends State<MapPage> {
       )
     );
   }
-
-  final List<Widget> itemSlider = listData.map((doctor) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(4,8,4,8),
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.4),
-              spreadRadius: 1,
-              blurRadius: 6,
-              offset: Offset(1, 1),
-            )
-          ]
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Container(
-                  height: 70,
-                  width: 70,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: ClipOval(
-                      child: buildImageAvatar(doctor),
-                    ),
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.lightBlueAccent.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                SizedBox(width: 10,),
-                Flexible(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(doctor.name, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textColor),),
-                      SizedBox(height: 2,),
-                      Text(doctor.getNameMajor(),maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),),
-                      SizedBox(height: 6,),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        children: <Widget>[
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Icon(Icons.assignment, color: textColor, size: 16,),
-                              Text('100',style: TextStyle(
-                                  fontSize: 14, color: textColor, fontWeight: FontWeight.w500
-                              ),),
-                            ],
-                          ),
-                          SizedBox(width: 20,),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Icon(Icons.star, color: Colors.yellow, size: 18,),
-                              Text('4.5',style: TextStyle(
-                                  fontSize: 14, color: textColor, fontWeight: FontWeight.w500
-                              ),),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 2,),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Expanded(
-                    child: Container(
-                      height: 36,
-                      width: 70,
-                      child: OutlineButton(
-                        borderSide: BorderSide(color: Colors.blue),
-                        child: Text('Book', style: TextStyle(
-                            fontSize: 14, color: textColor
-                        ),),
-                        onPressed: () {
-                          Navigator.push(contextBuilder, MaterialPageRoute(
-                            builder: (context) => ScheduleDoctorPage(userObjReceiver: doctor,),
-                          ));
-                        },
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                          side: BorderSide(color: Colors.blue)
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: heightSpaceSmall,),
-                  Expanded(
-                    child: Container(
-                      height: 36,
-                      width: 70,
-                      child: OutlineButton(
-                        borderSide: BorderSide(color: Colors.blue),
-                        child: Text('Directer', style: TextStyle(
-                            fontSize: 14, color: textColor
-                        ),),
-                        onPressed: () {
-
-                        },
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6)
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: heightSpaceSmall,),
-                  Expanded(
-                    child: Container(
-                      height: 36,
-                      width: 70,
-                      child: OutlineButton(
-                        borderSide: BorderSide(color: Colors.blue),
-                        child: Text('Details', style: TextStyle(
-                            fontSize: 14, color: textColor
-                        ),),
-                        onPressed: () {
-                          Navigator.push(contextBuilder, MaterialPageRoute(
-                            builder: (context) => DoctorDetailsPage(userObj: doctor,),
-                          ));
-                        },
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6)
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }).toList();
 
   static buildImageAvatar(UserObj item) {
     if (item.avatar != null) {
@@ -387,26 +397,31 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> _getCurrentLocation() async {
-    final GoogleMapController controller = await _controller.future;
-    await _geolocator
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-        .then((Position position) async {
-      final Uint8List markerIcon = await getBytesFromAsset('assets/images/ic_marker_current.png', 100);
-      setState(() {
-        _currentPosition = position;
-        _markers.add(Marker(
-          markerId: MarkerId(position.toString()),
-          position: LatLng(position.latitude, position.longitude),
-          infoWindow: InfoWindow(
-            title: 'Here you are',
-          ),
-          icon: BitmapDescriptor.fromBytes(markerIcon),
-        ));
-        loadAllMarkerDoctor();
-      });
-    }).catchError((e) {
-      print(e);
-    });
+    try {
+      final dataMap = await SharePreferences().getObject(SharePreferenceKey.location);
+      if (dataMap != null) {
+        final data = LocationObj.fromJson(dataMap);
+        if (data != null) {
+          final Uint8List markerIcon = await getBytesFromAsset('assets/images/ic_marker_current.png', 100);
+          final position = Position(latitude: data.latitude, longitude: data.longitude);
+          setState(() {
+            _currentPosition = position;
+            _markers.add(Marker(
+              markerId: MarkerId(position.toString()),
+              position: LatLng(position.latitude, position.longitude),
+              infoWindow: InfoWindow(
+                title: 'Here you are',
+              ),
+              icon: BitmapDescriptor.fromBytes(markerIcon),
+            ));
+            loadAllMarkerDoctor();
+          });
+        }
+      }
+    }catch (error) {
+      toast("Error get location current");
+    }
+
   }
   
   Future<void> loadAllMarkerDoctor() async {
@@ -421,10 +436,22 @@ class _MapPageState extends State<MapPage> {
           draggable: false,
           position: latlng,
           icon: BitmapDescriptor.fromBytes(markerIcon),
-            infoWindow: InfoWindow(
-              title: doctor.name,
-            ),
           onTap: () {
+            print('index: $index');
+            if (widget.isFromMain) {
+              if (!isShowPager) {
+                setState(() {
+                  isShowPager = true;
+                });
+                Timer(Duration(milliseconds: 1000), () {
+                  carouselController.jumpToPage(index);
+                });
+              } else {
+                Timer(Duration(milliseconds: 1000), () {
+                  carouselController.jumpToPage(index);
+                });
+              }
+            }
             mapController.animateCamera(
               CameraUpdate.newCameraPosition(
                 CameraPosition(
@@ -435,26 +462,13 @@ class _MapPageState extends State<MapPage> {
                 ),
               ),
             );
-            print('index: $index');
-            if (!isShowPager) {
-              setState(() {
-                isShowPager = true;
-              });
-              Timer(Duration(milliseconds: 1000), () {
-                carouselController.jumpToPage(index);
-              });
-            } else {
-              Timer(Duration(milliseconds: 1000), () {
-                carouselController.jumpToPage(index);
-              });
-            }
           }
         ));
       });
     });
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(
-      CameraUpdate.newLatLngBounds(getBounds(_markers.toList()), 80)
+      CameraUpdate.newLatLngBounds(getBounds(_markers.toList()), widget.isFromMain ? 80 : 100)
     );
   }
 

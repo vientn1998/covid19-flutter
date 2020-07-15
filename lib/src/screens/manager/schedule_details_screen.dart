@@ -279,14 +279,17 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                                 ),
                                 SizedBox(height: paddingDefault,),
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: <Widget>[
                                     Icon(Icons.location_on, size: sizeIcon, color: colorIcon),
                                     SizedBox(width: heightSpaceSmall,),
-                                    Text(widget.scheduleModel.receiver.getAddress().stringValue(), style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400,
-                                        color: backgroundSurvey
-                                    ),),
+                                    Expanded(
+                                      child: Text(widget.scheduleModel.receiver.getAddress().stringValue(), style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400,
+                                          color: backgroundSurvey
+                                      ),),
+                                    ),
                                   ],
                                 ),
                               ],

@@ -172,33 +172,62 @@ class ScheduleRepository {
   }
 
   Future<List<ScheduleModel>> getScheduleByUser(String idUser,
-      {int day = 0, StatusSchedule status = StatusSchedule.New}) async {
+      {int day = 0, int toDay = 0, StatusSchedule status = StatusSchedule.New}) async {
     List<ScheduleModel> list = [];
-    print('getScheduleByUser $idUser ${status.toShortString()}');
+    print('getScheduleByUser $idUser ${status.toShortString()} - $day - $toDay');
     try {
       if (status != null) {
-        await scheduleCollection
-            .where("senderId", isEqualTo: idUser)
-            .where("dateTime", isGreaterThanOrEqualTo: day)
-            .where("status", isEqualTo: status.toShortString())
-            .getDocuments()
-            .then((querySnapshot) {
-          final item = querySnapshot.documents.map((document) {
-            return ScheduleModel.fromSnapshot(document);
-          }).toList();
-          list.addAll(item);
-        });
+        if (toDay > 0) {
+          await scheduleCollection
+              .where("senderId", isEqualTo: idUser)
+              .where("dateTime", isLessThanOrEqualTo: toDay)
+              .where("status", isEqualTo: status.toShortString())
+              .getDocuments()
+              .then((querySnapshot) {
+            final item = querySnapshot.documents.map((document) {
+              return ScheduleModel.fromSnapshot(document);
+            }).toList();
+            list.addAll(item);
+          });
+        } else {
+          await scheduleCollection
+              .where("senderId", isEqualTo: idUser)
+              .where("dateTime", isGreaterThanOrEqualTo: day)
+              .where("status", isEqualTo: status.toShortString())
+              .getDocuments()
+              .then((querySnapshot) {
+            final item = querySnapshot.documents.map((document) {
+              return ScheduleModel.fromSnapshot(document);
+            }).toList();
+            list.addAll(item);
+          });
+        }
+
       } else {
-        await scheduleCollection
-            .where("senderId", isEqualTo: idUser)
-            .where("dateTime", isGreaterThanOrEqualTo: day)
-            .getDocuments()
-            .then((querySnapshot) {
-          final item = querySnapshot.documents.map((document) {
-            return ScheduleModel.fromSnapshot(document);
-          }).toList();
-          list.addAll(item);
-        });
+        if(toDay > 0) {
+          await scheduleCollection
+              .where("senderId", isEqualTo: idUser)
+              .where("dateTime", isLessThan: toDay)
+              .getDocuments()
+              .then((querySnapshot) {
+            final item = querySnapshot.documents.map((document) {
+              return ScheduleModel.fromSnapshot(document);
+            }).toList();
+            list.addAll(item);
+          });
+        } else {
+          await scheduleCollection
+              .where("senderId", isEqualTo: idUser)
+              .where("dateTime", isGreaterThanOrEqualTo: day)
+              .getDocuments()
+              .then((querySnapshot) {
+            final item = querySnapshot.documents.map((document) {
+              return ScheduleModel.fromSnapshot(document);
+            }).toList();
+            list.addAll(item);
+          });
+        }
+
       }
     } catch (error) {
       print('error getScheduleByUser : $error');

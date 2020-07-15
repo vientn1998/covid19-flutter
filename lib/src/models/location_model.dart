@@ -6,6 +6,7 @@ class LocationObj {
   int id;
   double latitude = 0.0;
   double longitude = 0.0;
+  double distance = 0.0;
   String street = '';
   String cityOrProvince = '';
   String country = '';

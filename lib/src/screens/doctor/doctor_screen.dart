@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:skeleton_text/skeleton_text.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
@@ -10,14 +11,17 @@ import 'package:template_flutter/src/blocs/doctor/doctor_bloc.dart';
 import 'package:template_flutter/src/blocs/doctor/doctor_event.dart';
 import 'package:template_flutter/src/blocs/doctor/doctor_state.dart';
 import 'package:template_flutter/src/blocs/schedule/bloc.dart';
+import 'package:template_flutter/src/models/location_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/chat/test_screen.dart';
 import 'package:template_flutter/src/screens/doctor/doctor_details_screen.dart';
 import 'package:template_flutter/src/screens/map/map_screen.dart';
+import 'package:template_flutter/src/utils/calculate.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/hex_color.dart';
+import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/utils/styles.dart';
 import 'package:template_flutter/src/widgets/icon.dart';
 import 'package:template_flutter/src/widgets/search_cus.dart';
@@ -32,12 +36,28 @@ class DoctorPage extends StatefulWidget {
 class _DoctorPageState extends State<DoctorPage> {
 
   List<UserObj> listUser = [];
-
+  List<UserObj> listUserNear = [];
+  LocationObj currentLocation;
   @override
   void initState() {
     super.initState();
-    print('initState');
+    _getCurrentLocation();
     BlocProvider.of<DoctorBloc>(context).add(FetchListDoctor());
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      final dataMap = await SharePreferences().getObject(SharePreferenceKey.location);
+      if (dataMap != null) {
+        final data = LocationObj.fromJson(dataMap);
+        if (data != null) {
+          currentLocation = data;
+        }
+      }
+    }catch (error) {
+      toast("Error get location current");
+    }
+
   }
 
   @override
@@ -76,6 +96,15 @@ class _DoctorPageState extends State<DoctorPage> {
               print('LoadSuccessFetchDoctor ${list.length}');
               setState(() {
                 listUser.addAll(list);
+              });
+              final List<UserObj> ls = [];
+              list.forEach((item) {
+                item.location.distance = calculateDistance(item.location.latitude, item.location.longitude, currentLocation.latitude, currentLocation.longitude);
+                ls.add(item);
+              });
+              ls.sort((a,b) => a.location.distance.compareTo(b.location.distance));
+              setState(() {
+                listUserNear.addAll(ls);
               });
             }
           },
@@ -309,7 +338,7 @@ class _DoctorPageState extends State<DoctorPage> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => MapPage(listDoctor: listUser,),
+                                  builder: (context) => MapPage(listDoctor: listUserNear,),
                                 ));
                           },
                         ),
@@ -323,12 +352,16 @@ class _DoctorPageState extends State<DoctorPage> {
                     width: double.infinity,
                     child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        itemCount: listUser.length,
+                        itemCount: listUserNear.length > 3 ? 3 : listUserNear.length,
                         separatorBuilder: (context, index) {
                           return Container(width: 0,);
                         },
                         itemBuilder: (BuildContext context, int index) {
-                          return _buildNearByDoctor(listUser[index]);
+                          return _buildNearByDoctor(listUserNear[index], () {
+                            Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => DoctorDetailsPage(userObj: listUserNear[index],),
+                            ));
+                          });
                         }
                     ),
                   ),
@@ -472,77 +505,81 @@ class _DoctorPageState extends State<DoctorPage> {
     );
   }
 
-  _buildNearByDoctor(UserObj item) {
-    return Container(
-      width: 170,
-      margin: EdgeInsets.only(right: 7, left: 7, top: 10, bottom: 10),
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.4),
-              spreadRadius: 1,
-              blurRadius: 6,
-              offset: Offset(0, 1),
-            )
-          ]
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            SizedBox(height: 10,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  height: 80,
-                  width: 80,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: ClipOval(
-                      child: _buildImageAvatar(item),
+  _buildNearByDoctor(UserObj item, Function function) {
+    final distance = item.location.distance.toStringAsFixed(1);
+    return InkWell(
+      child: Container(
+        width: 170,
+        margin: EdgeInsets.only(right: 7, left: 7, top: 10, bottom: 10),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.4),
+                spreadRadius: 1,
+                blurRadius: 6,
+                offset: Offset(0, 1),
+              )
+            ]
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              SizedBox(height: 10,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    height: 80,
+                    width: 80,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: ClipOval(
+                        child: _buildImageAvatar(item),
+                      ),
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.lightBlueAccent.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.lightBlueAccent.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(8),
+                ],
+              ),
+              SizedBox(height: 10,),
+              Text(
+                item.name,
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textColor),
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: 2,),
+              Text(item.getNameMajor(),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),
+                overflow: TextOverflow.ellipsis, maxLines: 2,
+              ),
+              SizedBox(height: heightSpaceSmall,),
+              Row(
+                children: <Widget>[
+                  Icon(Icons.star, color: Colors.yellow, size: 18,),
+                  Text('4.5',style: TextStyle(
+                      fontSize: 14, color: textColor, fontWeight: FontWeight.bold
+                  ),),
+                  Spacer(),
+                  Icon(Icons.location_on, color: Colors.grey, size: 18,),
+                  Text('$distance km', style: TextStyle(
+                      fontSize: 15, color: textColor, fontWeight: FontWeight.bold
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 10,),
-            Text(
-              item.name,
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textColor),
-              overflow: TextOverflow.ellipsis,
-            ),
-            SizedBox(height: 2,),
-            Text(item.getNameMajor(),
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),
-              overflow: TextOverflow.ellipsis, maxLines: 2,
-            ),
-            SizedBox(height: heightSpaceSmall,),
-            Row(
-              children: <Widget>[
-                Icon(Icons.star, color: Colors.yellow, size: 18,),
-                Text('4.5',style: TextStyle(
-                    fontSize: 14, color: textColor, fontWeight: FontWeight.bold
-                ),),
-                Spacer(),
-                Icon(Icons.location_on, color: Colors.grey, size: 18,),
-                Text('2.4 km', style: TextStyle(
-                    fontSize: 15, color: textColor, fontWeight: FontWeight.bold
-                ),
-                ),
-              ],
-            ),
-          ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
+      onTap: function,
     );
   }
 

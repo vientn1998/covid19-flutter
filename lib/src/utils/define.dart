@@ -37,6 +37,7 @@ enum StatusSchedule {
   Today,
   History,
   Done,
+  Clear,
   Canceled
 }
 

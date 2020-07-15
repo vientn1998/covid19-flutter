@@ -134,12 +134,12 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   Stream<ScheduleState> _mapFetchScheduleByUserToState(GetScheduleByUesr event) async* {
     yield LoadingFetchSchedule();
     try {
-      final data = await scheduleRepository.getScheduleByUser(event.idUser,day: event.fromDate.millisecondsSinceEpoch, status: event.statusSchedule);
+      final data = await scheduleRepository.getScheduleByUser(event.idUser,day: event.fromDate != null ?  event.fromDate.millisecondsSinceEpoch : 0, toDay: event.toDate != null ? event.toDate.millisecondsSinceEpoch : 0, status: event.statusSchedule);
       if (data != null) {
         if (event.statusSchedule == StatusSchedule.New) {
           numberExamination = data.length;
         }
-        yield FetchScheduleByUserSuccess(list: data);
+        yield FetchScheduleByUserSuccess(list: data, toDay: event.toDate?.millisecondsSinceEpoch ?? 0);
         print('_mapFetchScheduleByUserToState : ${data.length}');
       } else {
         yield ErrorFetchSchedule();

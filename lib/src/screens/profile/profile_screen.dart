@@ -274,7 +274,7 @@ class _ProfilePageState extends State<ProfilePage> {
               size: sizeIcon,
             ),
             "Medical examination",
-            "${data}", function: () {
+            "", function: () {
           Navigator.push(
               context,
               MaterialPageRoute(

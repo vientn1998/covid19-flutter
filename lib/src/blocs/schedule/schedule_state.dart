@@ -32,10 +32,9 @@ class CreateScheduleSuccess extends ScheduleState {
 }
 
 class LoadingFetchSchedule extends ScheduleState {
-  @override
-  String toString() {
-    return 'LoadingFetchSchedule';
-  }
+}
+
+class LoadingFetchScheduleLoadMore extends ScheduleState {
 }
 
 class LoadingLocalPushFetchSchedule extends ScheduleState {
@@ -98,6 +97,15 @@ class FetchScheduleByUserSuccess extends ScheduleState {
   final StatusSchedule statusSchedule;
   final int toDay;
   FetchScheduleByUserSuccess({@required this.list, this.statusSchedule, this.toDay});
+  @override
+  List<Object> get props => [this.list];
+}
+
+class FetchScheduleLoadMoreByUserSuccess extends ScheduleState {
+  final List<ScheduleModel> list;
+  final StatusSchedule statusSchedule;
+  final int toDay;
+  FetchScheduleLoadMoreByUserSuccess({@required this.list, this.statusSchedule, this.toDay});
   @override
   List<Object> get props => [this.list];
 }

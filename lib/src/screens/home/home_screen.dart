@@ -101,7 +101,7 @@ class _HomePageState extends State<HomePage> {
     Timer(Duration(seconds: 1), () {
       checkPermission();
     });
-
+    fetchDataMajor();
   }
 
   @override
@@ -113,9 +113,10 @@ class _HomePageState extends State<HomePage> {
           BlocListener<MajorBloc, MajorState>(
             listener: (context, state) {
               if (state is LoadedSuccessMajor) {
+                print('LoadedSuccessMajor : ${state.list.length}');
                 final list = state.list;
                 globals.listMajor.addAll(list);
-                dismissLoading(context);
+                print('LoadedSuccessMajor globals: ${globals.listMajor.length}');
               } else if (state is LoadedErrorMajor) {
                 print("LoadedErrorMajor");
               }

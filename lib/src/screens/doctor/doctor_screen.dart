@@ -300,11 +300,11 @@ class _DoctorPageState extends State<DoctorPage> {
                         InkWell(
                             child: Text('See all', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),),
                           onTap: () {
-                            BlocProvider.of<ScheduleBloc>(context).add(InitSchedule());
+                            BlocProvider.of<DoctorBloc>(context).add(InitDoctorEvent());
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => DoctorAllPage(),
+                                  builder: (context) => DoctorAllPage(currentLocation: currentLocation,),
                                 ));
                           },
                         ),

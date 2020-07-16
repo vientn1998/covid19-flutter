@@ -281,20 +281,20 @@ class ScheduleRepository {
 
   Future<List<DocumentSnapshot>> getScheduleLoadMoreByUser(List<DocumentSnapshot> list, String idUser,
       {int day = 0, int toDay = 0, StatusSchedule status = StatusSchedule.New}) async {
-    print('getScheduleByUser $idUser ${status.toShortString()} - $day - $toDay');
+    print('getScheduleByUser $idUser ${status.toShortString()} - $day - $toDay ${list.length}');
     try {
       if (list.length == 0) {
         if (status != null) {
           if (toDay > 0) {
             return (await scheduleCollection
                 .where("senderId", isEqualTo: idUser)
-                .where("dateTime", isLessThanOrEqualTo: toDay)
+                .where("dateTime", isLessThan: toDay)
                 .where("status", isEqualTo: status.toShortString()).limit(10).orderBy("dateTime")
                 .getDocuments()).documents;
           } else {
             return (await scheduleCollection
                 .where("senderId", isEqualTo: idUser)
-                .where("dateTime", isGreaterThanOrEqualTo: day)
+                .where("dateTime", isLessThan: day)
                 .where("status", isEqualTo: status.toShortString()).limit(10).orderBy("dateTime")
                 .getDocuments()).documents;
           }
@@ -302,7 +302,7 @@ class ScheduleRepository {
           if(toDay > 0) {
             return (await scheduleCollection
                 .where("senderId", isEqualTo: idUser)
-                .where("dateTime", isLessThan: toDay).limit(10).orderBy("dateTime")
+                .where("dateTime", isLessThan: toDay).orderBy("dateTime").limit(10)
                 .getDocuments()).documents;
           } else {
             return (await scheduleCollection
@@ -333,8 +333,8 @@ class ScheduleRepository {
           if(toDay > 0) {
             return (await scheduleCollection
                 .where("senderId", isEqualTo: idUser)
-                .where("dateTime", isLessThan: toDay)
-                .limit(10).orderBy("dateTime").startAfterDocument(list[list.length - 1])
+                .where("dateTime", isLessThan: toDay).orderBy("dateTime")
+                .limit(10).startAfterDocument(list[list.length - 1])
                 .getDocuments()).documents;
           } else {
             return (await scheduleCollection

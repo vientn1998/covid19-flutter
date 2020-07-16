@@ -193,4 +193,26 @@ class UserRepository {
     }
     return imageUrls;
   }
+
+  Future<List<DocumentSnapshot>> getDoctorLoadMore(List<DocumentSnapshot> list, KeyValueObj major,) async {
+    print('getDoctorLoadMore $major - ${list.length}');
+    if (list.length == 0) {
+      if (major != null && major.key != null && major.key.isNotEmpty) {
+        return (await userCollection
+            .where("isDoctor", isEqualTo: true).where("majors",arrayContains: {"key" : major.key, "value" : major.value})
+            .orderBy("name").limit(10)
+            .getDocuments()).documents;
+      } else {
+        return (await userCollection
+            .where("isDoctor", isEqualTo: true).orderBy("name").limit(10)
+            .getDocuments()).documents;
+      }
+    }
+    try {
+
+    } catch (error) {
+      print('error getScheduleByUser : $error');
+    }
+    return list;
+  }
 }

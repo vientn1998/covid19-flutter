@@ -26,3 +26,8 @@ class LoadSuccessFetchDoctor extends DoctorState {
   List<UserObj> list;
   LoadSuccessFetchDoctor({@required this.list});
 }
+
+class LoadSuccessDoctorLoadMore extends DoctorState {
+  List<UserObj> list;
+  LoadSuccessDoctorLoadMore({@required this.list});
+}

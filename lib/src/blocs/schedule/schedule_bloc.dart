@@ -201,19 +201,19 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
   }
 
   Stream<ScheduleState> _mapFetchScheduleLoadMoreByUserToState(GetScheduleLoadMoreByUesr event) async* {
-    yield LoadingFetchSchedule();
+    yield LoadingFetchScheduleLoadMore();
     try {
       if (!event.isLoadMore) {
         documentList.clear();
       }
       final data = await scheduleRepository.getScheduleLoadMoreByUser(documentList, event.idUser,day: event.fromDate != null ?  event.fromDate.millisecondsSinceEpoch : 0, toDay: event.toDate != null ? event.toDate.millisecondsSinceEpoch : 0, status: event.statusSchedule);
       documentList.addAll(data);
-      print('_mapFetchScheduleLoadMoreByUserToState documentList: ${documentList.length}');
+      print('_mapFetchScheduleLoadMoreByUserToState isLoadMore: ${event.isLoadMore} documentList: ${documentList.length}');
       if (data != null) {
         final List<ScheduleModel> list = data.map((document) {
           return ScheduleModel.fromSnapshot(document);
         }).toList();
-        yield FetchScheduleByUserSuccess(list: list, toDay: event.toDate?.millisecondsSinceEpoch ?? 0);
+        yield FetchScheduleLoadMoreByUserSuccess(list: list, toDay: event.toDate?.millisecondsSinceEpoch ?? 0);
         print('_mapFetchScheduleLoadMoreByUserToState : ${data.length}');
       } else {
         yield ErrorFetchSchedule();

@@ -6,6 +6,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
+import 'package:template_flutter/src/screens/doctor/rate_doctor_screen.dart';
 import 'package:template_flutter/src/screens/manager/schedule_details_screen.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
@@ -576,9 +577,15 @@ class _ListHistoryState extends State<ListHistory> {
         ),
       ),
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(
-          builder: (context) => ScheduleDetails(scheduleModel: item,),
-        ));
+        if (item.status == StatusSchedule.Done.toShortString()) {
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) => RateDoctorPage(item.receiver),
+          ));
+        } else {
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) => ScheduleDetails(scheduleModel: item,),
+          ));
+        }
       },
     );
   }

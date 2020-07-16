@@ -175,6 +175,7 @@ class UserObj extends Equatable {
       'phone': this.phone,
       'location': location != null ? location.toJson() : null,
       'email': this.email,
+      'avatar': this.avatar
     };
   }
 

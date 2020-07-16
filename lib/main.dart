@@ -20,12 +20,14 @@ import 'package:template_flutter/src/blocs/death/bloc.dart';
 import 'package:template_flutter/src/blocs/doctor/doctor_bloc.dart';
 import 'package:template_flutter/src/blocs/local_search/bloc.dart';
 import 'package:template_flutter/src/blocs/major/bloc.dart';
+import 'package:template_flutter/src/blocs/rate/rate_bloc.dart';
 import 'package:template_flutter/src/blocs/user/bloc.dart';
 import 'package:template_flutter/src/database/covid_dao.dart';
 import 'package:template_flutter/src/repositories/chat_repository.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_api_client.dart';
 import 'package:template_flutter/src/repositories/covid19/covid_repository.dart';
 import 'package:template_flutter/src/repositories/major_repository.dart';
+import 'package:template_flutter/src/repositories/rate_repository.dart';
 import 'package:template_flutter/src/repositories/schedule_repository.dart';
 import 'package:template_flutter/src/repositories/user_repository.dart';
 import 'package:template_flutter/src/screens/introduction/splash_screen.dart';
@@ -100,6 +102,7 @@ main() async {
   final chatRepository = ChatRepository();
   final userRepository = UserRepository();
   final scheduleRepository = ScheduleRepository();
+  final rateRepository = RateRepository();
   runApp(MultiBlocProvider(
     providers: [
       BlocProvider<Covid19Bloc>(
@@ -131,6 +134,9 @@ main() async {
       ),
       BlocProvider<ChatBloc>(
         create: (context) => ChatBloc(chatRepository),
+      ),
+      BlocProvider<RateBloc>(
+        create: (context) => RateBloc(rateRepository),
       ),
     ],
     child: MaterialApp(

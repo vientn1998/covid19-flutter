@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
 import 'package:template_flutter/src/repositories/schedule_repository.dart';
 import 'package:template_flutter/src/utils/define.dart';
@@ -10,6 +11,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
 
   final ScheduleRepository scheduleRepository;
   int numberExamination = 0;
+  List<DocumentSnapshot> documentList = [];
+
   ScheduleBloc(this.scheduleRepository);
 
   @override
@@ -23,6 +26,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       yield* _mapCreateToState(event);
     } else if (event is GetScheduleByDay) {
       yield* _mapFetchDataByDayToState(event);
+    } else if (event is GetScheduleLoadMore) {
+      yield* _mapFetchScheduleLoadMoreToState2(event);
     } else if (event is GetScheduleDayByDoctor) {
       yield* _mapFetchDataDayByDoctorToState(event);
     } else if (event is GetScheduleByUesr) {
@@ -45,6 +50,8 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       yield* _mapFetchScheduleLocalPushChangeStatusOfUserToState(event);
     } else if (event is GetScheduleLocalPushChangeStatusOfUserEventSuccess) {
       yield* _mapFetchScheduleLocalPushChangeStatusOfUserSuccessToState(event);
+    } else if (event is GetScheduleLoadMoreByUesr) {
+      yield* _mapFetchScheduleLoadMoreByUserToState(event);
     } else {
       yield InitialScheduleState();
     }
@@ -58,6 +65,48 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       yield CreateScheduleSuccess(dateTimeCreated: event.dateTimeCreate);
     } else {
       yield ScheduleError();
+    }
+  }
+
+  Stream<ScheduleState> _mapFetchScheduleLoadMoreToState(GetScheduleLoadMore event) async* {
+    yield LoadingFetchSchedule();
+    try {
+      final data = await scheduleRepository.getScheduleLoadFirst();
+      if (data != null) {
+        yield FetchAllTotalScheduleByDoctorSuccess(list: data);
+        print('_mapFetchScheduleLoadMoreToState : ${data.length}');
+      } else {
+        yield ErrorFetchSchedule();
+        print('error _mapFetchScheduleLoadMoreToState');
+      }
+    } catch(error) {
+      yield ErrorFetchSchedule();
+      print('error _mapFetchScheduleLoadMoreToState: $error');
+    }
+  }
+
+  Stream<ScheduleState> _mapFetchScheduleLoadMoreToState2(GetScheduleLoadMore event) async* {
+    yield LoadingFetchSchedule();
+    try {
+      if (!event.isLoadMore) {
+        documentList.clear();
+      }
+      final data = await scheduleRepository.getScheduleFirst(documentList);
+      documentList.addAll(data);
+      print('_mapFetchScheduleLoadMoreToState documentList: ${documentList.length}');
+      if (data != null) {
+        final List<ScheduleModel> list = data.map((document) {
+          return ScheduleModel.fromSnapshot(document);
+        }).toList();
+        yield FetchAllTotalScheduleByDoctorSuccess(list: list);
+        print('_mapFetchScheduleLoadMoreToState : ${data.length}');
+      } else {
+        yield ErrorFetchSchedule();
+        print('error _mapFetchScheduleLoadMoreToState');
+      }
+    } catch(error) {
+      yield ErrorFetchSchedule();
+      print('error _mapFetchScheduleLoadMoreToState: $error');
     }
   }
 
@@ -148,6 +197,31 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
     } catch(error) {
       yield ErrorFetchSchedule();
       print('error _mapFetchScheduleByUserToState: $error');
+    }
+  }
+
+  Stream<ScheduleState> _mapFetchScheduleLoadMoreByUserToState(GetScheduleLoadMoreByUesr event) async* {
+    yield LoadingFetchSchedule();
+    try {
+      if (!event.isLoadMore) {
+        documentList.clear();
+      }
+      final data = await scheduleRepository.getScheduleLoadMoreByUser(documentList, event.idUser,day: event.fromDate != null ?  event.fromDate.millisecondsSinceEpoch : 0, toDay: event.toDate != null ? event.toDate.millisecondsSinceEpoch : 0, status: event.statusSchedule);
+      documentList.addAll(data);
+      print('_mapFetchScheduleLoadMoreByUserToState documentList: ${documentList.length}');
+      if (data != null) {
+        final List<ScheduleModel> list = data.map((document) {
+          return ScheduleModel.fromSnapshot(document);
+        }).toList();
+        yield FetchScheduleByUserSuccess(list: list, toDay: event.toDate?.millisecondsSinceEpoch ?? 0);
+        print('_mapFetchScheduleLoadMoreByUserToState : ${data.length}');
+      } else {
+        yield ErrorFetchSchedule();
+        print('error _mapFetchScheduleLoadMoreByUserToState');
+      }
+    } catch(error) {
+      yield ErrorFetchSchedule();
+      print('error _mapFetchScheduleLoadMoreByUserToState: $error');
     }
   }
 

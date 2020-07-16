@@ -31,21 +31,15 @@ class RateBloc extends Bloc<RateEvent, RateState> {
   Stream<RateState> _mapCreateToState(CreateRate event) async* {
     yield LoadingCreateSchedule();
     try {
-      final data = await repository.checkExist(event.rateModel.idOrder, event.rateModel.idUser);
-      if (data != null && data.id.isNotEmpty) {
-        yield ExistsRate(data);
+      final isSuccess = await repository.createRate(event.rateModel);
+      if (isSuccess != null && isSuccess == true) {
+        yield CreateRateSuccess();
       } else {
-        final isSuccess = await repository.createRate(event.rateModel);
-        if (isSuccess != null && isSuccess == true) {
-          yield CreateRateSuccess();
-        } else {
-          yield ErrorCreateRate("Error submit rate");
-        }
+        yield ErrorCreateRate("Error submit rate");
       }
     }catch(error) {
       yield ErrorCreateRate(error.toString());
     }
-
   }
 
   Stream<RateState> _mapFetchRateToState(FetchRate event) async* {
@@ -56,13 +50,12 @@ class RateBloc extends Bloc<RateEvent, RateState> {
         yield FetchRateSuccess(list: data);
         print('_mapFetchRateToState : ${data.length}');
       } else {
-        yield ErrorFetchRate();
-        print('error _mapFetchRateToState');
+        yield FetchRateSuccess(list: data);
+        print('_mapFetchRateToState : not exists');
       }
     } catch(error) {
       yield ErrorFetchRate();
       print('error _mapFetchRateToState: $error');
     }
   }
-
 }

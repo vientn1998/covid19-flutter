@@ -57,8 +57,8 @@ class _MedicalExaminationState extends State<MedicalExamination> with SingleTick
           ),
           unselectedLabelColor: Colors.white.withOpacity(0.5),
           tabs: [
-            new Tab(icon: new Icon(Icons.calendar_today, size: 20,)),
-            new Tab(
+            Tab(icon: new Icon(Icons.calendar_today, size: 20,)),
+            Tab(
               icon: new Icon(Icons.history, size: 20),
             )
           ],
@@ -99,13 +99,11 @@ class _ListUpcomingState extends State<ListUpcoming> {
   DateTime dateCurrent;
 
   void _onRefresh() async{
-//    LoadingHud(context).show();
     _refreshController.refreshCompleted();
   }
 
   void _onLoading() async{
     _refreshController.loadComplete();
-    LoadingHud(context).dismiss();
   }
 
   @override
@@ -343,29 +341,38 @@ class ListHistory extends StatefulWidget {
 class _ListHistoryState extends State<ListHistory> {
   static const heightFilter = 35.0;
   List<ScheduleModel> list = [];
-  RefreshController _refreshController = RefreshController(initialRefresh: false);
+  RefreshController _refreshController;
   DateTime dateTimeSelected;
   StatusSchedule _statusSchedule;
   final dateNow = DateTime.now();
   DateTime dateCurrent;
 
   void _onRefresh() async{
-//    LoadingHud(context).show();
-    _refreshController.refreshCompleted();
+    list.clear();
+    fetchData();
   }
 
   void _onLoading() async{
-    _refreshController.loadComplete();
-    LoadingHud(context).dismiss();
+    loadingData();
   }
 
   @override
   void initState() {
     super.initState();
+    _refreshController = RefreshController(initialRefresh: false);
     dateTimeSelected = DateTime(dateNow.year, dateNow.month, dateNow.day);
     dateCurrent = DateTime(dateNow.year, dateNow.month, dateNow.day, dateNow.hour);
+    fetchData();
+  }
+
+  fetchData() {
     BlocProvider.of<ScheduleBloc>(context)
-        .add(GetScheduleByUesr(idUser: widget.idUser, toDate: dateTimeSelected, statusSchedule: _statusSchedule));
+        .add(GetScheduleLoadMoreByUesr(isLoadMore: false ,idUser: widget.idUser, toDate: dateTimeSelected, statusSchedule: _statusSchedule));
+  }
+
+  loadingData() {
+    BlocProvider.of<ScheduleBloc>(context)
+        .add(GetScheduleLoadMoreByUesr(isLoadMore: true ,idUser: widget.idUser, toDate: dateTimeSelected, statusSchedule: _statusSchedule));
   }
 
   @override
@@ -375,32 +382,15 @@ class _ListHistoryState extends State<ListHistory> {
         BlocListener<ScheduleBloc, ScheduleState>(
           listener: (ct, state) {
             if (state is LoadingFetchSchedule) {
-//              LoadingHud(context).show();
+              LoadingHud(context).show();
             } else if (state is ErrorFetchSchedule) {
+              _refreshController.refreshCompleted();
+              _refreshController.loadComplete();
               LoadingHud(context).dismiss();
-              _onLoading();
             } else if (state is FetchScheduleByUserSuccess) {
-
-              final data = state.list.where((element) {
-                var dateItem = DateTime.fromMillisecondsSinceEpoch(element.dateTime);
-                return (dateItem.isBefore(dateCurrent))
-                    || (dateItem.difference(dateCurrent).inDays == 0 && element.timeBook < dateCurrent.hour);
-              }).toList();
-
-              list.clear();
-              data.sort((a, b) {
-                int cmp = b.dateTime.compareTo(a.dateTime);
-                if (cmp != 0) {
-                  return cmp;
-                }
-                return b.timeBook.compareTo(a.timeBook);
-              });
-//              LoadingHud(ct).dismiss();
-              setState(() {
-                list.addAll(data);
-              });
-
-              print("history");
+              _refreshController.refreshCompleted();
+              _refreshController.loadComplete();
+              LoadingHud(context).dismiss();
             }
           },
         )
@@ -480,9 +470,38 @@ class _ListHistoryState extends State<ListHistory> {
             child: SmartRefresher(
               controller: _refreshController,
               enablePullDown: true,
+              enablePullUp: true,
               onRefresh: _onRefresh,
               onLoading: _onLoading,
-              child: buildListViewHistory(),
+              child: Container(
+                child: BlocBuilder<ScheduleBloc, ScheduleState>(
+                  builder: (context, state) {
+                    if (state is FetchScheduleByUserSuccess) {
+                      final data = state.list.where((element) {
+                        var dateItem = DateTime.fromMillisecondsSinceEpoch(element.dateTime);
+                        return (dateItem.isBefore(dateCurrent))
+                            || (dateItem.difference(dateCurrent).inDays == 0 && element.timeBook < dateCurrent.hour);
+                      }).toList();
+                      data.sort((a, b) {
+                        int cmp = b.dateTime.compareTo(a.dateTime);
+                        if (cmp != 0) {
+                          return cmp;
+                        }
+                        return b.timeBook.compareTo(a.timeBook);
+                      });
+                      print('list ${list.length}');
+                      print('data ${data.length}');
+                      list.addAll(data);
+                      return buildListViewHistory(list);
+                    } else if (state is LoadingFetchSchedule) {
+                      return buildListViewHistory(list);
+                    } else if (state is ErrorFetchSchedule) {
+                      return Text('ErrorFetchSchedule...');
+                    }
+                    return Text('Loading');
+                  },
+                ),
+              ),
             ),
           )
         ],
@@ -490,21 +509,23 @@ class _ListHistoryState extends State<ListHistory> {
     );
   }
 
-  buildListViewHistory() {
+  buildListViewHistory(List<ScheduleModel> list) {
+    print('buildListViewHistory ${list.length}');
     if (list.isEmpty) {
       return Center(child: Text('Empty'),);
     }
     return ListView.separated(
         itemBuilder: (context, index) {
-          return buildUpcomingItem(item: list[index]);
+          return buildHistoryItem(item: list[index]);
         },
+//        shrinkWrap: true,
         padding: EdgeInsets.only(top: 7, bottom: 10),
         separatorBuilder: (context, index) => Container(height: paddingDefault,),
         itemCount: list.length
     );
   }
 
-  buildUpcomingItem({@required ScheduleModel item}) {
+  buildHistoryItem({@required ScheduleModel item}) {
     return InkWell(
       child: Container(
         margin: EdgeInsets.only(right: paddingDefault, left: paddingDefault),
@@ -579,7 +600,7 @@ class _ListHistoryState extends State<ListHistory> {
       onTap: () {
         if (item.status == StatusSchedule.Done.toShortString()) {
           Navigator.push(context, MaterialPageRoute(
-            builder: (context) => RateDoctorPage(item.receiver),
+            builder: (context) => RateDoctorPage(item),
           ));
         } else {
           Navigator.push(context, MaterialPageRoute(

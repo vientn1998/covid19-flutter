@@ -11,6 +11,7 @@ class CreateRate extends RateEvent {
   CreateRate({@required this.rateModel});
 }
 
+
 class FetchRate extends RateEvent {
   final String idDoctor, idOrder;
   FetchRate({this.idDoctor = "", this.idOrder = ""});

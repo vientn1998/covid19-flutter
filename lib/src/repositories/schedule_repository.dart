@@ -6,7 +6,7 @@ import 'package:template_flutter/src/utils/define.dart';
 
 class ScheduleRepository {
   final scheduleCollection = Firestore.instance.collection("Schedules");
-
+  List<DocumentSnapshot> documentList = [];
   Future<bool> createSchedule(ScheduleModel scheduleModel) async {
     bool isSuccess = false;
     final id = scheduleCollection.document().documentID;
@@ -20,6 +20,50 @@ class ScheduleRepository {
       return false;
     });
     return isSuccess;
+  }
+
+  Future<List<DocumentSnapshot>> getScheduleFirst(List<DocumentSnapshot> list) async{
+    print('getScheduleFirst ${list.length}');
+    if (list.length == 0) {
+      return ( await scheduleCollection.limit(10).orderBy("dateTime").getDocuments()).documents;
+    } else {
+      return ( await scheduleCollection.limit(10).orderBy("dateTime").startAfterDocument(list[list.length - 1]).getDocuments()).documents;
+    }
+  }
+
+  Future<List<ScheduleModel>> getScheduleLoadFirst() async {
+    List<ScheduleModel> list = [];
+    try {
+      print('documentList ${documentList.length}');
+      if (documentList.length == 0) {
+        await scheduleCollection
+            .limit(10)
+        .orderBy("dateTime")
+            .getDocuments().then((querySnapshot) {
+          documentList.addAll(querySnapshot.documents);
+          final item = querySnapshot.documents.map((document) {
+            return ScheduleModel.fromSnapshot(document);
+          }).toList();
+          list.addAll(item);
+        });
+      } else {
+        await scheduleCollection
+            .limit(10)
+            .orderBy("dateTime")
+        .startAfterDocument(documentList[documentList.length - 1])
+            .getDocuments().then((querySnapshot) {
+          documentList.addAll(querySnapshot.documents);
+          final item = querySnapshot.documents.map((document) {
+            return ScheduleModel.fromSnapshot(document);
+          }).toList();
+          list.addAll(item);
+        });
+      }
+      print('getScheduleByDoctorAndDay list ${list.length}]');
+    } catch (error) {
+      print('error getScheduleByDoctorAndDay : $error');
+    }
+    return list;
   }
 
   Future<List<ScheduleModel>> getScheduleByDoctorAndDay(
@@ -229,6 +273,79 @@ class ScheduleRepository {
         }
 
       }
+    } catch (error) {
+      print('error getScheduleByUser : $error');
+    }
+    return list;
+  }
+
+  Future<List<DocumentSnapshot>> getScheduleLoadMoreByUser(List<DocumentSnapshot> list, String idUser,
+      {int day = 0, int toDay = 0, StatusSchedule status = StatusSchedule.New}) async {
+    print('getScheduleByUser $idUser ${status.toShortString()} - $day - $toDay');
+    try {
+      if (list.length == 0) {
+        if (status != null) {
+          if (toDay > 0) {
+            return (await scheduleCollection
+                .where("senderId", isEqualTo: idUser)
+                .where("dateTime", isLessThanOrEqualTo: toDay)
+                .where("status", isEqualTo: status.toShortString()).limit(10).orderBy("dateTime")
+                .getDocuments()).documents;
+          } else {
+            return (await scheduleCollection
+                .where("senderId", isEqualTo: idUser)
+                .where("dateTime", isGreaterThanOrEqualTo: day)
+                .where("status", isEqualTo: status.toShortString()).limit(10).orderBy("dateTime")
+                .getDocuments()).documents;
+          }
+        } else {
+          if(toDay > 0) {
+            return (await scheduleCollection
+                .where("senderId", isEqualTo: idUser)
+                .where("dateTime", isLessThan: toDay).limit(10).orderBy("dateTime")
+                .getDocuments()).documents;
+          } else {
+            return (await scheduleCollection
+                .where("senderId", isEqualTo: idUser)
+                .where("dateTime", isGreaterThanOrEqualTo: day).limit(10).orderBy("dateTime")
+                .getDocuments()).documents;
+          }
+        }
+      } else {
+        //load more
+        if (status != null) {
+          if (toDay > 0) {
+            return (await scheduleCollection
+                .where("senderId", isEqualTo: idUser)
+                .where("dateTime", isLessThanOrEqualTo: toDay)
+                .where("status", isEqualTo: status.toShortString())
+                .limit(10).orderBy("dateTime").startAfterDocument(list[list.length - 1])
+                .getDocuments()).documents;
+          } else {
+            return (await scheduleCollection
+                .where("senderId", isEqualTo: idUser)
+                .where("dateTime", isGreaterThanOrEqualTo: day)
+                .where("status", isEqualTo: status.toShortString())
+                .limit(10).orderBy("dateTime").startAfterDocument(list[list.length - 1])
+                .getDocuments()).documents;
+          }
+        } else {
+          if(toDay > 0) {
+            return (await scheduleCollection
+                .where("senderId", isEqualTo: idUser)
+                .where("dateTime", isLessThan: toDay)
+                .limit(10).orderBy("dateTime").startAfterDocument(list[list.length - 1])
+                .getDocuments()).documents;
+          } else {
+            return (await scheduleCollection
+                .where("senderId", isEqualTo: idUser)
+                .where("dateTime", isGreaterThanOrEqualTo: day)
+                .limit(10).orderBy("dateTime").startAfterDocument(list[list.length - 1])
+                .getDocuments()).documents;
+          }
+        }
+      }
+
     } catch (error) {
       print('error getScheduleByUser : $error');
     }

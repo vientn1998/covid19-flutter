@@ -27,6 +27,7 @@ import 'package:template_flutter/src/widgets/icon.dart';
 import 'package:template_flutter/src/widgets/search_cus.dart';
 
 import 'choose_schedule_screen.dart';
+import 'doctor_all_screen.dart';
 
 class DoctorPage extends StatefulWidget {
   @override
@@ -99,7 +100,9 @@ class _DoctorPageState extends State<DoctorPage> {
               });
               final List<UserObj> ls = [];
               list.forEach((item) {
-                item.location.distance = calculateDistance(item.location.latitude, item.location.longitude, currentLocation.latitude, currentLocation.longitude);
+                if (currentLocation != null && currentLocation.latitude != null && currentLocation.longitude != null) {
+                  item.location.distance = calculateDistance(item.location.latitude, item.location.longitude, currentLocation.latitude, currentLocation.longitude);
+                }
                 ls.add(item);
               });
               ls.sort((a,b) => a.location.distance.compareTo(b.location.distance));
@@ -294,7 +297,17 @@ class _DoctorPageState extends State<DoctorPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Text('Top doctor', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),),
-                        Text('See all', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),),
+                        InkWell(
+                            child: Text('See all', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: textColor),),
+                          onTap: () {
+                            BlocProvider.of<ScheduleBloc>(context).add(InitSchedule());
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DoctorAllPage(),
+                                ));
+                          },
+                        ),
                       ],
                     ),
                   ),

@@ -18,6 +18,13 @@ class CreateSchedule extends ScheduleEvent {
   CreateSchedule({@required this.scheduleModel, this.dateTimeCreate});
 }
 
+class GetScheduleLoadMore extends ScheduleEvent {
+  bool isLoadMore = false;
+  GetScheduleLoadMore({this.isLoadMore = false});
+}
+
+
+
 class GetScheduleByDay extends ScheduleEvent {
   final String idDoctor;
   final DateTime date;
@@ -30,6 +37,14 @@ class GetScheduleDayByDoctor extends ScheduleEvent {
   final StatusSchedule statusSchedule;
   DateTime fromDate;
   GetScheduleDayByDoctor({@required this.idDoctor, this.fromDate, this.statusSchedule});
+}
+
+class GetScheduleLoadMoreByUesr extends ScheduleEvent {
+  final String idUser;
+  final StatusSchedule statusSchedule;
+  DateTime fromDate, toDate;
+  bool isLoadMore;
+  GetScheduleLoadMoreByUesr({this.isLoadMore = false, @required this.idUser, this.fromDate, this.toDate, this.statusSchedule = StatusSchedule.New});
 }
 
 class GetScheduleByUesr extends ScheduleEvent {

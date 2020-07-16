@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loading_hud/loading_hud.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:template_flutter/src/blocs/rate/rate_bloc.dart';
+import 'package:template_flutter/src/models/rate_model.dart';
+import 'package:template_flutter/src/models/schedule_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/define.dart';
@@ -13,8 +14,8 @@ import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/widgets/button.dart';
 
 class RateDoctorPage extends StatefulWidget {
-  UserObj doctor;
-  RateDoctorPage(this.doctor);
+  ScheduleModel scheduleModel;
+  RateDoctorPage(this.scheduleModel);
   @override
   _RateDoctorPageState createState() => _RateDoctorPageState();
 }
@@ -22,11 +23,17 @@ class RateDoctorPage extends StatefulWidget {
 class _RateDoctorPageState extends State<RateDoctorPage> {
   final heightAvatar = 100.0;
   var star = 0.0;
+  var isReadOnly = true;
   TextEditingController textEditingController;
   @override
   void initState() {
     textEditingController = TextEditingController();
     super.initState();
+    fetData();
+  }
+
+  fetData() {
+    BlocProvider.of<RateBloc>(context).add(FetchRate(idOrder: widget.scheduleModel.id, idDoctor: widget.scheduleModel.sender.id));
   }
 
   @override
@@ -51,15 +58,33 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
       ),
       body: BlocListener<RateBloc, RateState>(
         listener: (context, state) {
-          if (state is LoadingCreateSchedule) {
+          if (state is LoadingCreateSchedule || state is LoadingFetchRate) {
             LoadingHud(context).show();
           } else if (state is ErrorCreateRate) {
             LoadingHud(context).dismiss();
-          } else if (state is ExistsRate) {
-            //show before rate
-            LoadingHud(context).dismiss();
+            toast(state.messageError);
           } else if (state is CreateRateSuccess) {
             //back
+            LoadingHud(context).dismiss();
+            toast("Submit rate successfully");
+            Navigator.pop(context);
+          } else if (state is FetchRateSuccess) {
+            final data = state.list;
+            if (data == null || data.length == 0) {
+              //create
+              setState(() {
+                isReadOnly = false;
+                star = 0.0;
+              });
+            } else {
+              //view only
+              final rate = data[0];
+              setState(() {
+                isReadOnly = true;
+                star = rate.star;
+                textEditingController.text = rate.reason;
+              });
+            }
             LoadingHud(context).dismiss();
           }
         },
@@ -96,14 +121,14 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
                             text: TextSpan(
                                 text: 'How was your experience \nwith ',
                                 style: TextStyle(fontSize: 20, color: textColor),
-                                children: [TextSpan(text: widget.doctor.name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: textColor))]
+                                children: [TextSpan(text: widget.scheduleModel.receiver.name, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: textColor))]
                             ),
                             textAlign: TextAlign.center,
                           ),
                           SizedBox(height: heightSpaceSmall,),
                           SmoothStarRating(
                             rating: star,
-                            isReadOnly: false,
+                            isReadOnly: isReadOnly,
                             size: 40,
                             filledIconData: Icons.star,
                             halfFilledIconData: Icons.star_half,
@@ -149,6 +174,7 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
                               maxLines: 6,
                               minLines: 6,
                               maxLength: 500,
+                              enabled: !isReadOnly,
                               textCapitalization: TextCapitalization.sentences,
                               style: TextStyle(
                                   fontSize: 16,
@@ -169,7 +195,7 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
                   ),
                 ),
               ),
-              Container(
+              isReadOnly ? SizedBox(height: 0,): Container(
                 margin: EdgeInsets.all(paddingDefault),
                 height: heightButton,
                 width: double.infinity,
@@ -179,7 +205,14 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
                     title: 'Submit Rate',
                     background: colorActive,
                     onPressed: star > 0 ? () {
-
+                      var rate = RateModel();
+                      rate.idOrder = widget.scheduleModel.id;
+                      rate.dateTime = DateTime.now().millisecondsSinceEpoch;
+                      rate.idDoctor = widget.scheduleModel.receiver.id;
+                      rate.idUser = widget.scheduleModel.sender.id;
+                      rate.star = star;
+                      rate.reason = textEditingController.text;
+                      BlocProvider.of<RateBloc>(context).add(CreateRate(rateModel: rate));
                     } : null,
                   ),
                 ),
@@ -191,9 +224,9 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
     );
   }
   _buildImageAvatar() {
-    if (widget.doctor.avatar != null) {
+    if (widget.scheduleModel.receiver.avatar != null) {
       return CachedNetworkImage(
-        imageUrl: widget.doctor.avatar,
+        imageUrl: widget.scheduleModel.receiver.avatar,
         fit: BoxFit.cover,
         placeholder: (context, url) => CircularProgressIndicator(),
         errorWidget: (context, url, error) => Center(

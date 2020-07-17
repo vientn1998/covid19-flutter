@@ -107,25 +107,52 @@ class _DoctorAllPageState extends State<DoctorAllPage> {
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.all(paddingDefault),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.white),
-                child: TextField(
-                  decoration: InputDecoration(
-                    contentPadding:
-                    EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                    hintText: "Search doctor by name, major...",
-                    border: InputBorder.none,
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 45,
+                      margin: EdgeInsets.all(paddingDefault),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white),
+                      child: Center(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            contentPadding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                            hintText: "Search doctor by name, major...",
+                            border: InputBorder.none,
+                          ),
+                          autofocus: false,
+                          textCapitalization: TextCapitalization.words,
+                          autocorrect: false,
+                          textInputAction: TextInputAction.search,
+                          controller: _textEditingController,
+                          onChanged: (value) {},
+                        ),
+                      ),
+                    ),
                   ),
-                  autofocus: false,
-                  textCapitalization: TextCapitalization.words,
-                  autocorrect: false,
-                  textInputAction: TextInputAction.search,
-                  controller: _textEditingController,
-                  onChanged: (value) {},
-                ),
+                  Material(
+                    child: InkWell(
+                      child: Container(
+                        height: 45,
+                        width: 45,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),),
+                        child: Center(child: Icon(Icons.sort)),
+                      ),
+                      onTap: () {
+
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.white,
+                  ),
+                  SizedBox(width: paddingDefault,)
+                ],
               ),
               Container(
                 height: 45,
@@ -174,27 +201,31 @@ class _DoctorAllPageState extends State<DoctorAllPage> {
       padding: EdgeInsets.only(left: paddingDefault, right: paddingDefault),
       itemBuilder: (context, index) {
         final item = majors[index];
-        return InkWell(
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              border: Border.all(color: colorIcon, width: 0.7),
-              color: indexSelected == index ? Colors.blueGrey : Colors.white
-            ),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
-                child: Text(item.value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: indexSelected == index ? Colors.white : textColor),),
+        return Material(
+          child: InkWell(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+                border: Border.all(color: colorIcon, width: 0.7),
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
+                  child: Text(item.value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: indexSelected == index ? Colors.white : textColor),),
+                ),
               ),
             ),
+            onTap: () {
+              listDoctor.clear();
+              setState(() {
+                indexSelected = index;
+              });
+              fetchData();
+            },
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
           ),
-          onTap: () {
-            listDoctor.clear();
-            setState(() {
-              indexSelected = index;
-            });
-            fetchData();
-          },
+          color: indexSelected == index ? Colors.blueGrey : Colors.white,
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
         );
       },
     );

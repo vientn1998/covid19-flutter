@@ -1,9 +1,18 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
+
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loading_hud/loading_hud.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:template_flutter/src/blocs/schedule/bloc.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
@@ -17,6 +26,8 @@ import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/widgets/button.dart';
 import '../../utils/extension/int_extention.dart';
 import '../../utils/extension/string_extention.dart';
+import 'package:path/path.dart' as p;
+import 'image_viewpager_screen.dart';
 class ScheduleDetails extends StatefulWidget {
   final ScheduleModel scheduleModel;
   ScheduleDetails({@required this.scheduleModel});
@@ -29,6 +40,7 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
   static const double sizeIcon = 20.0;
   StatusSchedule _statusSchedule;
   UserObj userObj = UserObj();
+  GlobalKey globalKeyQrCode = GlobalKey();
 
 
   updateSchedule(StatusSchedule statusSchedule) {
@@ -100,17 +112,13 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                   children: <Widget>[
                     SizedBox(height: paddingDefault,),
                     Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: borderColor)
-                      ),
+                      decoration: boxDecorationDetails(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.fromLTRB(heightSpaceSmall, heightSpaceSmall, heightSpaceSmall, 5),
-                            child: Text('Details user', style: TextStyle(
+                            child: Text('User', style: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 19,
                             ),),
@@ -162,17 +170,13 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                     ),
                     SizedBox(height: paddingDefault,),
                     Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: borderColor)
-                      ),
+                      decoration: boxDecorationDetails(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.fromLTRB(heightSpaceSmall, heightSpaceSmall, heightSpaceSmall, 5),
-                            child: Text('Details schedule', style: TextStyle(
+                            child: Text('Schedule', style: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 19,
                             ),),
@@ -184,35 +188,69 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 Row(
-                                  children: <Widget>[
-                                    Icon(Icons.adjust, size: sizeIcon, color: colorIcon),
-                                    SizedBox(width: heightSpaceSmall,),
-                                    Text(widget.scheduleModel.status, style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 17,
-                                    ),),
-                                  ],
-                                ),
-                                SizedBox(height: paddingDefault,),
-                                Row(
-                                  children: <Widget>[
-                                    Icon(Icons.calendar_today, size: sizeIcon, color: colorIcon),
-                                    SizedBox(width: heightSpaceSmall,),
-                                    Text(DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(widget.scheduleModel.dateTime)), style: TextStyle(
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 17,
-                                    ),),
-                                  ],
-                                ),
-                                SizedBox(height: paddingDefault,),
-                                Row(
-                                  children: <Widget>[
-                                    Icon(Icons.timer, size: sizeIcon, color: colorIcon),
-                                    SizedBox(width: heightSpaceSmall,),
-                                    Text(widget.scheduleModel.timeBook.getTypeTimeSchedule(), style: TextStyle(
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 17,
-                                    )),
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: <Widget>[
+                                              Icon(Icons.adjust, size: sizeIcon, color: colorIcon),
+                                              SizedBox(width: heightSpaceSmall,),
+                                              Text(widget.scheduleModel.status, style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 17,
+                                              ),),
+                                            ],
+                                          ),
+                                          SizedBox(height: paddingDefault,),
+                                          Row(
+                                            children: <Widget>[
+                                              Icon(Icons.calendar_today, size: sizeIcon, color: colorIcon),
+                                              SizedBox(width: heightSpaceSmall,),
+                                              Text(DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(widget.scheduleModel.dateTime)), style: TextStyle(
+                                                fontWeight: FontWeight.normal,
+                                                fontSize: 17,
+                                              ),),
+                                            ],
+                                          ),
+                                          SizedBox(height: paddingDefault,),
+                                          Row(
+                                            children: <Widget>[
+                                              Icon(Icons.timer, size: sizeIcon, color: colorIcon),
+                                              SizedBox(width: heightSpaceSmall,),
+                                              Text(widget.scheduleModel.timeBook.getTypeTimeSchedule(), style: TextStyle(
+                                                fontWeight: FontWeight.normal,
+                                                fontSize: 17,
+                                              )),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    InkWell(
+                                      child: Container(
+                                        height: 100,
+                                        width: 100,
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: borderColor)
+                                        ),
+                                        child: RepaintBoundary(child: Icon(Icons.print), key: globalKeyQrCode,),
+                                      ),
+                                      onTap: () async {
+                                        print("abc");
+                                        final fileImage = await _capturePngAndSaveFile(widget.scheduleModel.id);
+                                        if (fileImage != null) {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => ImageViewPager(fileImage: fileImage,),
+                                              ));
+                                        }
+                                      },
+                                    )
                                   ],
                                 ),
                                 SizedBox(height: paddingDefault,),
@@ -235,17 +273,13 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                     ),
                     SizedBox(height: paddingDefault,),
                     Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: borderColor)
-                      ),
+                      decoration: boxDecorationDetails(),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.fromLTRB(heightSpaceSmall, heightSpaceSmall, heightSpaceSmall, 5),
-                            child: Text('Details doctor', style: TextStyle(
+                            child: Text('Doctor', style: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 19,
                             ),),
@@ -302,7 +336,7 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                 ),
               ),
               widget.scheduleModel.status == StatusSchedule.New.toShortString()
-              ? Row(
+                  ? Row(
                 children: <Widget>[
                   Flexible(
                     child: Container(
@@ -380,6 +414,53 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
         ),
       ),
     );
+  }
+
+
+  Future<File> _capturePngAndSaveFile(String fileName) async {
+    RenderRepaintBoundary boundary = globalKeyQrCode.currentContext.findRenderObject();
+//    if (boundary.debugNeedsPaint) {
+//      Timer(Duration(seconds: 1), () => _capturePngAndSaveFile("12"));
+//      return null;
+//    }
+    var image = await boundary.toImage();
+    ByteData byteData = await image.toByteData(format: ImageByteFormat.png);
+    Uint8List pngBytes = byteData.buffer.asUint8List();
+    print("bytes: $pngBytes");
+    final tempDir = (await getTemporaryDirectory());
+    final dbPath = p.join(tempDir.path, '$fileName.png');
+    File qrCodeFile = await File(dbPath);
+    print("real path : ${qrCodeFile.path}");
+//    if (qrCodeFile.existsSync()) {
+//      print("existsSync : true");
+//      return qrCodeFile;
+//    } else {
+//      print("existsSync : false");
+//      await qrCodeFile.writeAsBytes(pngBytes);
+//      return qrCodeFile;
+//    }
+    await qrCodeFile.writeAsBytes(pngBytes);
+    return qrCodeFile;
+  }
+
+  Future<void> writeToFile(ByteData data, String path) {
+    final buffer = data.buffer;
+    return new File(path).writeAsBytes(
+        buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
+  }
+
+  boxDecorationDetails() {
+    return BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.4),
+            spreadRadius: 1,
+            blurRadius: 6,
+            offset: Offset(0, 1),
+          )
+        ]);
   }
 }
 

@@ -1,7 +1,9 @@
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -76,9 +78,10 @@ class _DoctorPageState extends State<DoctorPage> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.search, color: Colors.blue,),
-            onPressed: () {
-
+            icon: FaIcon(FontAwesomeIcons.qrcode, color: Colors.black,),
+            onPressed: () async {
+              final message = await scan();
+              print("result scan: $message");
             },
           )
         ],
@@ -386,6 +389,28 @@ class _DoctorPageState extends State<DoctorPage> {
         ),
       ),
     );
+  }
+
+  Future<String> scan() async {
+    String message = "";
+    try {
+      var options = ScanOptions(
+        // set the options
+      );
+      ScanResult barcode = await BarcodeScanner.scan();
+      message = barcode.rawContent;
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.cameraAccessDenied) {
+        message = 'The user did not grant the camera permission!';
+      } else {
+        message = 'Unknown error: $e';
+      }
+    } on FormatException{
+      message = 'null (User returned using the "back"-button before scanning anything. Result)';
+    } catch (e) {
+      message = 'Unknown error: $e';
+    }
+    return message;
   }
 
   _buildCategories(String name, String imageName, Color background, {Function function}) {

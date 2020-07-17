@@ -8,21 +8,17 @@ import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:template_flutter/src/models/location_model.dart';
 import 'package:template_flutter/src/models/user_model.dart';
 import 'package:template_flutter/src/screens/doctor/choose_schedule_screen.dart';
 import 'package:template_flutter/src/screens/doctor/doctor_details_screen.dart';
 import 'package:template_flutter/src/utils/calculate.dart';
 import 'package:template_flutter/src/utils/color.dart';
-import 'package:template_flutter/src/utils/constants.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/dialog_cus.dart';
-import 'package:template_flutter/src/utils/hex_color.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 
 class MapPage extends StatefulWidget {
@@ -39,7 +35,6 @@ class _MapPageState extends State<MapPage> {
 
   Completer<GoogleMapController> _controller = Completer();
   CarouselController carouselController;
-  final Geolocator _geolocator = Geolocator();
   static Position _currentPosition;
   bool isShowPager = false;
   int indexSelected = 0;

@@ -44,6 +44,9 @@ class LoadingLocalPushFetchSchedule extends ScheduleState {
   }
 }
 
+class ErrorFetchScheduleDetails extends ScheduleState {
+}
+
 class ErrorFetchSchedule extends ScheduleState {
   @override
   String toString() {
@@ -141,6 +144,13 @@ class FetchScheduleListenNewPushTotal extends ScheduleState {
 class FetchScheduleListenChangeStatusPushOfUser extends ScheduleState {
   final ScheduleModel item;
   FetchScheduleListenChangeStatusPushOfUser({@required this.item});
+  @override
+  List<Object> get props => [this.item];
+}
+
+class FetchScheduleDetailSuccess extends ScheduleState {
+  final ScheduleModel item;
+  FetchScheduleDetailSuccess({@required this.item});
   @override
   List<Object> get props => [this.item];
 }

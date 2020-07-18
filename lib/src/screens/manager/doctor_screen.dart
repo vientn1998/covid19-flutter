@@ -1,7 +1,10 @@
+import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loading_hud/loading_hud.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:template_flutter/src/blocs/schedule/bloc.dart';
@@ -58,6 +61,11 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
         .add(GetScheduleAllByDoctor(idDoctor: userObj.id, ));
   }
 
+  getDetailsSchedule(String id) {
+    BlocProvider.of<ScheduleBloc>(context)
+        .add(GetScheduleDetailsById(id: id, idDoctor: userObj.id));
+  }
+
   @override
   void initState() {
     dateCurrent = DateTime(dateNow.year, dateNow.month, dateNow.day, dateNow.hour);
@@ -76,6 +84,9 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                   LoadingHud(context).show();
                 } else if (state is ErrorFetchSchedule) {
                   LoadingHud(context).dismiss();
+                } else if (state is ErrorFetchScheduleDetails) {
+                  LoadingHud(context).dismiss();
+                  DialogCus(context).show(message: "The code invalid");
                 } else if (state is FetchAllScheduleByDoctorSuccess) {
                   final data = state.list;
                   data.sort((a, b) {
@@ -130,6 +141,11 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                   BlocProvider.of<ScheduleBloc>(context)
                       .add(GetScheduleByDoctor(idDoctor: userObj.id, fromDate: dateTimeSelected, statusSchedule: null));
                   LoadingHud(context).dismiss();
+                } else if (state is FetchScheduleDetailSuccess) {
+                  LoadingHud(context).dismiss();
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => ScheduleDetails(scheduleModel: state.item,),
+                  ));
                 }
               },
             )
@@ -164,10 +180,16 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                           ),
                         ],
                       ),
-                      IconBox(
-                        iconData: Icons.search,
+                      IconButton(
+                        icon: FaIcon(FontAwesomeIcons.qrcode, color: Colors.black, size: 20,),
                         onPressed: () async {
-                          toast("Coming soon", gravity: ToastGravity.BOTTOM);
+                          final message = await scan();
+                          if (message != null && message.split("_").length > 1) {
+                            print("result scan: $message -> ${message.split("_")[0]}");
+                            getDetailsSchedule(message.split("_")[0]);
+                          } else {
+                            DialogCus(context).show(message: "The code invalid");
+                          }
                         },
                       ),
                     ],
@@ -186,6 +208,28 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
         ),
       ),
     );
+  }
+
+  Future<String> scan() async {
+    String message = "";
+    try {
+      var options = ScanOptions(
+        // set the options
+      );
+      ScanResult barcode = await BarcodeScanner.scan();
+      message = barcode.rawContent;
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.cameraAccessDenied) {
+        message = 'The user did not grant the camera permission!';
+      } else {
+        message = 'Unknown error: $e';
+      }
+    } on FormatException{
+      message = 'null (User returned using the "back"-button before scanning anything. Result)';
+    } catch (e) {
+      message = 'Unknown error: $e';
+    }
+    return message;
   }
 
   buildListFilter() {

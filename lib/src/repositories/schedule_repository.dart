@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:template_flutter/src/models/schedule_day_model.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
 import "package:collection/collection.dart";
@@ -446,6 +447,24 @@ class ScheduleRepository {
       return false;
     });
     return isSuccess;
+  }
+
+  Future<ScheduleModel> getScheduleDetailsById({@required String id, @required String idDoctor}) async{
+    ScheduleModel scheduleModel;
+    print('getScheduleDetailsById : $id - idDoctor: $idDoctor');
+    try {
+      await scheduleCollection
+          .where("id", isEqualTo: id).where("receiverId",isEqualTo: idDoctor)
+          .getDocuments()
+          .then((querySnapshot) {
+            if (querySnapshot.documents.length > 0) {
+              scheduleModel = ScheduleModel.fromSnapshot(querySnapshot.documents[0]);
+            }
+      });
+    }catch(error) {
+      print('getScheduleDetailsById ${error.toString()}');
+    }
+    return scheduleModel;
   }
 }
 

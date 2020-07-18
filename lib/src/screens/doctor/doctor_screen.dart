@@ -78,10 +78,12 @@ class _DoctorPageState extends State<DoctorPage> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: FaIcon(FontAwesomeIcons.qrcode, color: Colors.black,),
+            icon: FaIcon(FontAwesomeIcons.search, color: Colors.blue, size: 20,),
             onPressed: () async {
-              final message = await scan();
-              print("result scan: $message");
+//              final message = await scan();
+//              if (message.split("_").length > 1) {
+//                print("result scan: $message");
+//              }
             },
           )
         ],

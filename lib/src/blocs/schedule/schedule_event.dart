@@ -108,4 +108,9 @@ class GetScheduleLocalPushChangeStatusOfUserEventSuccess extends ScheduleEvent {
   GetScheduleLocalPushChangeStatusOfUserEventSuccess({@required this.item});
 }
 
+class GetScheduleDetailsById extends ScheduleEvent {
+  final String id, idDoctor;
+  GetScheduleDetailsById({@required this.id, @required this.idDoctor});
+}
+
 

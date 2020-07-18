@@ -52,10 +52,30 @@ class ScheduleBloc extends Bloc<ScheduleEvent, ScheduleState> {
       yield* _mapFetchScheduleLocalPushChangeStatusOfUserSuccessToState(event);
     } else if (event is GetScheduleLoadMoreByUesr) {
       yield* _mapFetchScheduleLoadMoreByUserToState(event);
+    } else if (event is GetScheduleDetailsById) {
+      yield* _mapGetScheduleDetailByIdToState(event);
     } else {
       yield InitialScheduleState();
     }
   }
+
+  Stream<ScheduleState> _mapGetScheduleDetailByIdToState(GetScheduleDetailsById event) async* {
+    yield LoadingFetchSchedule();
+    try {
+      final data = await scheduleRepository.getScheduleDetailsById(id: event.id, idDoctor: event.idDoctor);
+      if (data != null) {
+        yield FetchScheduleDetailSuccess(item: data);
+        print('_mapGetScheduleDetailByIdToState : 1');
+      } else {
+        yield ErrorFetchScheduleDetails();
+        print('error _mapGetScheduleDetailByIdToState');
+      }
+    } catch(error) {
+      yield ErrorFetchSchedule();
+      print('error _mapGetScheduleDetailByIdToState: $error');
+    }
+  }
+
 
   Stream<ScheduleState> _mapCreateToState(CreateSchedule event) async* {
     yield ScheduleLoading();

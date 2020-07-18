@@ -28,6 +28,7 @@ import '../../utils/extension/int_extention.dart';
 import '../../utils/extension/string_extention.dart';
 import 'package:path/path.dart' as p;
 import 'image_viewpager_screen.dart';
+
 class ScheduleDetails extends StatefulWidget {
   final ScheduleModel scheduleModel;
   ScheduleDetails({@required this.scheduleModel});
@@ -41,6 +42,7 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
   StatusSchedule _statusSchedule;
   UserObj userObj = UserObj();
   GlobalKey globalKeyQrCode = GlobalKey();
+  String idQrCode = "";
 
 
   updateSchedule(StatusSchedule statusSchedule) {
@@ -63,6 +65,7 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
   @override
   void initState() {
     super.initState();
+    idQrCode = widget.scheduleModel.id + "_qrcode";
     getUser();
   }
 
@@ -228,7 +231,7 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                                         ],
                                       ),
                                     ),
-                                    InkWell(
+                                    widget.scheduleModel.status == StatusSchedule.Approved.toShortString() ? InkWell(
                                       child: Container(
                                         height: 100,
                                         width: 100,
@@ -237,20 +240,29 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                                             borderRadius: BorderRadius.circular(8),
                                             border: Border.all(color: borderColor)
                                         ),
-                                        child: RepaintBoundary(child: Icon(Icons.print), key: globalKeyQrCode,),
+                                        child: QrImage(
+                                          data: idQrCode,
+                                          version: QrVersions.auto,
+                                          size: 320,
+                                          gapless: false,
+                                        ),
                                       ),
                                       onTap: () async {
-                                        print("abc");
-                                        final fileImage = await _capturePngAndSaveFile(widget.scheduleModel.id);
-                                        if (fileImage != null) {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => ImageViewPager(fileImage: fileImage,),
-                                              ));
-                                        }
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ShowQrCodeLarge(idSchedule: idQrCode,),
+                                            ));
+//                                        final fileImage = await _capturePngAndSaveFile(widget.scheduleModel.id);
+//                                        if (fileImage != null) {
+//                                          Navigator.push(
+//                                              context,
+//                                              MaterialPageRoute(
+//                                                builder: (context) => ImageViewPager(fileImage: fileImage,),
+//                                              ));
+//                                        }
                                       },
-                                    )
+                                    ) : SizedBox(width: 0,)
                                   ],
                                 ),
                                 SizedBox(height: paddingDefault,),
@@ -461,6 +473,42 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
             offset: Offset(0, 1),
           )
         ]);
+  }
+}
+
+class ShowQrCodeLarge extends StatefulWidget {
+  String idSchedule;
+  ShowQrCodeLarge({@required this.idSchedule});
+
+  @override
+  _ShowQrCodeLargeState createState() => _ShowQrCodeLargeState();
+}
+
+class _ShowQrCodeLargeState extends State<ShowQrCodeLarge> {
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('View QrCode'),
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white,),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Center(
+        child: QrImage(
+          data: widget.idSchedule,
+          version: QrVersions.auto,
+          size: 320,
+          gapless: false,
+        ),
+      ),
+    );
   }
 }
 

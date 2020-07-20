@@ -501,7 +501,7 @@ class _DoctorPageState extends State<DoctorPage> {
                       children: <Widget>[
                         SmoothStarRating(
                           rating: 5,
-                          isReadOnly: false,
+                          isReadOnly: true,
                           size: 18,
                           filledIconData: Icons.star,
                           halfFilledIconData: Icons.star_half,

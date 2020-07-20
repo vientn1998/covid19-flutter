@@ -12,6 +12,7 @@ import 'package:template_flutter/src/utils/color.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import '../../utils/extension/int_extention.dart';
+import '../../utils/global.dart' as global;
 class MedicalExamination extends StatefulWidget {
   UserObj userObj;
   MedicalExamination({@required this.userObj});
@@ -307,9 +308,9 @@ class _ListUpcomingState extends State<ListUpcoming> {
                 width: 6,
                 height: 94,
                 decoration: BoxDecoration(
-                    color: item.status == StatusSchedule.New.toShortString()
+                    color: item.status == StatusSchedule.New.toCastEnumIntoString()
                         ? Colors.yellow
-                        : item.status == StatusSchedule.Approved.toShortString() ? Colors.green : item.status == StatusSchedule.Done.toShortString() ? Colors.green : Colors.grey,
+                        : item.status == StatusSchedule.Approved.toCastEnumIntoString() ? Colors.green : item.status == StatusSchedule.Done.toCastEnumIntoString() ? Colors.green : Colors.grey,
                     borderRadius: BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8))
                 ),
               ),
@@ -319,7 +320,7 @@ class _ListUpcomingState extends State<ListUpcoming> {
       ),
       onTap: () {
         Navigator.push(context, MaterialPageRoute(
-          builder: (context) => ScheduleDetails(scheduleModel: item,),
+          builder: (context) => ScheduleDetails(scheduleModel: item),
         ));
       },
     );
@@ -412,7 +413,7 @@ class _ListHistoryState extends State<ListHistory> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Text('List ${_statusSchedule == null ? 'history' : _statusSchedule.toShortString()}: ${totalSchedule}', style: TextStyle(
+                Text('List ${_statusSchedule == null ? 'history' : _statusSchedule.toCastEnumIntoString()}: ${totalSchedule}', style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700
                 ),),
@@ -596,9 +597,9 @@ class _ListHistoryState extends State<ListHistory> {
                 width: 6,
                 height: 94,
                 decoration: BoxDecoration(
-                    color: item.status == StatusSchedule.New.toShortString()
+                    color: item.status == StatusSchedule.New.toCastEnumIntoString()
                         ? Colors.yellow
-                        : item.status == StatusSchedule.Approved.toShortString() ? Colors.green : item.status == StatusSchedule.Done.toShortString() ? Colors.green : Colors.grey,
+                        : item.status == StatusSchedule.Approved.toCastEnumIntoString() ? Colors.green : item.status == StatusSchedule.Done.toCastEnumIntoString() ? Colors.green : Colors.grey,
                     borderRadius: BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8))
                 ),
               ),
@@ -607,13 +608,13 @@ class _ListHistoryState extends State<ListHistory> {
         ),
       ),
       onTap: () {
-        if (item.status == StatusSchedule.Done.toShortString()) {
+        if (item.status == StatusSchedule.Done.toCastEnumIntoString()) {
           Navigator.push(context, MaterialPageRoute(
             builder: (context) => RateDoctorPage(item),
           ));
         } else {
           Navigator.push(context, MaterialPageRoute(
-            builder: (context) => ScheduleDetails(scheduleModel: item,),
+            builder: (context) => ScheduleDetails(scheduleModel: item, isHistory: true,),
           ));
         }
       },

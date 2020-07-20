@@ -11,7 +11,7 @@ class RateModel extends Equatable {
   String idDoctor;
   String idUser;
   String reason;
-  double star;
+  int star;
   RateModel({this.id, this.dateTime, this.user, this.reason, this.idOrder, this.idDoctor, this.idUser, this.star});
 
   static RateModel fromSnapshot(DocumentSnapshot documentSnapshot) {
@@ -38,6 +38,12 @@ class RateModel extends Equatable {
       'reason' : this.reason,
       'star' : this.star,
     };
+  }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return 'id: $id - idUser: $idUser - idDoctor $idDoctor - idOrder: $idOrder';
   }
 
   @override

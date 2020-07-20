@@ -30,6 +30,7 @@ class RateBloc extends Bloc<RateEvent, RateState> {
 
   Stream<RateState> _mapCreateToState(CreateRate event) async* {
     yield LoadingCreateSchedule();
+    print("_mapCreateToState ${event.rateModel.toString()}");
     try {
       final isSuccess = await repository.createRate(event.rateModel);
       if (isSuccess != null && isSuccess == true) {
@@ -38,6 +39,7 @@ class RateBloc extends Bloc<RateEvent, RateState> {
         yield ErrorCreateRate("Error submit rate");
       }
     }catch(error) {
+      print(error);
       yield ErrorCreateRate(error.toString());
     }
   }

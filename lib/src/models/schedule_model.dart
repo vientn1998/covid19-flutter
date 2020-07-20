@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'user_model.dart';
 
 class ScheduleModel extends Equatable {
-  String id;
+  String id, receiverId, senderId;
   int timeBook;
   int dateTime;
   UserObj sender;
@@ -12,7 +12,7 @@ class ScheduleModel extends Equatable {
   String status;
   String note;
   DateTime dateTimeCreate;
-  ScheduleModel({this.id, this.timeBook, this.dateTime, this.sender, this.receiver, this.status, this.note, this.dateTimeCreate});
+  ScheduleModel({this.id, this.timeBook, this.dateTime, this.receiverId, this.senderId, this.sender, this.receiver, this.status, this.note, this.dateTimeCreate});
 
   static ScheduleModel fromSnapshot(DocumentSnapshot documentSnapshot) {
     return ScheduleModel(
@@ -23,6 +23,8 @@ class ScheduleModel extends Equatable {
       receiver: UserObj.fromJson(documentSnapshot.data['receiver']),
       status: documentSnapshot.data['status'] ?? '',
       note: documentSnapshot.data['note'] ?? '',
+      receiverId: documentSnapshot.data['receiverId'] ?? '',
+      senderId: documentSnapshot.data['senderId'] ?? '',
     );
   }
 

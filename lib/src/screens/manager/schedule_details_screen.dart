@@ -25,13 +25,16 @@ import 'package:template_flutter/src/utils/dialog_cus.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
 import 'package:template_flutter/src/widgets/button.dart';
 import '../../utils/extension/int_extention.dart';
-import '../../utils/extension/string_extention.dart';
+import '../../utils/string_extension.dart';
 import 'package:path/path.dart' as p;
 import 'image_viewpager_screen.dart';
+import '../../utils/global.dart' as global;
+import '../../utils/define.dart';
 
 class ScheduleDetails extends StatefulWidget {
-  final ScheduleModel scheduleModel;
-  ScheduleDetails({@required this.scheduleModel});
+  ScheduleModel scheduleModel;
+  bool isHistory = false;
+  ScheduleDetails({@required this.scheduleModel, this.isHistory = false});
   @override
   _ScheduleDetailsState createState() => _ScheduleDetailsState();
 }
@@ -67,6 +70,7 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
     super.initState();
     idQrCode = widget.scheduleModel.id + "_qrcode";
     getUser();
+    _statusSchedule = widget.scheduleModel.status.toCastStringIntoEnum();
   }
 
   @override
@@ -102,7 +106,7 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
           if (state is UpdateScheduleSuccess) {
             LoadingHud(context).dismiss();
             var result = widget.scheduleModel;
-            result.status = _statusSchedule.toShortString();
+            result.status = _statusSchedule.toCastEnumIntoString();
             Navigator.pop(context, result);
           }
         },
@@ -231,7 +235,7 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                                         ],
                                       ),
                                     ),
-                                    widget.scheduleModel.status == StatusSchedule.Approved.toShortString() ? InkWell(
+                                    widget.scheduleModel.status == StatusSchedule.Approved.toCastEnumIntoString() ? InkWell(
                                       child: Container(
                                         height: 100,
                                         width: 100,
@@ -347,63 +351,76 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                   ],
                 ),
               ),
-              widget.scheduleModel.status == StatusSchedule.New.toShortString()
-                  ? Row(
-                children: <Widget>[
-                  Flexible(
-                    child: Container(
-                      margin: EdgeInsets.only(top: paddingNavi, bottom: paddingNavi),
-                      height: heightButton,
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-                        child: ButtonCustom(
-                          title: 'Cancel',
-                          background: colorActive,
-                          onPressed: () async {
-                            final note = await showDialog(
-                                barrierDismissible: false,
-                                context: context,
-                                builder: (context) {
-                                  return MyDialogCreateSchedule();
-                                }) as String;
-                            print('note: $note');
-                            if (note != null && note.length > 0) {
-                              updateSchedule(StatusSchedule.Canceled);
-                              setState(() {
-                                _statusSchedule = StatusSchedule.Canceled;
-                              });
-                            }
-                          },
-                        ),
-                      ),
+              widget.isHistory ? buildActionHistory() : global.isDoctor ? buildActionDoctor() : buildActionUser()
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  buildActionDoctor() {
+    return widget.scheduleModel.status == StatusSchedule.New.toCastEnumIntoString()
+        ? Row(
+            children: <Widget>[
+              Flexible(
+                child: Container(
+                  margin:
+                      EdgeInsets.only(top: paddingNavi, bottom: paddingNavi),
+                  height: heightButton,
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                    child: ButtonCustom(
+                      title: 'Cancel',
+                      background: colorActive,
+                      onPressed: () async {
+                        final note = await showDialog(
+                            barrierDismissible: false,
+                            context: context,
+                            builder: (context) {
+                              return MyDialogCancelSchedule();
+                            }) as String;
+                        print('note: $note');
+                        if (note != null && note.length > 0) {
+                          updateSchedule(StatusSchedule.Canceled);
+                          setState(() {
+                            _statusSchedule = StatusSchedule.Canceled;
+                          });
+                        }
+                      },
                     ),
                   ),
-                  SizedBox(width: paddingDefault,),
-                  Flexible(
-                    child: Container(
-                      margin: EdgeInsets.only(top: paddingNavi, bottom: paddingNavi),
-                      height: heightButton,
-                      width: double.infinity,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
-                        child: ButtonCustom(
-                          title: 'Approve',
-                          background: colorActive,
-                          onPressed: () {
-                            setState(() {
-                              _statusSchedule = StatusSchedule.Approved;
-                            });
-                            updateSchedule(StatusSchedule.Approved);
-                          },
-                        ),
-                      ),
+                ),
+              ),
+              SizedBox(
+                width: paddingDefault,
+              ),
+              Flexible(
+                child: Container(
+                  margin:
+                      EdgeInsets.only(top: paddingNavi, bottom: paddingNavi),
+                  height: heightButton,
+                  width: double.infinity,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                    child: ButtonCustom(
+                      title: 'Approve',
+                      background: colorActive,
+                      onPressed: () {
+                        setState(() {
+                          _statusSchedule = StatusSchedule.Approved;
+                        });
+                        updateSchedule(StatusSchedule.Approved);
+                      },
                     ),
                   ),
-                ],
-              ) :
-              widget.scheduleModel.status == StatusSchedule.Approved.toShortString() ?
-              Container(
+                ),
+              ),
+            ],
+          )
+        : widget.scheduleModel.status == StatusSchedule.Approved.toCastEnumIntoString()
+            ? Container(
                 margin: EdgeInsets.only(top: paddingNavi, bottom: paddingNavi),
                 height: heightButton,
                 width: double.infinity,
@@ -420,14 +437,89 @@ class _ScheduleDetailsState extends State<ScheduleDetails> {
                     },
                   ),
                 ),
-              ) : SizedBox(height: 1,)
-            ],
-          ),
-        ),
-      ),
+              )
+            : SizedBox(
+                height: 1,
+              );
+  }
+
+  buildActionUser() {
+    return _statusSchedule == StatusSchedule.New
+        ? Container(
+            margin: EdgeInsets.only(top: paddingNavi, bottom: paddingNavi),
+            height: heightButton,
+            width: double.infinity,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+              child: ButtonCustom(
+                title: 'Cancel',
+                background: colorActive,
+                onPressed: () async {
+                  final note = await showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (context) {
+                        return MyDialogCancelSchedule();
+                      }) as String;
+                  print('note: $note');
+                  if (note != null && note.length > 0) {
+                    updateSchedule(StatusSchedule.Canceled);
+                    setState(() {
+                      _statusSchedule = StatusSchedule.Canceled;
+                    });
+                  }
+                },
+              ),
+            ),
+          )
+        : _statusSchedule == StatusSchedule.Done
+        ? Container(
+                margin: EdgeInsets.only(top: paddingNavi, bottom: paddingNavi),
+                height: heightButton,
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                  child: ButtonCustom(
+                    title: 'Rate',
+                    background: colorActive,
+                    onPressed: () {
+                      updateSchedule(StatusSchedule.Done);
+                      setState(() {
+                        _statusSchedule = StatusSchedule.Done;
+                      });
+                    },
+                  ),
+                ),
+              )
+            : SizedBox(
+      height: 1,
     );
   }
 
+  buildActionHistory() {
+    return widget.scheduleModel.status == StatusSchedule.Done.toCastEnumIntoString()
+            ? Container(
+                margin: EdgeInsets.only(top: paddingNavi, bottom: paddingNavi),
+                height: heightButton,
+                width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 2),
+                  child: ButtonCustom(
+                    title: 'Rate',
+                    background: colorActive,
+                    onPressed: () {
+                      updateSchedule(StatusSchedule.Done);
+                      setState(() {
+                        _statusSchedule = StatusSchedule.Done;
+                      });
+                    },
+                  ),
+                ),
+              )
+            : SizedBox(
+                height: 1,
+              );
+  }
 
   Future<File> _capturePngAndSaveFile(String fileName) async {
     RenderRepaintBoundary boundary = globalKeyQrCode.currentContext.findRenderObject();
@@ -513,13 +605,13 @@ class _ShowQrCodeLargeState extends State<ShowQrCodeLarge> {
 }
 
 
-class MyDialogCreateSchedule extends StatefulWidget {
+class MyDialogCancelSchedule extends StatefulWidget {
 
   @override
-  _MyDialogCreateScheduleState createState() => _MyDialogCreateScheduleState();
+  _MyDialogCancelScheduleState createState() => _MyDialogCancelScheduleState();
 }
 
-class _MyDialogCreateScheduleState extends State<MyDialogCreateSchedule> {
+class _MyDialogCancelScheduleState extends State<MyDialogCancelSchedule> {
 
   String note;
   TextEditingController textEditingController;

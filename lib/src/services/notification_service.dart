@@ -60,9 +60,9 @@ class NotificationPushLocal {
   Future<void> showNotificationChangeStatusOfUserSchedule(ScheduleModel scheduleModel) async {
     print('showNotificationChangeStatusOfUserSchedule');
     var message = "";
-    if (scheduleModel.status == StatusSchedule.Approved.toShortString()) {
+    if (scheduleModel.status == StatusSchedule.Approved.toCastEnumIntoString()) {
       message = "Cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))} đã được chấp nhận.";
-    } else if (scheduleModel.status == StatusSchedule.Canceled.toShortString()) {
+    } else if (scheduleModel.status == StatusSchedule.Canceled.toCastEnumIntoString()) {
       message = "Cuộc hẹn với bác sĩ ${scheduleModel.receiver.name} vào lúc ${scheduleModel.timeBook.getTypeTimeSchedule()} ngày ${DateTimeUtils().formatDateString(DateTime.fromMillisecondsSinceEpoch(scheduleModel.dateTime))} đã bị huỷ.";
     }
     var bigTextStyleInformation = BigTextStyleInformation(

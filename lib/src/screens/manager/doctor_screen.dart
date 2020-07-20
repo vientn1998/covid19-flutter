@@ -124,9 +124,9 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                   final data = state.list;
                   print('datetimedatetime ${dateTimeSelected.millisecondsSinceEpoch}');
                   final today = data.where((element) => element.dateTime == dateTimeSelected.millisecondsSinceEpoch).toList().length;
-                  final listNew = data.where((element) => element.status == StatusSchedule.New.toShortString()).toList();
-                  final approved = data.where((element) => element.status == StatusSchedule.Approved.toShortString()).toList().length;
-                  final canceled = data.where((element) => element.status == StatusSchedule.Canceled.toShortString()).toList().length;
+                  final listNew = data.where((element) => element.status == StatusSchedule.New.toCastEnumIntoString()).toList();
+                  final approved = data.where((element) => element.status == StatusSchedule.Approved.toCastEnumIntoString()).toList().length;
+                  final canceled = data.where((element) => element.status == StatusSchedule.Canceled.toCastEnumIntoString()).toList().length;
                   final newCase = listNew.where((element) {
                     var dateItem = DateTime.fromMillisecondsSinceEpoch(element.dateTime);
                     return (dateItem.isAfter(dateCurrent))
@@ -336,19 +336,19 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
               builder: (context) => ScheduleDetails(scheduleModel: list[index],),
             )) as ScheduleModel;
             if (data != null) {
-              if (data.status == StatusSchedule.Approved.toShortString()) {
+              if (data.status == StatusSchedule.Approved.toCastEnumIntoString()) {
                 setState(() {
                   list.removeAt(index);
                   numberApproved += 1;
                   numberNew -= 1;
                 });
-              } else if (data.status == StatusSchedule.Canceled.toShortString()) {
+              } else if (data.status == StatusSchedule.Canceled.toCastEnumIntoString()) {
                 setState(() {
                   list.removeAt(index);
                   numberCanceled += 1;
                   numberNew -= 1;
                 });
-              } else if (data.status == StatusSchedule.Done.toShortString()) {
+              } else if (data.status == StatusSchedule.Done.toCastEnumIntoString()) {
                 setState(() {
                   list.removeAt(index);
                   numberApproved -= 1;
@@ -468,13 +468,13 @@ class _DoctorManagerPageState extends State<DoctorManagerPage> {
                   width: 6,
                   height: 94,
                   decoration: BoxDecoration(
-                      color: item.status == StatusSchedule.New.toShortString()
+                      color: item.status == StatusSchedule.New.toCastEnumIntoString()
                           ? colorNew
                           : item.status ==
-                          StatusSchedule.Approved.toShortString()
+                          StatusSchedule.Approved.toCastEnumIntoString()
                           ? colorApproved
                           : item.status ==
-                          StatusSchedule.Done.toShortString() ? colorDeath : colorCancel,
+                          StatusSchedule.Done.toCastEnumIntoString() ? colorDeath : colorCancel,
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(8),
                           bottomRight: Radius.circular(8))),

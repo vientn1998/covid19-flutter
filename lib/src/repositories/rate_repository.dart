@@ -25,12 +25,12 @@ class RateRepository {
 
   Future<bool> createRate(RateModel rateModel) async {
     bool isSuccess = false;
-    final id = rateCollection
-        .document()
-        .documentID;
+    final id = rateCollection.document().documentID;
     rateModel.id = id;
+    print("documentID $id");
+    print('createRateFunc ${rateModel.toString()}');
     final data = rateModel.toJson();
-    print('createRate $data');
+
     await rateCollection.document(id).setData(data).then((value) {
       isSuccess = true;
     }, onError: (error) {
@@ -58,7 +58,6 @@ class RateRepository {
       } else {
         await rateCollection
             .where("idOrder", isEqualTo: idOrder)
-            .where("idDoctor", isEqualTo: idDoctor)
             .getDocuments()
             .then((querySnapshot) {
           final item = querySnapshot.documents.map((document) {

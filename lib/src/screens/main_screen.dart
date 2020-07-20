@@ -10,7 +10,7 @@ import 'package:template_flutter/src/screens/manager/doctor_screen.dart';
 import 'package:template_flutter/src/screens/profile/profile_screen.dart';
 import 'package:template_flutter/src/utils/define.dart';
 import 'package:template_flutter/src/utils/share_preferences.dart';
-
+import 'package:template_flutter/src/utils/global.dart' as global;
 import 'home/home_screen.dart';
 
 class MainPage extends StatefulWidget {
@@ -41,6 +41,7 @@ class _MainPageState extends State<MainPage> {
         setState(() {
           userObj = data;
         });
+        global.isDoctor = userObj.isDoctor;
       }
     }
   }

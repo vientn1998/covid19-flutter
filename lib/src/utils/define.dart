@@ -42,7 +42,7 @@ enum StatusSchedule {
 }
 
 extension ParseToString on StatusSchedule {
-  String toShortString() {
+  String toCastEnumIntoString() {
     return this.toString().split('.').last;
   }
 }

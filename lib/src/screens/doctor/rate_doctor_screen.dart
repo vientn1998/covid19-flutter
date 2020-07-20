@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,12 +30,15 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
   @override
   void initState() {
     textEditingController = TextEditingController();
+    star = 0;
     super.initState();
     fetData();
+
+    print("_RateDoctorPageState ${widget.scheduleModel.toJson()}");
   }
 
   fetData() {
-    BlocProvider.of<RateBloc>(context).add(FetchRate(idOrder: widget.scheduleModel.id, idDoctor: widget.scheduleModel.sender.id));
+    BlocProvider.of<RateBloc>(context).add(FetchRate(idOrder: widget.scheduleModel.id));
   }
 
   @override
@@ -81,9 +86,16 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
               final rate = data[0];
               setState(() {
                 isReadOnly = true;
-                star = rate.star;
+                star = rate.star.toDouble();
                 textEditingController.text = rate.reason;
               });
+              Timer(Duration(seconds: 1), () {
+                print("star : $star");
+                setState(() {
+                  star = rate.star.toDouble();
+                });
+              });
+
             }
             LoadingHud(context).dismiss();
           }
@@ -133,14 +145,16 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
                             filledIconData: Icons.star,
                             halfFilledIconData: Icons.star_half,
                             defaultIconData: Icons.star_border,
+                            allowHalfRating: false,
                             starCount: 5,
-                            allowHalfRating: true,
                             spacing: 1.0,
                             color: Colors.orange,
                             borderColor: Colors.grey,
                             onRated: (value) {
                               print("rating value -> $value");
-                              star = value;
+                              setState(() {
+                                star = value;
+                              });
                             },
                           ),
                           SizedBox(height: heightSpaceSmall,),
@@ -186,7 +200,7 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
                               },
                               decoration: InputDecoration(
                                 border: InputBorder.none,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 7),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 7,vertical: 5),
                               ),
                             ),
                           ),
@@ -208,10 +222,11 @@ class _RateDoctorPageState extends State<RateDoctorPage> {
                       var rate = RateModel();
                       rate.idOrder = widget.scheduleModel.id;
                       rate.dateTime = DateTime.now().millisecondsSinceEpoch;
-                      rate.idDoctor = widget.scheduleModel.receiver.id;
-                      rate.idUser = widget.scheduleModel.sender.id;
-                      rate.star = star;
+                      rate.idDoctor = widget.scheduleModel.receiverId;
+                      rate.idUser = widget.scheduleModel.senderId;
+                      rate.star = star.toInt();
                       rate.reason = textEditingController.text;
+                      rate.user = widget.scheduleModel.sender;
                       BlocProvider.of<RateBloc>(context).add(CreateRate(rateModel: rate));
                     } : null,
                   ),

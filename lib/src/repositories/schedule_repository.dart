@@ -133,7 +133,7 @@ class ScheduleRepository {
         if (status != null) {
           await scheduleCollection
               .where("receiverId", isEqualTo: idDoctor)
-              .where("status", isEqualTo: status.toShortString())
+              .where("status", isEqualTo: status.toCastEnumIntoString())
               .getDocuments()
               .then((querySnapshot) {
             final item = querySnapshot.documents.map((document) {
@@ -168,7 +168,7 @@ class ScheduleRepository {
           } else {
             await scheduleCollection
                 .where("receiverId", isEqualTo: idDoctor)
-                .where("status", isEqualTo: status.toShortString())
+                .where("status", isEqualTo: status.toCastEnumIntoString())
                 .where("dateTime", isGreaterThanOrEqualTo: day)
                 .getDocuments()
                 .then((querySnapshot) {
@@ -219,14 +219,14 @@ class ScheduleRepository {
   Future<List<ScheduleModel>> getScheduleByUser(String idUser,
       {int day = 0, int toDay = 0, StatusSchedule status = StatusSchedule.New}) async {
     List<ScheduleModel> list = [];
-    print('getScheduleByUser $idUser ${status.toShortString()} - $day - $toDay');
+    print('getScheduleByUser $idUser ${status.toCastEnumIntoString()} - $day - $toDay');
     try {
       if (status != null) {
         if (toDay > 0) {
           await scheduleCollection
               .where("senderId", isEqualTo: idUser)
               .where("dateTime", isLessThanOrEqualTo: toDay)
-              .where("status", isEqualTo: status.toShortString())
+              .where("status", isEqualTo: status.toCastEnumIntoString())
               .getDocuments()
               .then((querySnapshot) {
             final item = querySnapshot.documents.map((document) {
@@ -238,7 +238,7 @@ class ScheduleRepository {
           await scheduleCollection
               .where("senderId", isEqualTo: idUser)
               .where("dateTime", isGreaterThanOrEqualTo: day)
-              .where("status", isEqualTo: status.toShortString())
+              .where("status", isEqualTo: status.toCastEnumIntoString())
               .getDocuments()
               .then((querySnapshot) {
             final item = querySnapshot.documents.map((document) {
@@ -282,7 +282,7 @@ class ScheduleRepository {
 
   Future<List<DocumentSnapshot>> getScheduleLoadMoreByUser(List<DocumentSnapshot> list, String idUser,
       {int day = 0, int toDay = 0, StatusSchedule status = StatusSchedule.New}) async {
-    print('getScheduleByUser $idUser ${status.toShortString()} - $day - $toDay ${list.length}');
+    print('getScheduleByUser $idUser ${status.toCastEnumIntoString()} - $day - $toDay ${list.length}');
     try {
       if (list.length == 0) {
         if (status != null) {
@@ -290,13 +290,13 @@ class ScheduleRepository {
             return (await scheduleCollection
                 .where("senderId", isEqualTo: idUser)
                 .where("dateTime", isLessThan: toDay)
-                .where("status", isEqualTo: status.toShortString()).limit(10).orderBy("dateTime")
+                .where("status", isEqualTo: status.toCastEnumIntoString()).limit(10).orderBy("dateTime")
                 .getDocuments()).documents;
           } else {
             return (await scheduleCollection
                 .where("senderId", isEqualTo: idUser)
                 .where("dateTime", isLessThan: day)
-                .where("status", isEqualTo: status.toShortString()).limit(10).orderBy("dateTime")
+                .where("status", isEqualTo: status.toCastEnumIntoString()).limit(10).orderBy("dateTime")
                 .getDocuments()).documents;
           }
         } else {
@@ -319,14 +319,14 @@ class ScheduleRepository {
             return (await scheduleCollection
                 .where("senderId", isEqualTo: idUser)
                 .where("dateTime", isLessThanOrEqualTo: toDay)
-                .where("status", isEqualTo: status.toShortString())
+                .where("status", isEqualTo: status.toCastEnumIntoString())
                 .limit(10).orderBy("dateTime").startAfterDocument(list[list.length - 1])
                 .getDocuments()).documents;
           } else {
             return (await scheduleCollection
                 .where("senderId", isEqualTo: idUser)
                 .where("dateTime", isGreaterThanOrEqualTo: day)
-                .where("status", isEqualTo: status.toShortString())
+                .where("status", isEqualTo: status.toCastEnumIntoString())
                 .limit(10).orderBy("dateTime").startAfterDocument(list[list.length - 1])
                 .getDocuments()).documents;
           }
@@ -361,7 +361,7 @@ class ScheduleRepository {
       await scheduleCollection
           .where("senderId", isEqualTo: idUser)
           .where("dateTime", isGreaterThanOrEqualTo: day)
-          .where("status", isEqualTo: StatusSchedule.Approved.toShortString())
+          .where("status", isEqualTo: StatusSchedule.Approved.toCastEnumIntoString())
           .getDocuments()
           .then((querySnapshot) {
         final item = querySnapshot.documents.map((document) {
@@ -383,7 +383,7 @@ class ScheduleRepository {
       await scheduleCollection
           .where("receiverId", isEqualTo: idUser)
           .where("dateTime", isGreaterThanOrEqualTo: day)
-          .where("status", isEqualTo: StatusSchedule.Approved.toShortString())
+          .where("status", isEqualTo: StatusSchedule.Approved.toCastEnumIntoString())
           .getDocuments()
           .then((querySnapshot) {
         final item = querySnapshot.documents.map((document) {
@@ -405,7 +405,7 @@ class ScheduleRepository {
       await scheduleCollection
           .where("receiverId", isEqualTo: idDoctor)
           .where("dateTime", isGreaterThanOrEqualTo: day)
-          .where("status", isEqualTo: StatusSchedule.New.toShortString())
+          .where("status", isEqualTo: StatusSchedule.New.toCastEnumIntoString())
           .getDocuments()
           .then((querySnapshot) {
         final item = querySnapshot.documents.map((document) {
@@ -424,7 +424,7 @@ class ScheduleRepository {
     return scheduleCollection
         .where("receiverId", isEqualTo: idDoctor)
         .where("dateTime", isGreaterThanOrEqualTo: day)
-        .where("status", isEqualTo: StatusSchedule.New.toShortString()).snapshots();
+        .where("status", isEqualTo: StatusSchedule.New.toCastEnumIntoString()).snapshots();
   }
 
   Stream<QuerySnapshot> getScheduleLocalPushChangeStatusByUser(String idDoctor, int day) {
@@ -440,7 +440,7 @@ class ScheduleRepository {
     print('updateStatusSchedule $statusSchedule');
     await scheduleCollection
         .document(id)
-        .updateData({"status": statusSchedule.toShortString()}).then((value) {
+        .updateData({"status": statusSchedule.toCastEnumIntoString()}).then((value) {
       isSuccess = true;
     }, onError: (error) {
       print(error.toString());

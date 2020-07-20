@@ -97,7 +97,7 @@ dependencies:
   #pull to refresh
   pull_to_refresh: ^1.6.0
   #local push notification
-  flutter_local_notifications: ^1.4.4+1
+  flutter_local_notifications: ^1.4.4+2
   #check network
   connectivity: ^0.4.9
   #stream

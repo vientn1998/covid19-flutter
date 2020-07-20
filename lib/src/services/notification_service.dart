@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:template_flutter/src/models/notification_model.dart';
 import 'package:template_flutter/src/models/schedule_model.dart';
 import 'package:template_flutter/src/utils/date_time.dart';
 import 'package:template_flutter/src/utils/define.dart';
@@ -88,6 +89,38 @@ class NotificationPushLocal {
       await flutterLocalNotificationsPlugin.show(
           scheduleModel.dateTime ~/ 1000,
           'Bạn có 1 cuộc hẹn mới',
+          null, platformChannelSpecifics,
+          payload: 'item x');
+    }
+
+  }
+
+  Future<void> showNotificationWhenReceiverPush(ReceivedNotification notification) async {
+    print('showNotificationWhenReceiverPush: ' + notification.toString() );
+    var message = notification.body;
+    var bigTextStyleInformation = BigTextStyleInformation(
+        message,
+        htmlFormatBigText: true,
+        htmlFormatContentTitle: true,
+        htmlFormatSummaryText: true);
+
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'id', 'name', 'description',
+        styleInformation: bigTextStyleInformation,
+        importance: Importance.Max, priority: Priority.High);
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(
+        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    if (TargetPlatform.iOS != null) {
+      await flutterLocalNotificationsPlugin.show(
+          1,
+          notification.title,
+          message, platformChannelSpecifics,
+          payload: 'item x');
+    } else {
+      await flutterLocalNotificationsPlugin.show(
+          1,
+          notification.title,
           null, platformChannelSpecifics,
           payload: 'item x');
     }

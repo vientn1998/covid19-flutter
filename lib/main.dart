@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,6 +59,41 @@ void setupLocator() {
   getIt.registerSingleton(CallsAndMessagesService(),
       signalsReady: true);
 }
+final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+Future<void> myBackgroundMessageHandler(Map<String, dynamic> message) {
+  var notificationPushLocal = NotificationPushLocal();
+  ReceivedNotification receivedNotification = ReceivedNotification();
+  receivedNotification.title = message["data"]["title"];
+  receivedNotification.body = message["data"]["body"];
+  notificationPushLocal.showNotificationWhenReceiverPush(receivedNotification);
+}
+
+void setupPushFirebase() {
+  _firebaseMessaging.configure(
+    onMessage: (Map<String, dynamic> message) async {
+      print("onMessage: $message");
+    },
+    onLaunch: (Map<String, dynamic> message) async {
+      print("onLaunch: $message");
+    },
+    onResume: (Map<String, dynamic> message) async {
+      print("onResume: $message");
+    },
+    onBackgroundMessage: myBackgroundMessageHandler,
+  );
+  _firebaseMessaging.requestNotificationPermissions(
+      const IosNotificationSettings(
+          sound: true, badge: true, alert: true, provisional: true));
+  _firebaseMessaging.onIosSettingsRegistered
+      .listen((IosNotificationSettings settings) {
+    print("Settings registered: $settings");
+  });
+  _firebaseMessaging.getToken().then((String token) {
+    assert(token != null);
+    print("Push Messaging token: $token");
+  });
+}
 
 
 main() async {
@@ -95,6 +131,9 @@ main() async {
     badge: true,
     sound: true,
   );
+
+  setupPushFirebase();
+
   BlocSupervisor.delegate = SimpleBlocDelegate();
   final Covid19Repository covid19repository =
       Covid19Repository(covid19apiClient: Covid19ApiClient());

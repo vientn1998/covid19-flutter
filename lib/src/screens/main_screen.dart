@@ -27,24 +27,19 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
   UserObj userObj;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+
+
+
   @override
   void initState() {
     //getUser();
     userObj = widget.userObj ?? UserObj();
     super.initState();
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-      },
-    );
+
   }
+
+
 
   getUser() async {
     final dataMap = await SharePreferences().getObject(SharePreferenceKey.user);
